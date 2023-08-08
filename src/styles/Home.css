@@ -1,0 +1,40 @@
+.home-content {
+  padding: 75px 50px;
+}
+
+.home-summary {
+  display: flex;
+  background-color: #eaeaea;
+  padding: 50px 40px;
+  justify-content: space-around;
+}
+
+.summary-headers {
+  text-align: center;
+}
+
+.subheader {
+  color: cadetblue;
+}
+
+.summary-text {
+  width: 70%;
+  margin: 50px auto;
+}
+
+.summary-list {
+  padding: 0;
+  list-style: square;
+}
+
+.summary-list li {
+  margin: 15px 0;
+}
+
+.broad-search {
+  margin-top: 50px;
+}
+
+.summary-img {
+  width: 45vw;
+}
