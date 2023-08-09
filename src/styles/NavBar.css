@@ -4,8 +4,7 @@
   padding: 10px 50px;
 }
 
-.container {
-  margin: 0 auto;
+.nav-container {
   display: flex;
   justify-content: flex-start;
   align-items: center;

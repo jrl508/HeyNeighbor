@@ -1,7 +1,8 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"; // If you're using React Router for navigation.
 import NavigationBar from "./components/NavBar";
-import Home from "./components/Home"; // Import your other components/pages.
+import Home from "./pages/Home"; // Import your other components/pages.
+import Footer from "./components/Footer";
 
 const App = () => {
   return (
@@ -10,6 +11,7 @@ const App = () => {
       <Routes>
         <Route exact path="/" element={<Home />} />
       </Routes>
+      <Footer />
     </Router>
   );
 };

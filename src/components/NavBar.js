@@ -7,7 +7,7 @@ import SearchIcon from "../images/search-icon.svg";
 const NavBar = () => {
   return (
     <nav className="navbar">
-      <div className="container">
+      <div className="nav-container">
         <Link to="/" className="navbar-brand">
           <img
             src={Logo}

@@ -1,6 +1,8 @@
-import HeroBanner from "./HeroBanner";
+import HeroBanner from "../components/HeroBanner";
 import SnowBlower from "../images/snowblower.jpg";
 import "../styles/Home.css";
+import SearchIcon from "../images/search-icon.svg";
+
 function Home() {
   return (
     <div className="Home">
@@ -52,6 +54,40 @@ function Home() {
           >
             What are you looking for?
           </h1>
+
+          <div className="search-bar-large">
+            <input type="text" placeholder="Search For Local Tools" />
+            <button className="search-button">
+              <img src={SearchIcon} alt="search icon" className="search-icon" />
+            </button>
+          </div>
+
+          <div className="search-grid">
+            <div className="grid-item">
+              <img src="https://placehold.co/175" alt="placeholder" />
+              <h4>Power Tools</h4>
+            </div>
+
+            <div className="grid-item">
+              <img src="https://placehold.co/175" alt="placeholder" />
+              <h4>Hand Tools</h4>
+            </div>
+
+            <div className="grid-item">
+              <img src="https://placehold.co/175" alt="placeholder" />
+              <h4>Lawn Care</h4>
+            </div>
+
+            <div className="grid-item">
+              <img src="https://placehold.co/175" alt="placeholder" />
+              <h4>Automotive</h4>
+            </div>
+
+            <div className="grid-item">
+              <img src="https://placehold.co/175" alt="placeholder" />
+              <h4>Snow Tools</h4>
+            </div>
+          </div>
         </div>
       </div>
     </div>
