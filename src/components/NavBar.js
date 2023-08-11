@@ -1,10 +1,13 @@
 import React from "react";
-import { Link } from "react-router-dom"; // If you're using React Router for navigation.
+import { Link, useLocation } from "react-router-dom"; // If you're using React Router for navigation.
 import Logo from "../images/hand-shake-filled.svg";
 import "../styles/NavBar.css"; // Create a corresponding CSS file for styling (optional).
 import SearchIcon from "../images/search-icon.svg";
 
 const NavBar = () => {
+  const location = useLocation();
+  const { pathname } = location;
+
   return (
     <nav className="navbar">
       <div className="nav-container">
@@ -37,6 +40,13 @@ const NavBar = () => {
               Contact
             </Link>
           </li>
+          {pathname === "/login" ? null : (
+            <li className="nav-item">
+              <Link to="/login" className="nav-link">
+                Login
+              </Link>
+            </li>
+          )}
         </ul>
       </div>
     </nav>
