@@ -55,6 +55,7 @@
   font-size: 1em;
   font-weight: 600;
   box-sizing: border-box;
+  cursor: pointer;
 }
 
 .google-button {
