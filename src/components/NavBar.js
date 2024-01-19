@@ -1,7 +1,7 @@
 import React from "react";
-import { Link, useLocation } from "react-router-dom"; // If you're using React Router for navigation.
+import { Link, useLocation } from "react-router-dom";
 import Logo from "../images/hand-shake-filled.svg";
-import "../styles/NavBar.css"; // Create a corresponding CSS file for styling (optional).
+import "../styles/NavBar.css";
 import SearchIcon from "../images/search-icon.svg";
 
 const NavBar = () => {
