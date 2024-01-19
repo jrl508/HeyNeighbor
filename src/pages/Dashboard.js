@@ -68,7 +68,7 @@ const Dashboard = () => {
         <img
           src={ProfilePH}
           alt="profile pic"
-          style={{ height: "150px", width: "150px" }}
+          style={{ height: "150px", width: "150px", alignSelf: "center" }}
         />
         <h3>John Doe</h3>
         <span>4.8/5 stars</span>
@@ -95,16 +95,19 @@ const Dashboard = () => {
                   borderBottom: "1px solid lightgray",
                 }}
               >
-                Item 1
+                {"{item_name} rented to {renting_user} : {item_time_out}"}
               </li>
               <li
                 style={{
                   borderBottom: "1px solid lightgray",
                 }}
               >
-                Item 2
+                {`{renting_user} has initiated a return of {item_name}. Please confirm status and condition of your item.`}
+                <br />
+                <br />* Once confirmed, the funds from this transaction will be
+                released.
               </li>
-              <li>Item 3</li>
+              <li>List of items belonging to user</li>
             </ul>
           </div>
         </div>
@@ -124,9 +127,15 @@ const Dashboard = () => {
                 borderBottom: "1px solid lightgray",
               }}
             >
-              Item 1
+              {`{renting_user} has requested to rent {item_name} - click to view details`}
+              <br />
+              <br />
+              {`{time_stamp}`}
             </li>
-            <li>Item 2</li>
+            <li>
+              An update has been made to the Hey Neighbor app <br /> <br />
+              {`{time_stamp}`}{" "}
+            </li>
           </ul>
         </div>
       </div>
