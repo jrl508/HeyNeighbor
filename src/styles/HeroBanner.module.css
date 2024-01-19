@@ -1,0 +1,53 @@
+/* HeroBanner.css */
+.banner {
+  background-image: url("../../public/tools-splash.jpg"); /* Set the background image here */
+  background-size: cover;
+  background-position: center;
+  height: 80vh; /* Adjust the height as per your requirements */
+  min-height: 550px;
+  display: flex;
+  align-items: center;
+}
+
+.content {
+  width: 100%;
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: center;
+}
+
+.title {
+  font-size: 3rem;
+  color: #ffffff; /* Customize the color */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.subtitle {
+  font-size: 1.5rem;
+  color: #ffffff; /* Customize the color */
+  margin-bottom: 20px;
+}
+
+.button {
+  box-sizing: border-box;
+  width: fit-content;
+  padding: 12px 24px;
+  font-size: 1.2rem;
+  background: none;
+  color: #ffffff; /* Customize the text color */
+  border: 1px solid #ffffff;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.button:hover {
+  background-color: #535353a8; /* Customize the hover color */
+  transition: 0.2s;
+}
+
+.icon {
+  height: 60px;
+  width: 60px;
+}
