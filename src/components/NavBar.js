@@ -1,8 +1,9 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import Logo from "../images/hand-shake-filled.svg";
-//import "../styles/NavBar.css";
-import SearchIcon from "../images/search-icon.svg";
+import Icon from "@mdi/react";
+import { mdiInbox } from "@mdi/js";
+import ProfilePH from "../images/profile_ph.svg";
 
 const NavBar = () => {
   // const location = useLocation();
@@ -27,6 +28,28 @@ const NavBar = () => {
             Hey Neighbor
           </span>
         </Link>
+      </div>
+      <div className="navbar-end">
+        <div className="navbar-item is-hoverable">
+          <div className="icon">
+            <Icon path={mdiInbox} size={1} color="whitesmoke" />
+          </div>
+          <div className="navbar-dropdown is-right">
+            <div className="navbar-item">You have no messages</div>
+          </div>
+        </div>
+        <div className="navbar-item has-dropdown is-hoverable">
+          <div className="navbar-link">
+            <img className="image is-24x24 is-rounded" src={ProfilePH} />
+          </div>
+          <div class="navbar-dropdown is-right">
+            <div class="navbar-item">About Us</div>
+            <div class="navbar-item">Help & Support</div>
+            <div class="navbar-item">Settings</div>
+            <hr class="navbar-divider" />
+            <div class="navbar-item">Log Out</div>
+          </div>
+        </div>
       </div>
     </nav>
   );
