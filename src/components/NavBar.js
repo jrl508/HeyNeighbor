@@ -1,53 +1,32 @@
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import Logo from "../images/hand-shake-filled.svg";
-import "../styles/NavBar.css";
+//import "../styles/NavBar.css";
 import SearchIcon from "../images/search-icon.svg";
 
 const NavBar = () => {
-  const location = useLocation();
-  const { pathname } = location;
+  // const location = useLocation();
+  // const { pathname } = location;
 
   return (
-    <nav className="navbar">
-      <div className="nav-container">
-        <Link to="/" className="navbar-brand">
-          <img
-            src={Logo}
-            alt="logo"
-            style={{ width: "45px", height: "45px" }}
-          />
+    <nav className="navbar is-dark">
+      <div className="navbar-brand">
+        <Link
+          to="/"
+          style={{
+            padding: "8px 12px",
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
+          <img src={Logo} alt="logo" width={45} />{" "}
+          <span
+            className="title"
+            style={{ color: "whitesmoke", fontFamily: "Lobstah" }}
+          >
+            Hey Neighbor
+          </span>
         </Link>
-        <div className="search-bar">
-          <input type="text" placeholder="Search For Local Tools" />
-          <button className="search-button">
-            <img src={SearchIcon} alt="search icon" className="search-icon" />
-          </button>
-        </div>
-        <ul className="navbar-nav">
-          <li className="nav-item">
-            <Link to="/" className="nav-link">
-              Home
-            </Link>
-          </li>
-          <li className="nav-item">
-            <Link to="/about" className="nav-link">
-              About
-            </Link>
-          </li>
-          <li className="nav-item">
-            <Link to="/contact" className="nav-link">
-              Contact
-            </Link>
-          </li>
-          {pathname === "/login" ? null : (
-            <li className="nav-item">
-              <Link to="/login" className="nav-link">
-                Login
-              </Link>
-            </li>
-          )}
-        </ul>
       </div>
     </nav>
   );

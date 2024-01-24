@@ -1,0 +1,11 @@
+// Place any overridden Bulma variables before importing Bulma@charset "utf-8";
+@charset "utf-8";
+
+@font-face {
+  font-family: "Lobstah";
+  src: url("../fonts/Lobster-Regular.ttf") format("truetype");
+}
+
+$navbar-item-img-max-height: 3rem;
+
+@import "../../node_modules/bulma/bulma.sass";
