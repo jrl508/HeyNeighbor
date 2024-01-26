@@ -42,12 +42,12 @@ const NavBar = () => {
           <div className="navbar-link">
             <img className="image is-24x24 is-rounded" src={ProfilePH} />
           </div>
-          <div class="navbar-dropdown is-right">
-            <div class="navbar-item">About Us</div>
-            <div class="navbar-item">Help & Support</div>
-            <div class="navbar-item">Settings</div>
-            <hr class="navbar-divider" />
-            <div class="navbar-item">Log Out</div>
+          <div className="navbar-dropdown is-right">
+            <div className="navbar-item">About Us</div>
+            <div className="navbar-item">Help & Support</div>
+            <div className="navbar-item">Settings</div>
+            <hr className="navbar-divider" />
+            <div className="navbar-item">Log Out</div>
           </div>
         </div>
       </div>
