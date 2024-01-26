@@ -1,6 +1,7 @@
 import React from "react";
 import styles from "../styles/Dashboard.module.css";
 import ProfilePH from "../images/profile_ph.svg";
+import { Link } from "react-router-dom";
 
 /*
 
@@ -65,14 +66,72 @@ const Dashboard = () => {
           borderRight: "solid gray 1px",
         }}
       >
-        <img
-          src={ProfilePH}
-          alt="profile pic"
-          style={{ height: "150px", width: "150px", alignSelf: "center" }}
-        />
-        <h3>John Doe</h3>
-        <span>4.8/5 stars</span>
-        <h5>Taunton, MA</h5>
+        <div
+          style={{
+            borderBottom: "solid gray 1px",
+            paddingBottom: "25px",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "flex-start",
+            }}
+          >
+            <div className="image is-64x64">
+              <img src={ProfilePH} alt="profile pic" />
+            </div>
+            <span
+              className="title is-5"
+              style={{
+                marginLeft: "15px",
+              }}
+            >
+              John Doe
+            </span>
+          </div>
+          <span>4.8/5 stars</span>
+          <h5>Taunton, MA</h5>
+        </div>
+
+        <aside
+          className="menu"
+          style={{
+            marginTop: "25px",
+          }}
+        >
+          <p className="menu-label">General</p>
+          <ul className="menu-list">
+            <li>
+              <Link to="">Dashboard</Link>
+            </li>
+            <li>
+              <Link to="">Profile</Link>
+            </li>
+            <li>
+              <Link to="">Toolshed</Link>
+            </li>
+          </ul>
+          <p className="menu-label">Neighborhood</p>
+          <ul className="menu-list">
+            <li>
+              <Link to="">Listings</Link>
+            </li>
+            <li>
+              <Link to="">Local Business</Link>
+            </li>
+          </ul>
+          <p className="menu-label">Transactions</p>
+          <ul className="menu-list">
+            <li>
+              <Link to="">Transaction History</Link>
+            </li>
+            <li>
+              <Link to="">Balance</Link>
+            </li>
+          </ul>
+        </aside>
       </div>
       <div className={styles.center}>
         <div

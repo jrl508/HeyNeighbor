@@ -4170,7 +4170,7 @@ button.dropdown-item.is-active {
   padding: 0.5em 0.75em;
 }
 .menu-list a:hover {
-  background-color: hsl(0, 0%, 96%);
+  background-color: rgb(200, 200, 200);
   color: hsl(0, 0%, 21%);
 }
 .menu-list a.is-active {
