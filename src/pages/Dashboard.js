@@ -1,8 +1,7 @@
 import React from "react";
 import styles from "../styles/Dashboard.module.css";
 import ProfilePH from "../images/profile_ph.svg";
-import { Link } from "react-router-dom";
-
+import { Link, Outlet } from "react-router-dom";
 /*
 
 Dashboard Components:
@@ -95,6 +94,8 @@ const Dashboard = () => {
           <h5>Taunton, MA</h5>
         </div>
 
+        {/* Side Nav component Start, TODO: Make them auth routes */}
+
         <aside
           className="menu"
           style={{
@@ -104,100 +105,40 @@ const Dashboard = () => {
           <p className="menu-label">General</p>
           <ul className="menu-list">
             <li>
-              <Link to="">Dashboard</Link>
+              <Link to="/dashboard">Dashboard</Link>
             </li>
             <li>
-              <Link to="">Profile</Link>
+              <Link to="profile">Profile</Link>
             </li>
             <li>
-              <Link to="">Toolshed</Link>
+              <Link to="toolshed">Toolshed</Link>
             </li>
           </ul>
           <p className="menu-label">Neighborhood</p>
           <ul className="menu-list">
             <li>
-              <Link to="">Listings</Link>
+              <Link to="listings">Listings</Link>
             </li>
             <li>
-              <Link to="">Local Business</Link>
+              <Link to="local-biz">Local Business</Link>
             </li>
           </ul>
           <p className="menu-label">Transactions</p>
           <ul className="menu-list">
             <li>
-              <Link to="">Transaction History</Link>
+              <Link to="transaction-history">Transaction History</Link>
             </li>
             <li>
-              <Link to="">Balance</Link>
+              <Link to="balance">Balance</Link>
             </li>
           </ul>
         </aside>
+        {/* Side nav End */}
       </div>
-      <div className={styles.center}>
-        <div
-          style={{
-            width: "100%",
-          }}
-        >
-          <h3
-            style={{
-              alignSelf: "flex-start",
-              margin: "0 0 1em",
-            }}
-          >
-            Home
-          </h3>
-          <div className={styles.card}>
-            <ul>
-              <li
-                style={{
-                  borderBottom: "1px solid lightgray",
-                }}
-              >
-                {"{item_name} rented to {renting_user} : {item_time_out}"}
-              </li>
-              <li
-                style={{
-                  borderBottom: "1px solid lightgray",
-                }}
-              >
-                {`{renting_user} has initiated a return of {item_name}. Please confirm status and condition of your item.`}
-                <br />
-                <br />* Once confirmed, the funds from this transaction will be
-                released.
-              </li>
-              <li>List of items belonging to user</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-      <div className={styles.right}>
-        <h3
-          style={{
-            margin: "0 0 1em",
-          }}
-        >
-          Notification Center
-        </h3>
-        <div className={styles.card}>
-          <ul>
-            <li
-              style={{
-                borderBottom: "1px solid lightgray",
-              }}
-            >
-              {`{renting_user} has requested to rent {item_name} - click to view details`}
-              <br />
-              <br />
-              {`{time_stamp}`}
-            </li>
-            <li>
-              An update has been made to the Hey Neighbor app <br /> <br />
-              {`{time_stamp}`}{" "}
-            </li>
-          </ul>
-        </div>
-      </div>
+
+      {/* Render auth components here */}
+      <Outlet />
+      {/* Render Auth Components End */}
     </div>
   );
 };
