@@ -7,12 +7,12 @@
 }
 
 .center {
+  flex-grow: 2;
   width: 52%;
   box-sizing: border-box;
   display: flex;
   flex-flow: column nowrap;
   align-items: center;
-  padding: 2% 3%;
 }
 
 .card {
@@ -46,7 +46,7 @@
 }
 
 .right {
+  flex-grow: 1;
   box-sizing: border-box;
   width: 28%;
-  padding: 2% 3% 0 0;
 }

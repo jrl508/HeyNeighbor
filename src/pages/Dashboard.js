@@ -137,7 +137,14 @@ const Dashboard = () => {
       </div>
 
       {/* Render auth components here */}
-      <Outlet />
+      <div
+        style={{
+          width: "80%",
+          padding: "2%",
+        }}
+      >
+        <Outlet />
+      </div>
       {/* Render Auth Components End */}
     </div>
   );

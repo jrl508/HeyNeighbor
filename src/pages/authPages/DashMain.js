@@ -3,7 +3,12 @@ import styles from "../../styles/Dashboard.module.css";
 
 const DashMain = () => {
   return (
-    <>
+    <div
+      style={{
+        display: "flex",
+        gap: "25px",
+      }}
+    >
       <div className={styles.center}>
         <div
           style={{
@@ -69,7 +74,7 @@ const DashMain = () => {
           </ul>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
