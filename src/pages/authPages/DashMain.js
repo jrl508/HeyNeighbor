@@ -15,14 +15,15 @@ const DashMain = () => {
             width: "100%",
           }}
         >
-          <h3
+          <div
+            className="title is-5"
             style={{
               alignSelf: "flex-start",
               margin: "0 0 1em",
             }}
           >
             Home
-          </h3>
+          </div>
           <div className={styles.card}>
             <ul>
               <li
@@ -48,13 +49,14 @@ const DashMain = () => {
         </div>
       </div>
       <div className={styles.right}>
-        <h3
+        <div
+          className="title is-5"
           style={{
             margin: "0 0 1em",
           }}
         >
           Notification Center
-        </h3>
+        </div>
         <div className={styles.card}>
           <ul>
             <li
