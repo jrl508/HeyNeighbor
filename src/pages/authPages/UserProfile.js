@@ -12,7 +12,7 @@ const UserProfile = () => {
           <div className="card-image">
             <figure className="image">
               <img
-                src="https://bulma.io/images/placeholders/480x480.png"
+                src="https://placehold.co/400x500?text=Profile+Image"
                 alt="Placeholder image"
                 style={{ width: "auto" }}
               />
