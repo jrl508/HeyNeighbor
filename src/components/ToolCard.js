@@ -6,7 +6,7 @@ const ToolCard = ({ tool, onClick }) => {
     <div
       className="card"
       style={{
-        maxWidth: "280px",
+        maxWidth: "250px",
         minWidth: "200px",
       }}
       onClick={() => onClick(tool)}
