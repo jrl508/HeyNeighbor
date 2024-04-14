@@ -3,6 +3,8 @@ import Icon from "@mdi/react";
 import { listingToolData } from "../../seed/toolData";
 import { usersData } from "../../seed/userData";
 import { mdiMagnify } from "@mdi/js";
+import ToolCard from "../../components/ToolCard";
+import ToolModal from "../../components/ToolModal";
 
 const Listings = () => {
   const [tools, setTools] = useState(null);
@@ -10,6 +12,18 @@ const Listings = () => {
   const [zipCode, setZipCode] = useState("02780");
   const [radius, setRadius] = useState(10);
   const [loading, setLoading] = useState(true);
+  const [openModal, setOpenModal] = useState(false);
+  const [selectedTool, setSelectedTool] = useState(null);
+
+  const handleCardClick = (tool) => {
+    setSelectedTool(tool);
+    setOpenModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setOpenModal(false);
+    setSelectedTool(null);
+  };
 
   const getTools = () => {
     setTools(listingToolData);
@@ -56,6 +70,25 @@ const Listings = () => {
         miles of{" "}
         <span className="has-text-weight-semibold is-clickable">{zipCode}</span>
       </div>
+      <div
+        className="tool-list"
+        style={{
+          padding: "25px",
+          display: "flex",
+          flexFlow: "row wrap",
+          justifyContent: "space-evenly",
+          gap: "25px",
+        }}
+      >
+        {tools.map((tool) => (
+          <ToolCard key={tool.id} tool={tool} onClick={handleCardClick} />
+        ))}
+      </div>
+      <ToolModal
+        isOpen={openModal}
+        onClose={handleCloseModal}
+        tool={selectedTool}
+      />
     </div>
   );
 };
