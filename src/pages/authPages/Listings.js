@@ -1,19 +1,31 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import Icon from "@mdi/react";
-import { listingToolData } from "../../seed/toolData";
-import { usersData } from "../../seed/userData";
 import { mdiMagnify } from "@mdi/js";
 import ToolCard from "../../components/ToolCard";
 import ToolModal from "../../components/ToolModal";
+import Pagination from "../../components/Pagination";
+import { listingToolData } from "../../seed/toolData";
 
 const Listings = () => {
-  const [tools, setTools] = useState(null);
-  const [users, setUsers] = useState(null);
-  const [zipCode, setZipCode] = useState("02780");
-  const [radius, setRadius] = useState(10);
-  const [loading, setLoading] = useState(true);
+  const [tools, setTools] = useState(listingToolData);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredTools, setFilteredTools] = useState([]);
   const [openModal, setOpenModal] = useState(false);
   const [selectedTool, setSelectedTool] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  useEffect(() => {
+    setFilteredTools(
+      tools.filter((tool) =>
+        tool.toolName.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    );
+  }, [searchQuery, tools]);
+
+  const handleSearchChange = (event) => {
+    setSearchQuery(event.target.value);
+  };
 
   const handleCardClick = (tool) => {
     setSelectedTool(tool);
@@ -25,25 +37,15 @@ const Listings = () => {
     setSelectedTool(null);
   };
 
-  const getTools = () => {
-    setTools(listingToolData);
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
   };
 
-  const getUsers = () => {
-    setUsers(usersData);
-  };
-
-  useEffect(() => {
-    getTools();
-    getUsers();
-    setLoading(false);
-  }, []);
-
-  !loading && console.log(users);
-
-  if (loading) {
-    return;
-  }
+  const totalPages = Math.ceil(filteredTools.length / itemsPerPage);
+  const pageItems = filteredTools.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   return (
     <div>
@@ -54,6 +56,8 @@ const Listings = () => {
             className="input is-medium"
             type="text"
             placeholder="Search For Tools"
+            value={searchQuery}
+            onChange={handleSearchChange}
           />
           <span className="icon is-right is-clickable">
             <Icon path={mdiMagnify} size={2} />
@@ -63,12 +67,11 @@ const Listings = () => {
       <div className="is-size-6">
         There are{" "}
         <span className="has-text-weight-semibold is-clickable">
-          {tools.length}
+          {filteredTools.length}
         </span>{" "}
         listings within{" "}
-        <span className="has-text-weight-semibold is-clickable">{radius}</span>{" "}
-        miles of{" "}
-        <span className="has-text-weight-semibold is-clickable">{zipCode}</span>
+        <span className="has-text-weight-semibold is-clickable">10</span> miles
+        of <span className="has-text-weight-semibold is-clickable">02780</span>
       </div>
       <div
         className="tool-list"
@@ -80,10 +83,15 @@ const Listings = () => {
           gap: "25px",
         }}
       >
-        {tools.map((tool) => (
+        {pageItems.map((tool) => (
           <ToolCard key={tool.id} tool={tool} onClick={handleCardClick} />
         ))}
       </div>
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+      />
       <ToolModal
         isOpen={openModal}
         onClose={handleCloseModal}
