@@ -13,7 +13,7 @@ const Listings = () => {
   const [openModal, setOpenModal] = useState(false);
   const [selectedTool, setSelectedTool] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 8;
 
   useEffect(() => {
     setFilteredTools(
