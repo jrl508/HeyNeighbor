@@ -9,10 +9,50 @@ import {
   mdiWeb,
 } from "@mdi/js";
 
+const BusinessForm = () => {
+  return (
+    <div className="business-form">
+      <div className="field">
+        <label className="label">Business Name</label>
+        <div className="control">
+          <input className="input" type="text" />
+        </div>
+      </div>
+
+      <div className="field">
+        <label className="label">Business Type</label>
+        <div className="control">
+          <input
+            className="input"
+            type="text"
+            placeholder='Ex. "General Contractor"'
+          />
+        </div>
+      </div>
+
+      <div className="field">
+        <label className="label">Location</label>
+        <div className="control">
+          <input className="input" type="text" />
+        </div>
+      </div>
+
+      <div className="field">
+        <label className="label">Phone Number</label>
+        <div className="control">
+          <input className="input" type="text" />
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const LocalBiz = () => {
   const [showEmail, setShowEmail] = useState(false);
   const [showPhone, setShowPhone] = useState(false);
   const [showLinks, setShowLinks] = useState(false);
+  const [openBizForm, setOpenBizForm] = useState(false);
+
   return (
     <div>
       <div className="level">
@@ -25,7 +65,10 @@ const LocalBiz = () => {
           </div>
         </div>
         <div className="level-right">
-          <button className="level-item button is-ghost">
+          <button
+            onClick={() => setOpenBizForm(true)}
+            className="level-item button is-ghost"
+          >
             {/* TODO: Make this open a form to submit a business */}
             Recommend Business
           </button>
@@ -84,32 +127,54 @@ const LocalBiz = () => {
                 </div>
               </div>
               <div className="right">
-                <div
-                  style={{
-                    display: "flex",
-                    columnGap: "5px",
-                  }}
-                >
-                  <Icon
+                <div className="buttons has-addons">
+                  <button
+                    className="button"
                     onClick={() => setShowPhone(!showPhone)}
-                    className="is-clickable"
-                    path={mdiPhone}
-                    size={1}
-                  />
-                  <Icon
+                  >
+                    <Icon className="icon" path={mdiPhone} size={1} />
+                  </button>
+                  <button
+                    className="button"
                     onClick={() => setShowEmail(!showEmail)}
-                    className="is-clickable"
-                    path={mdiEmail}
-                    size={1}
-                  />
-                  <Icon
+                  >
+                    <Icon className="icon" path={mdiEmail} size={1} />
+                  </button>
+                  <button
+                    className="button"
                     onClick={() => setShowLinks(!showLinks)}
-                    className="is-clickable"
-                    path={mdiLinkVariant}
-                    size={1}
-                  />
+                  >
+                    <Icon className="icon" path={mdiLinkVariant} size={1} />
+                  </button>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className={`modal ${openBizForm ? "is-active" : null}`}>
+        <div className="modal-background"></div>
+        <div className="modal-card">
+          <header className="modal-card-head">
+            <div className="modal-card-title">Recommend a Business</div>
+          </header>
+          <div className="modal-card-body">
+            <BusinessForm />
+          </div>
+          <div className="modal-card-foot">
+            <div className="buttons">
+              <button
+                onClick={() => setOpenBizForm(false)}
+                className="button is-info"
+              >
+                Submit
+              </button>
+              <button
+                onClick={() => setOpenBizForm(false)}
+                className="button is-warning"
+              >
+                Cancel
+              </button>
             </div>
           </div>
         </div>
