@@ -52,6 +52,8 @@ const LocalBiz = () => {
   const [showPhone, setShowPhone] = useState(false);
   const [showLinks, setShowLinks] = useState(false);
   const [openBizForm, setOpenBizForm] = useState(false);
+  const [rating, setRating] = useState(4);
+  const [hover, setHover] = useState(null);
 
   return (
     <div>
@@ -94,7 +96,39 @@ const LocalBiz = () => {
               <div className="left">
                 <p className="job-type">General Contractor</p>
                 {/* TODO: Make Clickable to open modal of user reviews */}
-                <p className="ratings">5.0 * * * * * &#x28;10&#x29;</p>
+                <p className="ratings">
+                  4.0{" "}
+                  {[...Array(5)].map((star, index) => {
+                    const currentRating = index + 1;
+
+                    return (
+                      <label className="radio" key={index}>
+                        <input
+                          style={{ display: "none" }}
+                          type="radio"
+                          name="rating"
+                          value={currentRating}
+                          onChange={() => setRating(currentRating)}
+                        />
+                        <span
+                          className="star"
+                          style={{
+                            fontSize: "1.2rem",
+                            color:
+                              currentRating <= (hover || rating)
+                                ? "#ffc107"
+                                : "#e4e5e9",
+                          }}
+                          onMouseEnter={() => setHover(currentRating)}
+                          onMouseLeave={() => setHover(null)}
+                        >
+                          &#9733;
+                        </span>
+                      </label>
+                    );
+                  })}{" "}
+                  &#x28;10&#x29;
+                </p>
                 <p className="location">123 Main St, Taunton, MA 02780</p>
                 <p
                   style={{
@@ -171,7 +205,7 @@ const LocalBiz = () => {
               </button>
               <button
                 onClick={() => setOpenBizForm(false)}
-                className="button is-warning"
+                className="button is-danger"
               >
                 Cancel
               </button>
