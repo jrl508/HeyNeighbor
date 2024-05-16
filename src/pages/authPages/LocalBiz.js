@@ -32,7 +32,34 @@ const BusinessForm = ({ setOpenBizForm }) => {
     sat: false,
     sun: false,
   });
+  const [links, setLinks] = useState([
+    {
+      url: "",
+      type: 1,
+    },
+  ]);
 
+  const linkField = {
+    url: "",
+    type: 1,
+  };
+
+  const addLink = () => {
+    const payload = [...links];
+    payload.push(linkField);
+    setLinks(payload);
+  };
+
+  const linkTypes = [
+    {
+      name: "web",
+      value: 1,
+    },
+    {
+      name: "facebook",
+      value: 2,
+    },
+  ];
   const handleStartTimeChange = (event, field) => {
     const payload = { ...startTime };
     payload[field] = event.target.value;
@@ -131,94 +158,128 @@ const BusinessForm = ({ setOpenBizForm }) => {
             />
           </div>
         </div>
+        <div>
+          <label className="label">Link</label>
+          <div className="field has-addons">
+            <p className="control">
+              <input className="input" type="text" name="Link" />
+            </p>
+            <p className="control">
+              <span className="select">
+                <select>
+                  <option>Web</option>
+                  <option>Facebook</option>
+                </select>
+              </span>
+            </p>
+          </div>
+        </div>
+        <br />
         <div className="field">
           <label className="label">Business Hours</label>
+          <br />
           <div
-            className="biz-hours-container"
+            className="biz-hours-container control"
             style={{ display: "flex", columnGap: "25px", flexFlow: "row wrap" }}
           >
             <div
               className="start-time-group"
-              style={{ display: "flex", columnGap: "5px" }}
+              style={{
+                display: "flex",
+                columnGap: "5px",
+                alignItems: "center",
+              }}
             >
-              <span>
-                <b>Start: </b>
+              <label className="label">Start: </label>
+              <span className="select">
+                <select
+                  id="start-time"
+                  value={startTime.hour}
+                  onChange={(e) => handleStartTimeChange(e, "hour")}
+                >
+                  {hours.map((h) => (
+                    <option key={h.value} value={h.value}>
+                      {h.label}
+                    </option>
+                  ))}
+                </select>
               </span>
-              <select
-                id="start-time"
-                value={startTime.hour}
-                onChange={(e) => handleStartTimeChange(e, "hour")}
-              >
-                {hours.map((h) => (
-                  <option key={h.value} value={h.value}>
-                    {h.label}
-                  </option>
-                ))}
-              </select>
-              <select
-                value={startTime.minute}
-                onChange={(e) => handleStartTimeChange(e, "minute")}
-              >
-                {minutes.map((m) => (
-                  <option key={m.value} value={m.value}>
-                    {m.label}
-                  </option>
-                ))}
-              </select>
-              <select
-                value={startTime.mer}
-                onChange={(e) => handleStartTimeChange(e, "mer")}
-              >
-                <option value="AM">AM</option>
-                <option value="PM">PM</option>
-              </select>
+              <span className="select">
+                <select
+                  value={startTime.minute}
+                  onChange={(e) => handleStartTimeChange(e, "minute")}
+                >
+                  {minutes.map((m) => (
+                    <option key={m.value} value={m.value}>
+                      {m.label}
+                    </option>
+                  ))}
+                </select>
+              </span>
+              <span className="select">
+                <select
+                  value={startTime.mer}
+                  onChange={(e) => handleStartTimeChange(e, "mer")}
+                >
+                  <option value="AM">AM</option>
+                  <option value="PM">PM</option>
+                </select>
+              </span>
             </div>
             <div
               className="end-time-group"
-              style={{ display: "flex", columnGap: "5px" }}
+              style={{
+                display: "flex",
+                columnGap: "5px",
+                alignItems: "center",
+              }}
             >
-              <span>
-                <b>End: </b>
+              <label className="label">End: </label>
+              <span className="select">
+                <select
+                  id="end-time"
+                  value={endTime.hour}
+                  onChange={(e) => handleEndTimeChange(e, "hour")}
+                >
+                  {hours.map((h) => (
+                    <option key={h.value} value={h.value}>
+                      {h.label}
+                    </option>
+                  ))}
+                </select>
               </span>
-              <select
-                id="end-time"
-                value={endTime.hour}
-                onChange={(e) => handleEndTimeChange(e, "hour")}
-              >
-                {hours.map((h) => (
-                  <option key={h.value} value={h.value}>
-                    {h.label}
-                  </option>
-                ))}
-              </select>
-              <select
-                value={endTime.minute}
-                onChange={(e) => handleEndTimeChange(e, "minute")}
-              >
-                {minutes.map((m) => (
-                  <option key={m.value} value={m.value}>
-                    {m.label}
-                  </option>
-                ))}
-              </select>
-              <select
-                value={endTime.mer}
-                onChange={(e) => handleEndTimeChange(e, "mer")}
-              >
-                <option value="AM">AM</option>
-                <option value="PM">PM</option>
-              </select>
+              <span className="select">
+                <select
+                  value={endTime.minute}
+                  onChange={(e) => handleEndTimeChange(e, "minute")}
+                >
+                  {minutes.map((m) => (
+                    <option key={m.value} value={m.value}>
+                      {m.label}
+                    </option>
+                  ))}
+                </select>
+              </span>
+              <span className="select">
+                <select
+                  value={endTime.mer}
+                  onChange={(e) => handleEndTimeChange(e, "mer")}
+                >
+                  <option value="AM">AM</option>
+                  <option value="PM">PM</option>
+                </select>
+              </span>
             </div>
             <div
               className="days-container"
-              style={{ flex: "1 100%", marginTop: "10px" }}
+              style={{ flex: "1 100%", marginTop: "25px" }}
             >
               <fieldset>
                 <div
                   style={{
                     display: "flex",
                     justifyContent: "start",
-                    columnGap: "10px",
+                    columnGap: "30px",
                   }}
                 >
                   <div
@@ -346,7 +407,9 @@ const BusinessForm = ({ setOpenBizForm }) => {
             padding: "0 5px",
           }}
         >
-          <span className="is-clickable has-text-info">Add Link</span>
+          <span className="is-clickable has-text-info" onClick={addLink}>
+            Add Link
+          </span>
         </div>
       </div>
       <div className="modal-card-foot">
