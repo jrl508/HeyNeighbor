@@ -17,38 +17,45 @@ const Login = () => {
           <h3>Hey Neighbor!</h3>
         </div>
         <form className="login-form">
-          <input
-            value={email}
-            type="text"
-            placeholder="Email"
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <input
-            value={pw}
-            type="text"
-            placeholder="Password"
-            onChange={(e) => setPw(e.target.value)}
-          />
-          <div className="login-subtext">
-            Don't have an account? <span>Click here</span> to register.
+          <div className="field">
+            <div className="control">
+              <input
+                className="input"
+                value={email}
+                type="text"
+                placeholder="Email"
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+          </div>
+          <div className="field">
+            <div className="control">
+              <input
+                className="input"
+                value={pw}
+                type="text"
+                placeholder="Password"
+                onChange={(e) => setPw(e.target.value)}
+              />
+            </div>
+          </div>
+          <div className="is-size-6">
+            Don't have an account?{" "}
+            <span className="has-text-weight-semibold has-text-info is-clickable">
+              Click here
+            </span>{" "}
+            to register.
           </div>
         </form>
         <div className="buttons-wrapper">
           <button
-            className="login-button cred-button"
+            className="button is-info is-fullwidth"
             onClick={() => {
               console.log(`TODO: SETUP AUTHENTICATION`);
               navigate("/dashboard");
             }}
           >
             Sign In
-          </button>
-          <button
-            className="login-button google-button"
-            onClick={() => console.log("Setup Google OAuth")}
-          >
-            <span>Sign In With Google</span>
-            <img className="google-icon" src={Google} alt="google-icon" />
           </button>
         </div>
       </div>
