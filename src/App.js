@@ -9,7 +9,7 @@ import "./styles/custom-styles.css";
 import "./fonts/Lobster-Regular.ttf";
 import DashMain from "./pages/authPages/DashMain";
 import UserProfile from "./pages/authPages/UserProfile";
-import LocalBiz from "./pages/authPages/LocalBiz";
+import LocalBiz from "./pages/authPages/LocalBusiness/LocalBiz";
 import Balance from "./pages/authPages/Balance";
 import Listings from "./pages/authPages/Listings";
 import Toolshed from "./pages/authPages/Toolshed";
