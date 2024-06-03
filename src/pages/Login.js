@@ -4,7 +4,7 @@ import Logo from "../images/hand-shake-filled-b.svg";
 import Google from "../images/google.svg";
 import { useNavigate } from "react-router-dom";
 
-const SignUpForm = () => {
+const SignUpForm = ({ setRegisterMode }) => {
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
   const [confirmPw, setConfirmPw] = useState("");
@@ -69,6 +69,7 @@ const SignUpForm = () => {
           />
         </div>
       </div>
+
       <div className="buttons-wrapper">
         <button
           className="button is-info is-fullwidth"
@@ -79,6 +80,15 @@ const SignUpForm = () => {
         >
           Sign Up
         </button>
+      </div>
+      <div className="is-size-6 my-4 mx-auto">
+        Already have an account?{" "}
+        <span
+          className="has-text-weight-semibold has-text-info is-clickable"
+          onClick={() => setRegisterMode(false)}
+        >
+          Click here
+        </span>{" "}
       </div>
     </>
   );
@@ -110,7 +120,7 @@ const Login = () => {
           </div>
         </header>
         {registerMode ? (
-          <SignUpForm />
+          <SignUpForm setRegisterMode={setRegisterMode} />
         ) : (
           <>
             <div className="field">
@@ -135,16 +145,7 @@ const Login = () => {
                 />
               </div>
             </div>
-            <div className="is-size-6">
-              Don't have an account?{" "}
-              <span
-                className="has-text-weight-semibold has-text-info is-clickable"
-                onClick={() => setRegisterMode(true)}
-              >
-                Click here
-              </span>{" "}
-              to register.
-            </div>
+
             <div className="buttons-wrapper">
               <button
                 className="button is-info is-fullwidth"
@@ -155,6 +156,15 @@ const Login = () => {
               >
                 Sign In
               </button>
+            </div>
+            <div className="is-size-6 mx-auto">
+              Don't have an account?{" "}
+              <span
+                className="has-text-weight-semibold has-text-info is-clickable"
+                onClick={() => setRegisterMode(true)}
+              >
+                Click here
+              </span>{" "}
             </div>
           </>
         )}
