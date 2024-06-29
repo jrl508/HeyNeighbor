@@ -27,12 +27,25 @@ const Login = () => {
           </div>
         </header>
         {registerMode ? (
-          <SignUpForm setRegisterMode={setRegisterMode} setErrors={setErrors} />
+          <SignUpForm
+            setRegisterMode={setRegisterMode}
+            setErrors={setErrors}
+            errors={errors}
+          />
         ) : (
-          <LoginForm setRegisterMode={setRegisterMode} setErrors={setErrors} />
+          <LoginForm
+            setRegisterMode={setRegisterMode}
+            setErrors={setErrors}
+            errors={errors}
+          />
         )}
         {errors ? (
-          <div className="errors mx-auto has-text-danger"> {errors} </div>
+          <div className="errors mx-auto has-text-danger">
+            {" "}
+            {errors.map((error, index) => (
+              <p key={index}>{error}</p>
+            ))}{" "}
+          </div>
         ) : null}
       </div>
     </div>

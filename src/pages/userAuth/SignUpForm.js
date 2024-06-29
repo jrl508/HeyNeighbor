@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const SignUpForm = ({ setRegisterMode, setErrors }) => {
+const SignUpForm = ({ setRegisterMode, errors, setErrors }) => {
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
   const [confirmPw, setConfirmPw] = useState("");
@@ -113,7 +113,10 @@ const SignUpForm = ({ setRegisterMode, setErrors }) => {
         Already have an account?{" "}
         <span
           className="has-text-weight-semibold has-text-info is-clickable"
-          onClick={() => setRegisterMode(false)}
+          onClick={() => {
+            setRegisterMode(false);
+            errors && setErrors(null);
+          }}
         >
           Click here
         </span>{" "}
