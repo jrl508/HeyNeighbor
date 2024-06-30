@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Logo from "../images/hand-shake-filled.svg";
 import Icon from "@mdi/react";
 import { mdiInbox } from "@mdi/js";
@@ -8,6 +8,7 @@ import ProfilePH from "../images/profile_ph.svg";
 const NavBar = () => {
   // const location = useLocation();
   // const { pathname } = location;
+  const navigate = useNavigate();
 
   return (
     <nav className="navbar is-dark">
@@ -43,11 +44,19 @@ const NavBar = () => {
             <img className="image is-24x24 is-rounded" src={ProfilePH} />
           </div>
           <div className="navbar-dropdown is-right">
-            <div className="navbar-item">About Us</div>
-            <div className="navbar-item">Help & Support</div>
-            <div className="navbar-item">Settings</div>
+            <div className="navbar-item is-clickable">About Us</div>
+            <div className="navbar-item is-clickable">Help & Support</div>
+            <div className="navbar-item is-clickable">Settings</div>
             <hr className="navbar-divider" />
-            <div className="navbar-item">Log Out</div>
+            <div
+              className="navbar-item is-clickable"
+              onClick={() => {
+                console.log("Remove JWT token");
+                navigate("/login");
+              }}
+            >
+              Log Out
+            </div>
           </div>
         </div>
       </div>
