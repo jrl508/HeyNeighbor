@@ -6,6 +6,36 @@ const LoginForm = ({ setRegisterMode, errors, setErrors }) => {
   const [pw, setPw] = useState("");
   const navigate = useNavigate();
 
+  const api = process.env.REACT_APP_API_URL;
+
+  const handleSubmit = async () => {
+    const payload = {
+      session: {
+        email,
+        password: pw,
+      },
+    };
+    try {
+      const response = await fetch(`${api}/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) {
+        const errorResponse = await response.json();
+        setErrors([errorResponse.error]);
+        throw new Error(`${JSON.stringify(errorResponse)}`);
+      }
+      const result = await response.json();
+      navigate("/dashboard");
+      console.log("Success:", result);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <>
       <div className="field">
@@ -34,10 +64,7 @@ const LoginForm = ({ setRegisterMode, errors, setErrors }) => {
       <div className="buttons-wrapper">
         <button
           className="button is-info is-fullwidth"
-          onClick={() => {
-            console.log(`TODO: SETUP AUTHENTICATION`);
-            navigate("/dashboard");
-          }}
+          onClick={() => handleSubmit()}
         >
           Sign In
         </button>
@@ -46,7 +73,10 @@ const LoginForm = ({ setRegisterMode, errors, setErrors }) => {
         Don't have an account?{" "}
         <span
           className="has-text-weight-semibold has-text-info is-clickable"
-          onClick={() => setRegisterMode(true)}
+          onClick={() => {
+            setRegisterMode(true);
+            errors && setErrors(null);
+          }}
         >
           Click here
         </span>{" "}
