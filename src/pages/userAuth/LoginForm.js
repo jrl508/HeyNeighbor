@@ -1,14 +1,19 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
+import { LOGIN, LOGIN_FAILURE, LOGIN_SUCCESS } from "../../actionTypes";
+import { type } from "@testing-library/user-event/dist/type";
 
 const LoginForm = ({ setRegisterMode, errors, setErrors }) => {
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
   const navigate = useNavigate();
+  const { state, dispatch } = useAuth();
 
   const api = process.env.REACT_APP_API_URL;
 
   const handleSubmit = async () => {
+    dispatch({ type: LOGIN });
     const payload = {
       session: {
         email,
@@ -23,14 +28,17 @@ const LoginForm = ({ setRegisterMode, errors, setErrors }) => {
         },
         body: JSON.stringify(payload),
       });
-      if (!response.ok) {
+      if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem("token", data.token);
+        dispatch({ type: LOGIN_SUCCESS, payload: data.user });
+        navigate("/dashboard");
+      } else {
         const errorResponse = await response.json();
+        dispatch({ type: LOGIN_FAILURE, payload: errorResponse });
         setErrors([errorResponse.error]);
         throw new Error(`${JSON.stringify(errorResponse)}`);
       }
-      const result = await response.json();
-      navigate("/dashboard");
-      console.log("Success:", result);
     } catch (error) {
       console.log(error);
     }
