@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { LOGIN, LOGIN_FAILURE, LOGIN_SUCCESS } from "../../actionTypes";
-import { type } from "@testing-library/user-event/dist/type";
 
 const LoginForm = ({ setRegisterMode, errors, setErrors }) => {
   const [email, setEmail] = useState("");
