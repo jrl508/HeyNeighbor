@@ -1,5 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
+import {
+  REGISTER,
+  REGISTER_SUCCESS,
+  REGISTER_FAILURE,
+} from "../../actionTypes";
 
 const SignUpForm = ({ setRegisterMode, errors, setErrors }) => {
   const [email, setEmail] = useState("");
@@ -8,10 +14,12 @@ const SignUpForm = ({ setRegisterMode, errors, setErrors }) => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const navigate = useNavigate();
+  const { state, dispatch } = useAuth();
 
   const api = process.env.REACT_APP_API_URL;
 
   const handleSubmit = async () => {
+    dispatch({ type: REGISTER });
     const payload = {
       user: {
         first_name: firstName,
@@ -28,14 +36,17 @@ const SignUpForm = ({ setRegisterMode, errors, setErrors }) => {
         },
         body: JSON.stringify(payload),
       });
-      if (!response.ok) {
+      if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem("token", data.token);
+        dispatch({ type: REGISTER_SUCCESS, payload: data.user });
+        navigate("/dashboard");
+      } else {
         const errorResponse = await response.json();
+        dispatch({ type: REGISTER_FAILURE, payload: errorResponse.errors });
         setErrors(errorResponse.errors);
         throw new Error(`${JSON.stringify(errorResponse)}`);
       }
-      const result = await response.json();
-      navigate("/dashboard");
-      console.log("Success:", result);
     } catch (error) {
       console.log(error);
     }
