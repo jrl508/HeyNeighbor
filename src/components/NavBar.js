@@ -4,11 +4,12 @@ import Logo from "../images/hand-shake-filled.svg";
 import Icon from "@mdi/react";
 import { mdiInbox } from "@mdi/js";
 import ProfilePH from "../images/profile_ph.svg";
+import { useAuth } from "../hooks/useAuth";
 
 const NavBar = () => {
-  // const location = useLocation();
-  // const { pathname } = location;
   const navigate = useNavigate();
+  const { state } = useAuth();
+  const { isAuthenticated } = state;
 
   return (
     <nav className="navbar is-dark">
@@ -31,14 +32,16 @@ const NavBar = () => {
         </Link>
       </div>
       <div className="navbar-end">
-        <div className="navbar-item is-hoverable">
-          <div className="icon">
-            <Icon path={mdiInbox} size={1} color="whitesmoke" />
+        {isAuthenticated ? (
+          <div className="navbar-item is-hoverable">
+            <div className="icon">
+              <Icon path={mdiInbox} size={1} color="whitesmoke" />
+            </div>
+            <div className="navbar-dropdown is-right">
+              <div className="navbar-item">You have no messages</div>
+            </div>
           </div>
-          <div className="navbar-dropdown is-right">
-            <div className="navbar-item">You have no messages</div>
-          </div>
-        </div>
+        ) : null}
         <div className="navbar-item has-dropdown is-hoverable">
           <div className="navbar-link">
             <img className="image is-24x24 is-rounded" src={ProfilePH} />
@@ -46,17 +49,32 @@ const NavBar = () => {
           <div className="navbar-dropdown is-right">
             <div className="navbar-item is-clickable">About Us</div>
             <div className="navbar-item is-clickable">Help & Support</div>
-            <div className="navbar-item is-clickable">Settings</div>
-            <hr className="navbar-divider" />
-            <div
-              className="navbar-item is-clickable"
-              onClick={() => {
-                console.log("Remove JWT token");
-                navigate("/login");
-              }}
-            >
-              Log Out
-            </div>
+            {isAuthenticated ? (
+              <>
+                <div className="navbar-item is-clickable">Settings</div>
+                <hr className="navbar-divider" />
+                <div
+                  className="navbar-item is-clickable"
+                  onClick={() => {
+                    console.log("Remove JWT token");
+                  }}
+                >
+                  Log Out
+                </div>
+              </>
+            ) : (
+              <>
+                <hr className="navbar-divider" />
+                <div
+                  className="navbar-item is-clickable"
+                  onClick={() => {
+                    navigate("/login");
+                  }}
+                >
+                  Login
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
