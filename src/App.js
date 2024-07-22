@@ -15,6 +15,7 @@ import Listings from "./pages/authPages/Listings";
 import Toolshed from "./pages/authPages/Toolshed";
 import TranHist from "./pages/authPages/TranHist";
 import { AuthProvider } from "./contexts/AuthContext";
+import AuthRoutes from "./components/AuthRoutes";
 
 const App = () => {
   return (
@@ -24,14 +25,16 @@ const App = () => {
         <Routes>
           <Route exact path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
-          <Route path="dashboard" element={<Dashboard />}>
-            <Route index element={<DashMain />} />
-            <Route path="profile" element={<UserProfile />} />
-            <Route path="local-biz" element={<LocalBiz />} />
-            <Route path="balance" element={<Balance />} />
-            <Route path="listings" element={<Listings />} />
-            <Route path="toolshed" element={<Toolshed />} />
-            <Route path="transaction-history" element={<TranHist />} />
+          <Route element={<AuthRoutes />}>
+            <Route path="dashboard" element={<Dashboard />}>
+              <Route index element={<DashMain />} />
+              <Route path="profile" element={<UserProfile />} />
+              <Route path="local-biz" element={<LocalBiz />} />
+              <Route path="balance" element={<Balance />} />
+              <Route path="listings" element={<Listings />} />
+              <Route path="toolshed" element={<Toolshed />} />
+              <Route path="transaction-history" element={<TranHist />} />
+            </Route>
           </Route>
         </Routes>
       </Router>
