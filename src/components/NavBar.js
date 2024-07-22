@@ -5,11 +5,16 @@ import Icon from "@mdi/react";
 import { mdiInbox } from "@mdi/js";
 import ProfilePH from "../images/profile_ph.svg";
 import { useAuth } from "../hooks/useAuth";
+import { LOGOUT } from "../actionTypes";
 
 const NavBar = () => {
   const navigate = useNavigate();
-  const { state } = useAuth();
+  const { state, dispatch } = useAuth();
   const { isAuthenticated } = state;
+  const handleLogout = () => {
+    dispatch({ type: LOGOUT });
+    localStorage.clear();
+  };
 
   return (
     <nav className="navbar is-dark">
@@ -56,7 +61,7 @@ const NavBar = () => {
                 <div
                   className="navbar-item is-clickable"
                   onClick={() => {
-                    console.log("Remove JWT token");
+                    handleLogout();
                   }}
                 >
                   Log Out
