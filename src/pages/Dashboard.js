@@ -2,6 +2,9 @@ import React from "react";
 import styles from "../styles/Dashboard.module.css";
 import ProfilePH from "../images/profile_ph.svg";
 import { Link, Outlet } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth.js";
+import { capitalize } from "../util/UtilFunctions.js";
+
 /*
 
 Dashboard Components:
@@ -57,6 +60,10 @@ Tools to search for specific tools or filter based on categories, location, or o
 */
 
 const Dashboard = () => {
+  const { state } = useAuth();
+
+  const { user } = state;
+
   return (
     <div className={styles.wrapper}>
       <div
@@ -87,7 +94,7 @@ const Dashboard = () => {
                 marginLeft: "15px",
               }}
             >
-              John Doe
+              {`${capitalize(user.first_name + " " + user.last_name)}`}
             </span>
           </div>
           <span>4.8/5 stars</span>
