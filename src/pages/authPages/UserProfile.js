@@ -1,8 +1,26 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useAuth } from "../../hooks/useAuth.js";
+import { capitalize } from "../../util/UtilFunctions.js";
 
 const UserProfile = () => {
+  const { state } = useAuth();
+  const { user, token } = state;
+
   const [editMode, setEditMode] = useState(false);
-  const [profilePic, setProfilePic] = useState(null);
+  // const [profilePic, setProfilePic] = useState("");
+  const [firstName, setFirstName] = useState(user.first_name);
+  const [lastName, setLastName] = useState(user.last_name);
+  const [phone, setPhone] = useState(user.phone_number || "");
+  const [email, setEmail] = useState(user.email);
+  const [location, setLocation] = useState(user.location || "");
+
+  const handleCancel = () => {
+    setFirstName(user.first_name);
+    setLastName(user.last_name);
+    setPhone(user.phone_number || "");
+    setLocation(user.location || "");
+    setEditMode(false);
+  };
 
   return (
     <div>
@@ -25,12 +43,38 @@ const UserProfile = () => {
             <div className="field">
               <label className="label">Name</label>
               <div className="control">
-                <input
-                  className="input"
-                  type="text"
-                  value="John Doe"
-                  disabled={!editMode}
-                />
+                {editMode ? (
+                  <div
+                    style={{
+                      display: "flex",
+                      columnGap: "25px",
+                    }}
+                  >
+                    <input
+                      className="input"
+                      type="text"
+                      value={firstName}
+                      name="first_name"
+                      placeholder="First Name"
+                      onChange={(e) => setFirstName(e.target.value)}
+                    />
+                    <input
+                      className="input"
+                      type="text"
+                      value={lastName}
+                      name="last_name"
+                      placeholder="Last Name"
+                      onChange={(e) => setLastName(e.target.value)}
+                    />
+                  </div>
+                ) : (
+                  <input
+                    className="input"
+                    type="text"
+                    value={capitalize(firstName) + " " + capitalize(lastName)}
+                    disabled={!editMode}
+                  />
+                )}
               </div>
             </div>{" "}
             <div className="field">
@@ -39,7 +83,8 @@ const UserProfile = () => {
                 <input
                   className="input"
                   type="email"
-                  value="JDoe@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   disabled={!editMode}
                 />
               </div>
@@ -50,9 +95,10 @@ const UserProfile = () => {
                 <input
                   className="input"
                   type="tel"
-                  value="555-555-5555"
+                  value={phone}
                   disabled={!editMode}
                   pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
+                  onChange={(e) => setPhone(e.target.value)}
                 />
               </div>
             </div>
@@ -62,7 +108,8 @@ const UserProfile = () => {
                 <input
                   className="input"
                   type="text"
-                  value="Taunton, MA"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
                   disabled={!editMode}
                 />
               </div>
@@ -107,7 +154,7 @@ const UserProfile = () => {
                 style={{
                   width: "fit-content",
                 }}
-                onClick={() => setEditMode(false)}
+                onClick={() => handleCancel()}
               >
                 Cancel
               </button>
