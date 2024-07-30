@@ -6,6 +6,12 @@ import {
   REGISTER,
   REGISTER_SUCCESS,
   REGISTER_FAILURE,
+  UPDATE_USER,
+  UPDATE_USER_SUCCESS,
+  UPDATE_USER_FAILURE,
+  GET_USER,
+  GET_USER_SUCCESS,
+  GET_USER_FAILURE,
 } from "../actionTypes";
 
 const authReducer = (state, action) => {
@@ -37,6 +43,38 @@ const authReducer = (state, action) => {
       };
     case REGISTER_FAILURE:
       return { ...state, loading: false, error: action.payload };
+
+    case UPDATE_USER:
+      return { ...state, loading: true };
+    case UPDATE_USER_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        user: {
+          ...state.user,
+          ...action.payload,
+        },
+      };
+    case UPDATE_USER_FAILURE:
+      return { ...state, loading: false, error: action.payload };
+
+    case GET_USER:
+      return {
+        ...state,
+        loading: true,
+      };
+    case GET_USER_SUCCESS:
+      return {
+        ...state,
+        ...action.payload,
+        loading: false,
+      };
+    case GET_USER_FAILURE:
+      return {
+        ...state,
+        loading: false,
+        error: action.payload,
+      };
     default:
       return state;
   }
