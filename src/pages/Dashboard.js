@@ -64,6 +64,8 @@ const Dashboard = () => {
 
   const { user } = state;
 
+  if (state.loading) return;
+
   return (
     <div className={styles.wrapper}>
       <div
