@@ -1,15 +1,22 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../hooks/useAuth.js";
 import { capitalize } from "../../util/UtilFunctions.js";
+import {
+  UPDATE_USER,
+  UPDATE_USER_FAILURE,
+  UPDATE_USER_SUCCESS,
+} from "../../actionTypes.js";
+
+// ************************ TODO: Error Handling, Profile Picture Logic ********************************
 
 const UserProfile = () => {
-  const { state } = useAuth();
-  const { user, token } = state;
+  const { state, dispatch } = useAuth();
+  const { user, error } = state;
 
   const [editMode, setEditMode] = useState(false);
   // const [profilePic, setProfilePic] = useState("");
-  const [firstName, setFirstName] = useState(user.first_name);
-  const [lastName, setLastName] = useState(user.last_name);
+  const [firstName, setFirstName] = useState(user.first_name || "");
+  const [lastName, setLastName] = useState(user.last_name || "");
   const [phone, setPhone] = useState(user.phone_number || "");
   const [email, setEmail] = useState(user.email);
   const [location, setLocation] = useState(user.location || "");
@@ -20,6 +27,46 @@ const UserProfile = () => {
     setPhone(user.phone_number || "");
     setLocation(user.location || "");
     setEditMode(false);
+  };
+
+  const handleUpdate = async () => {
+    dispatch({ type: UPDATE_USER });
+
+    const payload = {
+      user: {
+        first_name: firstName,
+        last_name: lastName,
+        phone_number: String(phone),
+        email,
+        location,
+      },
+    };
+
+    try {
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL}/users/${user.id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+      if (response.ok) {
+        console.log("OK");
+        const data = await response.json();
+        console.log("success data:", data);
+        dispatch({ type: UPDATE_USER_SUCCESS, payload: data.user });
+        setEditMode(false);
+      } else {
+        const errorResponse = await response.json();
+        dispatch({ type: UPDATE_USER_FAILURE, payload: errorResponse.errors });
+      }
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   return (
@@ -163,14 +210,13 @@ const UserProfile = () => {
                 style={{
                   width: "fit-content",
                 }}
-                onClick={() => setEditMode(false)}
+                onClick={() => handleUpdate()}
               >
                 Update
               </button>
             </div>
           </div>
         </div>
-        <div className="card-bottom"></div>
       </div>
     </div>
   );
