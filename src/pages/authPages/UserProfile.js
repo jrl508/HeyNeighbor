@@ -6,20 +6,41 @@ import {
   UPDATE_USER_FAILURE,
   UPDATE_USER_SUCCESS,
 } from "../../actionTypes.js";
+import ProfilePicModal from "../../components/ProfilePicModal.js";
 
 // ************************ TODO: Error Handling, Profile Picture Logic ********************************
 
 const UserProfile = () => {
   const { state, dispatch } = useAuth();
   const { user, error } = state;
-
   const [editMode, setEditMode] = useState(false);
-  // const [profilePic, setProfilePic] = useState("");
+  const [image, setImage] = useState(
+    user.profile_image_url || "https://placehold.co/400x500?text=Profile+Image"
+  );
+  const [preview, setPreview] = useState(null);
   const [firstName, setFirstName] = useState(user.first_name || "");
   const [lastName, setLastName] = useState(user.last_name || "");
   const [phone, setPhone] = useState(user.phone_number || "");
   const [email, setEmail] = useState(user.email);
   const [location, setLocation] = useState(user.location || "");
+
+  console.dir(user);
+
+  const [openModal, setOpenModal] = useState(false);
+
+  const handleOpenModal = () => {
+    setOpenModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setOpenModal(false);
+  };
+
+  const handleImageChange = (e) => {
+    console.dir(e.target);
+    const file = e.target.files[0];
+    file ? setPreview(file.name) : setPreview(null);
+  };
 
   const handleCancel = () => {
     setFirstName(user.first_name);
@@ -74,10 +95,10 @@ const UserProfile = () => {
       <div className="title is-5">Profile</div>
       <div className="card">
         <div className="card-top" style={{ display: "flex" }}>
-          <div className="card-image">
+          <div className="card-image is-clickable" onClick={handleOpenModal}>
             <figure className="image">
               <img
-                src="https://placehold.co/400x500?text=Profile+Image"
+                src={image}
                 alt="Placeholder image"
                 style={{ width: "auto" }}
               />
@@ -136,6 +157,7 @@ const UserProfile = () => {
                 />
               </div>
             </div>
+            {/* TODO - Implement formatting of phone numbers */}
             <div className="field">
               <label className="label">Phone</label>
               <div className="control">
@@ -182,20 +204,10 @@ const UserProfile = () => {
                 className="file"
                 style={{
                   marginRight: "auto",
+                  columnGap: "25px",
+                  alignItems: "center",
                 }}
-              >
-                <label className="file-label">
-                  <input
-                    className="file-input"
-                    type="file"
-                    name="photo"
-                    onChange={(e) => console.log(e.target.files[0])}
-                  />
-                  <span className="file-cta">
-                    <span className="file-label">Upload Photo</span>
-                  </span>
-                </label>
-              </div>
+              ></div>
               <button
                 className="button is-danger is-inverted"
                 style={{
@@ -218,6 +230,11 @@ const UserProfile = () => {
           </div>
         </div>
       </div>
+      <ProfilePicModal
+        isOpen={openModal}
+        handleClose={handleCloseModal}
+        user={user}
+      />
     </div>
   );
 };
