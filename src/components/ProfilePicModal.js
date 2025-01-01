@@ -4,13 +4,12 @@ const ProfilePicModal = ({ isOpen, handleClose, user }) => {
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
   const [imageFile, setImageFile] = useState(null);
-
   const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    file ? setImage(URL.createObjectURL(file)) : setImage(null);
-    file ? setPreview(file.name) : setPreview(null);
-    file ? setImageFile(file) : setImageFile(null);
-    e.target.value = null;
+    const selectedFile = e.target.files[0];
+    if (selectedFile) {
+      setImageFile(selectedFile);
+      setPreview(URL.createObjectURL(selectedFile));
+    }
   };
 
   const handleCancelUpload = () => {
@@ -23,13 +22,13 @@ const ProfilePicModal = ({ isOpen, handleClose, user }) => {
   const handleUploadImage = async (e) => {
     e.preventDefault();
     const formData = new FormData();
-    formData.append("image", imageFile);
+    formData.append("profile_picture", imageFile);
 
     try {
       const response = await fetch(
-        `http://localhost:3001/users/${user.id}/upload_profile_image`,
+        `${process.env.REACT_APP_API_URL}/users/${user.id}/profile-picture`,
         {
-          method: "PATCH",
+          method: "POST",
           body: formData,
         }
       );
@@ -38,7 +37,7 @@ const ProfilePicModal = ({ isOpen, handleClose, user }) => {
         const data = await response.json();
         console.log("Image uploaded successfully:", data);
       } else {
-        console.error("Error uploading image");
+        console.error("Error uploading image", response);
       }
     } catch (error) {
       console.error("Error:", error);

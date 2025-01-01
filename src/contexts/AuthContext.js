@@ -16,11 +16,11 @@ export const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
   const getUser = async (t) => {
     const decodedToken = jwtDecode(t);
-    const { user_id } = decodedToken;
+    const { userId } = decodedToken;
     try {
       dispatch({ type: GET_USER });
       const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/users/${user_id}`,
+        `${process.env.REACT_APP_API_URL}/users/${userId}`,
         {
           headers: {
             Authorization: `Bearer ${t}`,
@@ -31,7 +31,7 @@ export const AuthProvider = ({ children }) => {
         const data = await response.json();
         dispatch({
           type: GET_USER_SUCCESS,
-          payload: { isAuthenticated: true, user: data.user },
+          payload: { isAuthenticated: true, user: data },
         });
       }
     } catch (err) {

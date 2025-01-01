@@ -24,8 +24,6 @@ const UserProfile = () => {
   const [email, setEmail] = useState(user.email);
   const [location, setLocation] = useState(user.location || "");
 
-  console.dir(user);
-
   const [openModal, setOpenModal] = useState(false);
 
   const handleOpenModal = () => {
