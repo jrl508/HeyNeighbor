@@ -1,10 +1,14 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
+import { authAPI } from "../../api";
 import {
   REGISTER,
   REGISTER_SUCCESS,
   REGISTER_FAILURE,
+  LOGIN,
+  LOGIN_FAILURE,
+  LOGIN_SUCCESS,
 } from "../../actionTypes";
 
 const SignUpForm = ({ setRegisterMode, errors, setErrors }) => {
@@ -16,30 +20,39 @@ const SignUpForm = ({ setRegisterMode, errors, setErrors }) => {
   const navigate = useNavigate();
   const { state, dispatch } = useAuth();
 
-  const api = process.env.REACT_APP_API_URL;
+  const handleLogin = async (email, password) => {
+    try {
+      dispatch({ type: LOGIN });
+      const response = await authAPI.login({ email, password });
+      if (!response.ok) {
+        const errorResponse = await response.json();
+        throw new Error(errorResponse.message || "Login Failed");
+      }
+      const data = await response.json();
+      localStorage.setItem("token", data.token);
+      dispatch({ type: LOGIN_SUCCESS, payload: data.user });
+      return data;
+    } catch (error) {
+      dispatch({ type: LOGIN_FAILURE, payload: error.message });
+      throw error;
+    }
+  };
 
   const handleSubmit = async () => {
     dispatch({ type: REGISTER });
     const payload = {
-      user: {
-        first_name: firstName,
-        last_name: lastName,
-        email,
-        password: pw,
-      },
+      first_name: firstName,
+      last_name: lastName,
+      email,
+      password: pw,
     };
     try {
-      const response = await fetch(`${api}/users`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+      const response = await authAPI.register(payload);
       if (response.ok) {
         const data = await response.json();
         localStorage.setItem("token", data.token);
         dispatch({ type: REGISTER_SUCCESS, payload: data.user });
+        await handleLogin(email, pw);
         navigate("/dashboard");
       } else {
         const errorResponse = await response.json();

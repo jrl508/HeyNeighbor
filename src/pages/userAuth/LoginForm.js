@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { LOGIN, LOGIN_FAILURE, LOGIN_SUCCESS } from "../../actionTypes";
+import { authAPI } from "../../api";
 
 const LoginForm = ({ setRegisterMode, errors, setErrors }) => {
   const [email, setEmail] = useState("");
@@ -14,19 +15,11 @@ const LoginForm = ({ setRegisterMode, errors, setErrors }) => {
   const handleSubmit = async () => {
     dispatch({ type: LOGIN });
     const payload = {
-      session: {
-        email,
-        password: pw,
-      },
+      email,
+      password: pw,
     };
     try {
-      const response = await fetch(`${api}/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+      const response = await authAPI.login(payload);
       if (response.ok) {
         const data = await response.json();
         localStorage.setItem("token", data.token);
