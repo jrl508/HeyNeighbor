@@ -24,3 +24,7 @@ code {
   display: flex;
   flex-direction: column;
 }
+
+.tool-list .cell:last-child {
+  margin-bottom: 1.5rem;
+}

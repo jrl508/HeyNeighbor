@@ -1,16 +1,9 @@
 // Card.js
 import React from "react";
 
-const ToolCard = ({ tool, onClick }) => {
+const ToolCard = ({ tool, onClick, classProps }) => {
   return (
-    <div
-      className="card"
-      style={{
-        maxWidth: "250px",
-        minWidth: "200px",
-      }}
-      onClick={() => onClick(tool)}
-    >
+    <div className={`card ${classProps}`} onClick={() => onClick(tool)}>
       <div className="card-image">
         <figure className="image">
           <img
