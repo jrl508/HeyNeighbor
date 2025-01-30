@@ -112,32 +112,32 @@ const Dashboard = () => {
           }}
         >
           <p className="menu-label">General</p>
-          <ul className="menu-list">
-            <li>
+          <ul>
+            <li className="side-menu-item">
               <Link to="/dashboard">Dashboard</Link>
             </li>
-            <li>
+            <li className="side-menu-item">
               <Link to="profile">Profile</Link>
             </li>
-            <li>
+            <li className="side-menu-item">
               <Link to="toolshed">Toolshed</Link>
             </li>
           </ul>
           <p className="menu-label">Neighborhood</p>
-          <ul className="menu-list">
-            <li>
+          <ul>
+            <li className="side-menu-item">
               <Link to="listings">Listings</Link>
             </li>
-            <li>
+            <li className="side-menu-item">
               <Link to="local-biz">Local Business</Link>
             </li>
           </ul>
           <p className="menu-label">Transactions</p>
-          <ul className="menu-list">
-            <li>
+          <ul>
+            <li className="side-menu-item">
               <Link to="transaction-history">Transaction History</Link>
             </li>
-            <li>
+            <li className="side-menu-item">
               <Link to="balance">Balance</Link>
             </li>
           </ul>

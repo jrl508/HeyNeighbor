@@ -242,75 +242,75 @@ const UserProfile = () => {
                   />
                 </div>
               </div>
-              <button
-                className="button is-info is-inverted"
-                style={{
-                  width: "fit-content",
-                  alignSelf: "end",
-                  display: editMode ? "none" : null,
-                }}
-                onClick={(e) => {
-                  e.preventDefault();
-                  setEditMode(true);
-                }}
-              >
-                Edit
-              </button>
               <div
-                className="edit-mode-buttons"
-                style={{
-                  display: !editMode ? "none" : "flex",
-                }}
+                className={`edit-mode-buttons mt-5 ${
+                  !editMode
+                    ? null
+                    : "is-flex is-justify-content-space-between is-align-items-start"
+                }`}
               >
-                <div
-                  className="file"
-                  style={{
-                    marginRight: "auto",
-                    columnGap: "25px",
-                    alignItems: "center",
-                  }}
-                >
-                  <label className="file-label">
-                    <input
-                      key={fileInputKey}
-                      className="file-input"
-                      type="file"
-                      name="profile_image"
-                      accept="image/*"
-                      onChange={handleImageChange}
-                    />
-                    <span className="file-cta">
-                      <span className="file-icon">
-                        <Icon path={mdiUpload} size={3} />
-                      </span>
-                      <span className="file-label">Select Image</span>
-                    </span>
-                  </label>
-                  {preview ? <span>{preview}</span> : null}
-                </div>
-                <button
-                  className="button is-danger is-inverted"
-                  style={{
-                    width: "fit-content",
-                  }}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleCancel();
-                  }}
-                >
-                  Cancel
-                </button>
-                <button
-                  className="button is-info is-inverted"
-                  style={{
-                    width: "fit-content",
-                  }}
-                  onClick={(event) => {
-                    handleSubmit(event);
-                  }}
-                >
-                  Update
-                </button>
+                {!editMode ? (
+                  <button
+                    className="button is-link is-inverted"
+                    style={{
+                      width: "fit-content",
+                      alignSelf: "end",
+                      display: editMode ? "none" : null,
+                    }}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setEditMode(true);
+                    }}
+                  >
+                    Edit
+                  </button>
+                ) : (
+                  <>
+                    <div
+                      className="file mr-auto"
+                      style={{
+                        columnGap: "25px",
+                      }}
+                    >
+                      <label className="file-label">
+                        <input
+                          key={fileInputKey}
+                          className="file-input"
+                          type="file"
+                          name="profile_image"
+                          accept="image/*"
+                          onChange={handleImageChange}
+                        />
+                        <span className="file-cta">
+                          <span className="file-icon">
+                            <Icon path={mdiUpload} size={3} />
+                          </span>
+                          <span className="file-label">Select Image</span>
+                        </span>
+                      </label>
+                      {preview ? <span>{preview}</span> : null}
+                    </div>
+                    <div className="buttons">
+                      <button
+                        className="button is-danger is-outlined"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleCancel();
+                        }}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        className="button is-info is-outlined"
+                        onClick={(event) => {
+                          handleSubmit(event);
+                        }}
+                      >
+                        Update
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             </form>
           </div>
