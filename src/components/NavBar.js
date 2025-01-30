@@ -30,7 +30,10 @@ const NavBar = () => {
           <img src={Logo} alt="logo" width={45} />{" "}
           <span
             className="title"
-            style={{ color: "whitesmoke", fontFamily: "Lobstah" }}
+            style={{
+              fontFamily: "lobstah",
+              color: "whitesmoke",
+            }}
           >
             Hey Neighbor
           </span>

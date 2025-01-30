@@ -21,7 +21,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "build-bulma": "sass --load-path=node_modules bulma-custom-styles.scss bulma-custom-styles.css"
+    "build-bulma": "sass --load-path=node_modules src/styles/bulma-custom-styles.scss src/styles/bulma-custom-styles.css"
   },
   "eslintConfig": {
     "extends": [

@@ -1,0 +1,24 @@
+$darkGrey: #b3b3b3;
+
+@use "bulma/sass/" as bulma with (
+  $navbar-item-img-max-height: 3rem
+);
+
+@font-face {
+  font-family: "Lobstah";
+  src: url("../fonts/Lobster-Regular.ttf") format("truetype");
+}
+
+.side-menu-item {
+  border-radius: 15px;
+}
+
+.side-menu-item a {
+  display: block;
+  color: black;
+  padding: 0.5rem 1rem;
+  width: 100%;
+  &:hover {
+    background-color: $darkGrey;
+  }
+}
