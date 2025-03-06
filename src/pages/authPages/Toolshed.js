@@ -5,6 +5,7 @@ import ToolCard from "../../components/ToolCard";
 import ToolModal from "../../components/ToolModal";
 import Icon from "@mdi/react";
 import { mdiPlusCircleOutline } from "@mdi/js";
+import { Link } from "react-router-dom";
 
 const Toolshed = () => {
   const [openModal, setOpenModal] = useState(false);
@@ -24,9 +25,11 @@ const Toolshed = () => {
     <div>
       <div className="toolshed-header is-flex is-flex-direction-row mb-5 is-justify-content-space-between">
         <div className="title is-5">Toolshed</div>
-        <div className="icon is-clickable">
-          <Icon path={mdiPlusCircleOutline} size={1} />
-        </div>
+        <Link to="/dashboard/toolshed/new" className="has-text-black">
+          <div className="icon">
+            <Icon path={mdiPlusCircleOutline} size={1} />
+          </div>
+        </Link>
       </div>
       <div className="tool-list grid is-col-min-10 is-gap-3">
         {userToolData.map((tool) => (
