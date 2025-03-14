@@ -141,11 +141,13 @@ function AddTool() {
                   position="bottom"
                   content="Let others know if you are willing to deliver the tool to them. For an added fee, of course!"
                 >
-                  <Icon
-                    path={mdiInformationOutline}
-                    size={1}
-                    className="ml-2"
-                  />
+                  <div>
+                    <Icon
+                      path={mdiInformationOutline}
+                      size={1}
+                      className="ml-2"
+                    />
+                  </div>
                 </Tooltip>
               </div>
             </div>
