@@ -30,6 +30,8 @@ function AddTool() {
   const [toolImage, setToolImage] = React.useState(null);
   const [deliveryAvailable, setDeliveryAvailable] = React.useState(false);
 
+  const token = localStorage.getItem("token");
+
   const handleToolNameChange = (e) => setToolName(e.target.value);
   const handleToolCategoryChange = (e) => setToolCategory(e.target.value);
   const handleToolDescriptionChange = (e) => setToolDescription(e.target.value);
@@ -37,6 +39,38 @@ function AddTool() {
   const handleToolImageChange = (e) => setToolImage(e.target.files[0]);
   const handleDeliveryAvailableChange = (e) =>
     setDeliveryAvailable(e.target.checked);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    // Here you would typically handle the form submission,
+    // such as sending the data to a server or updating the state.
+
+    const payload = {
+      name: toolName,
+      description: toolDescription,
+      category: toolCategory,
+      rental_price_per_day: rentalRate,
+      available: true,
+      image_url: toolImage,
+      deliveryAvailable,
+    };
+
+    await fetch(`${process.env.REACT_APP_API_URL}/tools`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    })
+      .then((res) => {
+        console.log("RESPONSE: ", res);
+      })
+      .catch((err) => {
+        console.log("ERROR: ", err);
+      });
+  };
+
   return (
     <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
       <div className="new-tool-header is-flex is-flex-direction-row mb-5">
@@ -153,7 +187,10 @@ function AddTool() {
             </div>
             <div className="field cell is-row-start-4">
               <div className="control">
-                <button className="button is-success is-outlined">
+                <button
+                  className="button is-success is-outlined"
+                  onClick={handleSubmit}
+                >
                   Add Tool
                 </button>
               </div>
