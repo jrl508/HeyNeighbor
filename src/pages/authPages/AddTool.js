@@ -36,39 +36,48 @@ function AddTool() {
   const handleToolCategoryChange = (e) => setToolCategory(e.target.value);
   const handleToolDescriptionChange = (e) => setToolDescription(e.target.value);
   const handleRentalRateChange = (e) => setRentalRate(e.target.value);
-  const handleToolImageChange = (e) => setToolImage(e.target.files[0]);
+  const handleToolImageChange = (e) => {
+    console.log(e.target.files);
+    setToolImage(e.target.files[0]);
+  };
   const handleDeliveryAvailableChange = (e) =>
     setDeliveryAvailable(e.target.checked);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Here you would typically handle the form submission,
-    // such as sending the data to a server or updating the state.
 
-    const payload = {
-      name: toolName,
-      description: toolDescription,
-      category: toolCategory,
-      rental_price_per_day: rentalRate,
-      available: true,
-      image_url: toolImage,
-      deliveryAvailable,
-    };
+    const formData = new FormData();
+    formData.append("name", toolName);
+    formData.append("description", toolDescription);
+    formData.append("category", toolCategory);
+    formData.append("rental_price_per_day", rentalRate);
+    formData.append("available", "true");
+    formData.append("deliveryAvailable", String(deliveryAvailable));
 
-    await fetch(`${process.env.REACT_APP_API_URL}/tools`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(payload),
-    })
-      .then((res) => {
-        console.log("RESPONSE: ", res);
-      })
-      .catch((err) => {
-        console.log("ERROR: ", err);
+    if (toolImage) {
+      formData.append("tool_image", toolImage); // ensure the key matches your multer `.single("tool_image")`
+    }
+
+    try {
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/tools`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
       });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        console.error("Upload error:", data.message || "Unknown error");
+        return;
+      }
+
+      console.log("Tool uploaded successfully:", data);
+    } catch (err) {
+      console.error("Request failed:", err.message);
+    }
   };
 
   return (
