@@ -34,6 +34,8 @@
 
 ### Contributing
 
+Check out Trello Board for current tasks: `https://trello.com/b/qs77eV7d/hey-neighbor`
+
 1. Fork the repository.
 2. Create a new branch:
    ```bash
