@@ -17,22 +17,12 @@ import {
 const authReducer = (state, action) => {
   switch (action.type) {
     case LOGIN:
-      return { ...state, loading: true };
-    case LOGIN_SUCCESS:
-      return {
-        ...state,
-        isAuthenticated: true,
-        user: action.payload,
-        loading: false,
-        error: null,
-      };
-    case LOGIN_FAILURE:
-      return { ...state, loading: false, error: action.payload };
-    case LOGOUT:
-      return { ...state, isAuthenticated: false, user: null };
-
     case REGISTER:
+    case UPDATE_USER:
+    case GET_USER:
       return { ...state, loading: true };
+
+    case LOGIN_SUCCESS:
     case REGISTER_SUCCESS:
       return {
         ...state,
@@ -41,41 +31,37 @@ const authReducer = (state, action) => {
         loading: false,
         error: null,
       };
-    case REGISTER_FAILURE:
-      return { ...state, loading: false, error: action.payload };
 
-    case UPDATE_USER:
-      return { ...state, loading: true };
     case UPDATE_USER_SUCCESS:
       return {
         ...state,
         loading: false,
-        user: {
-          ...state.user,
-          ...action.payload,
-        },
+        user: { ...state.user, ...action.payload },
         error: null,
       };
-    case UPDATE_USER_FAILURE:
-      return { ...state, loading: false, error: action.payload };
 
-    case GET_USER:
-      return {
-        ...state,
-        loading: true,
-      };
     case GET_USER_SUCCESS:
       return {
         ...state,
-        ...action.payload,
+        user: action.payload,
         loading: false,
+        error: null,
       };
+
+    case LOGIN_FAILURE:
+    case REGISTER_FAILURE:
+    case UPDATE_USER_FAILURE:
     case GET_USER_FAILURE:
+      return { ...state, loading: false, error: action.payload };
+
+    case LOGOUT:
       return {
         ...state,
-        loading: false,
-        error: action.payload,
+        isAuthenticated: false,
+        user: null,
+        error: null,
       };
+
     default:
       return state;
   }

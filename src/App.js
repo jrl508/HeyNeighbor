@@ -15,32 +15,35 @@ import Toolshed from "./pages/authPages/Toolshed";
 import TranHist from "./pages/authPages/TranHist";
 import AddTool from "./pages/authPages/AddTool";
 import { AuthProvider } from "./contexts/AuthContext";
+import { ToolProvider } from "./contexts/ToolContext";
 import AuthRoutes from "./components/AuthRoutes";
 
 const App = () => {
   return (
     <AuthProvider>
-      <Router>
-        <NavigationBar />
-        <Routes>
-          <Route exact path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route element={<AuthRoutes />}>
-            <Route path="dashboard" element={<Dashboard />}>
-              <Route index element={<DashMain />} />
-              <Route path="profile" element={<UserProfile />} />
-              <Route path="local-biz" element={<LocalBiz />} />
-              <Route path="balance" element={<Balance />} />
-              <Route path="listings" element={<Listings />} />
-              <Route path="toolshed">
-                <Route index element={<Toolshed />} />
-                <Route path="new" element={<AddTool />} />
+      <ToolProvider>
+        <Router>
+          <NavigationBar />
+          <Routes>
+            <Route exact path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route element={<AuthRoutes />}>
+              <Route path="dashboard" element={<Dashboard />}>
+                <Route index element={<DashMain />} />
+                <Route path="profile" element={<UserProfile />} />
+                <Route path="local-biz" element={<LocalBiz />} />
+                <Route path="balance" element={<Balance />} />
+                <Route path="listings" element={<Listings />} />
+                <Route path="toolshed">
+                  <Route index element={<Toolshed />} />
+                  <Route path="new" element={<AddTool />} />
+                </Route>
+                <Route path="transaction-history" element={<TranHist />} />
               </Route>
-              <Route path="transaction-history" element={<TranHist />} />
             </Route>
-          </Route>
-        </Routes>
-      </Router>
+          </Routes>
+        </Router>
+      </ToolProvider>
     </AuthProvider>
   );
 };

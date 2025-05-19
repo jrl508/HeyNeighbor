@@ -4,6 +4,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import Tooltip from "../../components/Tooltip";
 import { mdiInformationOutline } from "@mdi/js";
+import { toolsAPI } from "../../api";
 
 function AddTool() {
   const toolCategories = [
@@ -37,7 +38,6 @@ function AddTool() {
   const handleToolDescriptionChange = (e) => setToolDescription(e.target.value);
   const handleRentalRateChange = (e) => setRentalRate(e.target.value);
   const handleToolImageChange = (e) => {
-    console.log(e.target.files);
     setToolImage(e.target.files[0]);
   };
   const handleDeliveryAvailableChange = (e) =>
@@ -55,17 +55,11 @@ function AddTool() {
     formData.append("deliveryAvailable", String(deliveryAvailable));
 
     if (toolImage) {
-      formData.append("tool_image", toolImage); // ensure the key matches your multer `.single("tool_image")`
+      formData.append("tool_image", toolImage);
     }
 
     try {
-      const res = await fetch(`${process.env.REACT_APP_API_URL}/tools`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      });
+      const res = await toolsAPI.addTool(formData, token);
 
       const data = await res.json();
 
@@ -76,7 +70,10 @@ function AddTool() {
 
       console.log("Tool uploaded successfully:", data);
     } catch (err) {
-      console.error("Request failed:", err.message);
+      console.error(
+        "Request failed:",
+        err instanceof Error ? err.message : "Unknown error"
+      );
     }
   };
 
