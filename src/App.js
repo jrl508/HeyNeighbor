@@ -25,7 +25,7 @@ const App = () => {
         <Router>
           <NavigationBar />
           <Routes>
-            <Route exact path="/" element={<Home />} />
+            <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route element={<AuthRoutes />}>
               <Route path="dashboard" element={<Dashboard />}>
