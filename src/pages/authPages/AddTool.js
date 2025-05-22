@@ -5,6 +5,8 @@ import { Link } from "react-router-dom";
 import Tooltip from "../../components/Tooltip";
 import { mdiInformationOutline } from "@mdi/js";
 import { toolsAPI } from "../../api";
+import { useTool } from "../../hooks/useTool";
+import { ADD_TOOL, ADD_TOOL_FAIL, ADD_TOOL_SUCCESS } from "../../actionTypes";
 
 function AddTool() {
   const toolCategories = [
@@ -33,6 +35,8 @@ function AddTool() {
 
   const token = localStorage.getItem("token");
 
+  const { dispatch } = useTool();
+
   const handleToolNameChange = (e) => setToolName(e.target.value);
   const handleToolCategoryChange = (e) => setToolCategory(e.target.value);
   const handleToolDescriptionChange = (e) => setToolDescription(e.target.value);
@@ -59,17 +63,20 @@ function AddTool() {
     }
 
     try {
+      dispatch({ type: ADD_TOOL });
       const res = await toolsAPI.addTool(formData, token);
 
       const data = await res.json();
 
       if (!res.ok) {
+        dispatch({ type: ADD_TOOL_FAIL, payload: data });
         console.error("Upload error:", data.message || "Unknown error");
         return;
       }
 
-      console.log("Tool uploaded successfully:", data);
+      dispatch({ type: ADD_TOOL_SUCCESS, payload: data });
     } catch (err) {
+      dispatch({ type: ADD_TOOL_FAIL, payload: err });
       console.error(
         "Request failed:",
         err instanceof Error ? err.message : "Unknown error"
