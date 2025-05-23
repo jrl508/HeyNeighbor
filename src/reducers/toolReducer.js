@@ -21,7 +21,12 @@ const toolReducer = (state, action) => {
     case DELETE_TOOL:
       return { ...state, loading: true, errors: null };
     case GET_TOOLS_SUCCESS:
-      return { ...state, tools: action.payload, loading: false };
+      return {
+        ...state,
+        tools: action.payload,
+        loading: false,
+        hasFetched: true,
+      };
     case ADD_TOOL_SUCCESS:
       return { ...state, tools: [action.payload, ...state.tools] };
     case UPDATE_TOOL_SUCCESS:
