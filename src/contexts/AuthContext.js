@@ -1,7 +1,12 @@
 import React, { createContext, useEffect, useReducer } from "react";
 import { jwtDecode } from "jwt-decode";
 import authReducer from "../reducers/authReducer";
-import { GET_USER, GET_USER_FAILURE, GET_USER_SUCCESS } from "../actionTypes";
+import {
+  GET_USER,
+  GET_USER_FAILURE,
+  GET_USER_SUCCESS,
+  LOGOUT,
+} from "../actionTypes";
 
 const initialState = {
   isAuthenticated: false,
@@ -14,12 +19,23 @@ export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
+
   const getUser = async (t) => {
-    const decodedToken = jwtDecode(t);
-    const { userId } = decodedToken;
     try {
+      const decodedToken = jwtDecode(t);
+
+      if (decodedToken.exp * 1000 < Date.now()) {
+        localStorage.removeItem("token");
+        dispatch({ type: LOGOUT });
+        return;
+      }
+
+      const { userId } = decodedToken;
+      if (!userId || state.user) return;
+
       dispatch({ type: GET_USER });
-      const response = await fetch(
+
+      const res = await fetch(
         `${process.env.REACT_APP_API_URL}/users/${userId}`,
         {
           headers: {
@@ -27,26 +43,29 @@ export const AuthProvider = ({ children }) => {
           },
         }
       );
-      if (response.ok) {
-        const data = await response.json();
-        dispatch({
-          type: GET_USER_SUCCESS,
-          payload: { isAuthenticated: true, user: data },
-        });
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch user");
       }
+
+      const data = await res.json();
+      dispatch({
+        type: GET_USER_SUCCESS,
+        payload: { isAuthenticated: true, user: data },
+      });
     } catch (err) {
-      console.log(err);
+      console.error("Auth rehydration error:", err);
       dispatch({ type: GET_USER_FAILURE, payload: err });
+      localStorage.removeItem("token"); // clean up
     }
   };
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-
     if (token && !state.user) {
       getUser(token);
     }
-  }, []);
+  }, [state.user]);
 
   return (
     <AuthContext.Provider value={{ state, dispatch, getUser }}>
