@@ -41,24 +41,23 @@ const NavBar = () => {
       </div>
       <div className="navbar-end">
         {isAuthenticated ? (
-          <div className="navbar-item is-hoverable">
-            <div className="icon">
-              <Icon path={mdiInbox} size={1} color="whitesmoke" />
+          <>
+            <div className="navbar-item is-hoverable">
+              <div className="icon">
+                <Icon path={mdiInbox} size={1} color="whitesmoke" />
+              </div>
+              <div className="navbar-dropdown is-right">
+                <div className="navbar-item">You have no messages</div>
+              </div>
             </div>
-            <div className="navbar-dropdown is-right">
-              <div className="navbar-item">You have no messages</div>
-            </div>
-          </div>
-        ) : null}
-        <div className="navbar-item has-dropdown is-hoverable">
-          <div className="navbar-link">
-            <img className="image is-24x24 is-rounded" src={ProfilePH} />
-          </div>
-          <div className="navbar-dropdown is-right">
-            <div className="navbar-item is-clickable">About Us</div>
-            <div className="navbar-item is-clickable">Help & Support</div>
-            {isAuthenticated ? (
-              <>
+
+            <div className="navbar-item has-dropdown is-hoverable">
+              <div className="navbar-link">
+                <img className="image is-24x24 is-rounded" src={ProfilePH} />
+              </div>
+              <div className="navbar-dropdown is-right">
+                <div className="navbar-item is-clickable">About Us</div>
+                <div className="navbar-item is-clickable">Help & Support</div>
                 <div className="navbar-item is-clickable">Settings</div>
                 <hr className="navbar-divider" />
                 <div
@@ -69,22 +68,43 @@ const NavBar = () => {
                 >
                   Log Out
                 </div>
-              </>
-            ) : (
-              <>
-                <hr className="navbar-divider" />
-                <div
-                  className="navbar-item is-clickable"
-                  onClick={() => {
-                    navigate("/login");
-                  }}
-                >
-                  Login
-                </div>
-              </>
-            )}
-          </div>
-        </div>
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="navbar-item">
+              <div
+                className="navbar-item is-clickable"
+                onClick={() => {
+                  console.log("MAKE MY PAGE!");
+                }}
+              >
+                About Us
+              </div>
+            </div>
+            <div className="navbar-item">
+              <div
+                className="navbar-item is-clickable"
+                onClick={() => {
+                  console.log("MAKE MY PAGE!");
+                }}
+              >
+                Contact
+              </div>
+            </div>
+            <div className="navbar-item">
+              <div
+                className="navbar-item is-clickable"
+                onClick={() => {
+                  navigate("/login");
+                }}
+              >
+                Login
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </nav>
   );
