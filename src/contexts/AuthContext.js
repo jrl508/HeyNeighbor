@@ -51,7 +51,7 @@ export const AuthProvider = ({ children }) => {
       const data = await res.json();
       dispatch({
         type: GET_USER_SUCCESS,
-        payload: { isAuthenticated: true, user: data },
+        payload: data,
       });
     } catch (err) {
       console.error("Auth rehydration error:", err);
