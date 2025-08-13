@@ -20,7 +20,7 @@ const NavBar = () => {
     <nav className="navbar is-dark">
       <div className="navbar-brand">
         <Link
-          to="/"
+          to={isAuthenticated ? "/dashboard" : "/"}
           style={{
             padding: "8px 12px",
             display: "flex",
