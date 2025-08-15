@@ -5,18 +5,15 @@ const ToolCard = ({ tool, onClick, classProps }) => {
   return (
     <div className={`card ${classProps}`} onClick={() => onClick(tool)}>
       <div className="card-image">
-        <figure className="image">
-          <img
-            src="https://placehold.co/500x400?text=Tool+Image"
-            alt="tool placeholder"
-          />
+        <figure className="image is-4by3">
+          <img src={tool.image_url} alt="tool placeholder" />
         </figure>
       </div>
       <div className="card-content">
-        <div className="title is-6">{tool.toolName}</div>
+        <div className="title is-6">{tool.name}</div>
       </div>
       <div className="card-footer">
-        <div className="card-footer-item">{tool.rentalRate}</div>
+        <div className="card-footer-item">{tool.rental_price_per_day}</div>
         <div className="card-footer-item title is-6">
           {tool.available ? (
             <div className="has-text-success">Available</div>
