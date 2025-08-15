@@ -9,3 +9,14 @@ export async function addTool(toolData, token) {
 
   return response;
 }
+
+export async function getUserTools(token) {
+  const response = await fetch(`${process.env.REACT_APP_API_URL}/tools`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return response;
+}
