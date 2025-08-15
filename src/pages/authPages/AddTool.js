@@ -7,25 +7,9 @@ import { mdiInformationOutline } from "@mdi/js";
 import { toolsAPI } from "../../api";
 import { useTool } from "../../hooks/useTool";
 import { ADD_TOOL, ADD_TOOL_FAIL, ADD_TOOL_SUCCESS } from "../../actionTypes";
+import toolCategories from "../../util/ToolCategories";
 
 function AddTool() {
-  const toolCategories = [
-    "Power Tools",
-    "Hand Tools",
-    "Woodworking Tools",
-    "Automotive Tools",
-    "Construction Equipment",
-    "Lawn & Garden Tools",
-    "Plumbing Tools",
-    "Electrical Tools",
-    "Painting & Finishing Tools",
-    "Measuring & Layout Tools",
-    "Heavy Machinery",
-    "Cleaning Equipment",
-    "Metalworking Tools",
-    "Concrete & Masonry Tools",
-    "HVAC Tools",
-  ];
   const [toolName, setToolName] = React.useState("");
   const [toolCategory, setToolCategory] = React.useState("");
   const [toolDescription, setToolDescription] = React.useState("");
