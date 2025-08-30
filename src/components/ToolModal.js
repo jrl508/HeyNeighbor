@@ -1,5 +1,8 @@
+import { Link } from "react-router-dom";
+
 const ToolModal = ({ isOpen, onClose, tool }) => {
   if (!tool) return null;
+  console.log(tool);
   return (
     <div className={`modal ${isOpen && "is-active"}`}>
       <div className="modal-background" onClick={onClose}></div>
@@ -25,7 +28,9 @@ const ToolModal = ({ isOpen, onClose, tool }) => {
           </div>
         </section>
         <footer className="modal-card-foot">
-          <button className="button is-info">Edit Info</button>
+          <Link to={`/dashboard/toolshed/edit/${tool.id}`} state={{ tool }}>
+            <button className="button is-info">Edit Info</button>
+          </Link>
         </footer>
       </div>
     </div>
