@@ -11,12 +11,13 @@ import UserProfile from "./pages/authPages/UserProfile";
 import LocalBiz from "./pages/authPages/LocalBusiness/LocalBiz";
 import Balance from "./pages/authPages/Balance";
 import Listings from "./pages/authPages/Listings";
-import Toolshed from "./pages/authPages/Toolshed";
+import Toolshed from "./pages/authPages/Tools/Toolshed";
 import TranHist from "./pages/authPages/TranHist";
-import AddTool from "./pages/authPages/AddTool";
+import AddTool from "./pages/authPages/Tools/AddTool";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ToolProvider } from "./contexts/ToolContext";
 import AuthRoutes from "./components/AuthRoutes";
+import EditTool from "./pages/authPages/Tools/EditTool";
 
 const App = () => {
   return (
@@ -37,6 +38,7 @@ const App = () => {
                 <Route path="toolshed">
                   <Route index element={<Toolshed />} />
                   <Route path="new" element={<AddTool />} />
+                  <Route path="edit/:toolId" element={<EditTool />} />
                 </Route>
                 <Route path="transaction-history" element={<TranHist />} />
               </Route>
