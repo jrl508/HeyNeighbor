@@ -20,3 +20,15 @@ export async function getUserTools(token) {
 
   return response;
 }
+
+export async function updateTool(id, toolData, token) {
+  const response = await fetch(`${process.env.REACT_APP_API_URL}/tools/${id}`, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: toolData,
+  });
+
+  return response;
+}
