@@ -20,7 +20,6 @@ interface ToolFormProps {
 
 const ToolForm: React.FC<ToolFormProps> = (props) => {
   const { tool, submitLabel, submitFunc } = props;
-  console.log(tool);
   const [toolName, setToolName] = React.useState(tool.name || "");
   const [toolCategory, setToolCategory] = React.useState(tool.category || "");
   const [toolDescription, setToolDescription] = React.useState(
@@ -69,7 +68,7 @@ const ToolForm: React.FC<ToolFormProps> = (props) => {
       formData.append("tool_image", toolImage);
     }
 
-    submitFunc(formData);
+    await submitFunc(formData);
   };
 
   return (
