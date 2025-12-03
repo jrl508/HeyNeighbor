@@ -41,10 +41,16 @@ const UserProfile = () => {
   const [openModal, setOpenModal] = useState(false);
 
   useEffect(() => {
-    if (!user) {
-      getUser(token);
-    }
-  }, [user, getUser, token]);
+    if (!user) return;
+    setFirstName(user.first_name || "");
+    setLastName(user.last_name || "");
+    setPhone(user.phone_number || "");
+    setEmail(user.email || "");
+    setLocation(user.location || "");
+    setImage(
+      user.profile_image || "https://placehold.co/500x500?text=Profile+Image"
+    );
+  }, [user]);
 
   const handleOpenModal = () => {
     setOpenModal(true);
@@ -74,6 +80,8 @@ const UserProfile = () => {
 
   const handleUploadImage = async (e) => {
     e.preventDefault();
+    if (!imageFile) return;
+
     const formData = new FormData();
     formData.append("profile_picture", imageFile);
 
@@ -82,12 +90,24 @@ const UserProfile = () => {
         `${process.env.REACT_APP_API_URL}/users/${user.id}/profile-picture`,
         {
           method: "POST",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
           body: formData,
         }
       );
 
       if (response.ok) {
         const data = await response.json();
+        // If the API returns the updated user object:
+        if (data.user) {
+          dispatch({ type: UPDATE_USER_SUCCESS, payload: data.user });
+        }
+        // Or if API returns just the image URL:
+        else if (data.profile_image) {
+          setImage(data.profile_image);
+          // optionally dispatch UPDATE_USER_SUCCESS with { profile_image: data.profile_image }
+        }
       } else {
         console.error("Error uploading image", response);
       }
@@ -137,11 +157,12 @@ const UserProfile = () => {
     }
   };
 
-  const handleSubmit = (event) => {
-    handleUpdate();
+  const handleSubmit = async (event) => {
+    await handleUpdate();
     if (imageFile) {
-      handleUploadImage(event);
+      await handleUploadImage(event);
     }
+    await getUser(token);
   };
 
   if (error) {
