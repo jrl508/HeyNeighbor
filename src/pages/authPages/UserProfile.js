@@ -23,7 +23,9 @@ const UserProfile = () => {
     last_name,
     phone_number,
     email: userEmail,
-    location: userLocation,
+    city,
+    state: stateGeo,
+    zip_code,
   } = user || {};
 
   const [editMode, setEditMode] = useState(false);
@@ -35,7 +37,7 @@ const UserProfile = () => {
   const [lastName, setLastName] = useState(last_name || "");
   const [phone, setPhone] = useState(phone_number || "");
   const [email, setEmail] = useState(userEmail || "");
-  const [location, setLocation] = useState(userLocation || "");
+  const [zipCode, setZipCode] = useState(zip_code || "");
   const [imageFile, setImageFile] = useState(null);
   const [fileInputKey, setFileInputKey] = useState(Date.now());
   const [openModal, setOpenModal] = useState(false);
@@ -46,7 +48,7 @@ const UserProfile = () => {
     setLastName(user.last_name || "");
     setPhone(user.phone_number || "");
     setEmail(user.email || "");
-    setLocation(user.location || "");
+    setZipCode(user.zip_code || "");
     setImage(
       user.profile_image || "https://placehold.co/500x500?text=Profile+Image"
     );
@@ -71,7 +73,7 @@ const UserProfile = () => {
     setFirstName(first_name);
     setLastName(last_name);
     setPhone(phone_number || "");
-    setLocation(location || "");
+    setZipCode(zip_code || "");
     setImageFile(null);
     setFileInputKey(Date.now());
     setPreview("");
@@ -125,7 +127,7 @@ const UserProfile = () => {
         last_name: lastName,
         phone_number: String(phone),
         email,
-        location,
+        zip_code: zipCode,
       },
     };
 
@@ -142,9 +144,7 @@ const UserProfile = () => {
         }
       );
       if (response.ok) {
-        console.log("OK");
         const data = await response.json();
-        console.log("success data:", data);
         dispatch({ type: UPDATE_USER_SUCCESS, payload: data.user });
         getUser(token);
         setEditMode(false);
@@ -252,13 +252,19 @@ const UserProfile = () => {
                 </div>
               </div>
               <div className="field">
-                <label className="label">Location</label>
+                <label className="label">
+                  Location {editMode ? "(Zip Code)" : null}
+                </label>
                 <div className="control">
                   <input
                     className="input"
                     type="text"
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
+                    value={
+                      editMode
+                        ? zipCode
+                        : `${city + ", " + stateGeo + " " + zipCode} `
+                    }
+                    onChange={(e) => setZipCode(e.target.value)}
                     disabled={!editMode}
                   />
                 </div>
@@ -276,7 +282,7 @@ const UserProfile = () => {
                     style={{
                       width: "fit-content",
                       alignSelf: "end",
-                      display: editMode ? "none" : null,
+                      display: editMode ? "none" : "null",
                     }}
                     onClick={(e) => {
                       e.preventDefault();
