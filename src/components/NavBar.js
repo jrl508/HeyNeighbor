@@ -6,6 +6,7 @@ import { mdiInbox } from "@mdi/js";
 import ProfilePH from "../images/profile_ph.svg";
 import { useAuth } from "../hooks/useAuth";
 import { LOGOUT } from "../actionTypes";
+import Avatar from "./Avatar";
 
 const NavBar = () => {
   const navigate = useNavigate();
@@ -53,7 +54,7 @@ const NavBar = () => {
 
             <div className="navbar-item has-dropdown is-hoverable">
               <div className="navbar-link">
-                <img className="image is-24x24 is-rounded" src={ProfilePH} />
+                <Avatar src={state.user.profile_image} size="sm" />
               </div>
               <div className="navbar-dropdown is-right">
                 <div className="navbar-item is-clickable">About Us</div>

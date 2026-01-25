@@ -4,6 +4,7 @@ import ProfilePH from "../../images/profile_ph.svg";
 import { Link, Outlet } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth.js";
 import { capitalize } from "../../util/UtilFunctions.js";
+import Avatar from "../../components/Avatar";
 
 /*
 
@@ -75,6 +76,7 @@ const Dashboard = () => {
         }}
       >
         <div
+          className="fixed-grid has-1-cols"
           style={{
             borderBottom: "solid gray 1px",
             paddingBottom: "25px",
@@ -82,25 +84,17 @@ const Dashboard = () => {
         >
           <div
             style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "flex-start",
+              textAlign: "center",
+              marginBottom: "25px",
             }}
           >
-            <div className="image is-64x64">
-              <img src={ProfilePH} alt="profile pic" />
-            </div>
-            <span
-              className="title is-5"
-              style={{
-                marginLeft: "15px",
-              }}
-            >
-              {`${capitalize(user.first_name + " " + user.last_name)}`}
-            </span>
+            <Avatar src={user.profile_image} size="xl" />
           </div>
-          <span>4.8/5 stars</span>
-          <h5>Taunton, MA</h5>
+          <div className="has-text-weight-bold">
+            {`${capitalize(user.first_name + " " + user.last_name)}`}
+          </div>
+          <div>4.8/5 stars</div>
+          <div>{`${user.city + ", " + user.state}`}</div>
         </div>
 
         {/* Side Nav component Start, TODO: Make them auth routes */}
