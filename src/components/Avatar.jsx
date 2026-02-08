@@ -1,4 +1,5 @@
 import "../styles/avatar.css";
+import placeholder from "../images/placeholder_avatar.png";
 
 const SIZE_MAP = {
   xs: "avatar-xs",
@@ -23,7 +24,7 @@ export default function Avatar({
 }) {
   return (
     <figure className={`avatar ${SIZE_MAP[size]} ${className}`}>
-      <img src={src || "/avatar-placeholder.png"} alt={alt} loading="lazy" />
+      <img src={src || placeholder} alt={alt} loading="lazy" />
     </figure>
   );
 }

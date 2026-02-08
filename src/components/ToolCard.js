@@ -1,12 +1,13 @@
 // Card.js
 import React from "react";
+import placeholderTool from "../images/placeholder_tools.png";
 
 const ToolCard = ({ tool, onClick, classProps }) => {
   return (
     <div className={`card ${classProps}`} onClick={() => onClick(tool)}>
       <div className="card-image">
         <figure className="image is-4by3">
-          <img src={tool.image_url} alt="tool placeholder" />
+          <img src={tool.image_url || placeholderTool} alt="tool placeholder" />
         </figure>
       </div>
       <div className="card-content">
