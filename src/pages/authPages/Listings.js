@@ -4,10 +4,9 @@ import { mdiMagnify } from "@mdi/js";
 import ToolCard from "../../components/ToolCard";
 import ToolModal from "../../components/ToolModal";
 import Pagination from "../../components/Pagination";
-import { listingToolData } from "../../seed/toolData";
 
 const Listings = () => {
-  const [tools, setTools] = useState(listingToolData);
+  const [tools, setTools] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredTools, setFilteredTools] = useState([]);
   const [openModal, setOpenModal] = useState(false);
@@ -18,8 +17,8 @@ const Listings = () => {
   useEffect(() => {
     setFilteredTools(
       tools.filter((tool) =>
-        tool.toolName.toLowerCase().includes(searchQuery.toLowerCase())
-      )
+        tool.toolName.toLowerCase().includes(searchQuery.toLowerCase()),
+      ),
     );
   }, [searchQuery, tools]);
 
@@ -44,7 +43,7 @@ const Listings = () => {
   const totalPages = Math.ceil(filteredTools.length / itemsPerPage);
   const pageItems = filteredTools.slice(
     (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
+    currentPage * itemsPerPage,
   );
 
   return (
