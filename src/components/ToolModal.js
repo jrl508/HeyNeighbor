@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import placeholderTool from "../images/placeholder_tools.png";
 
 const ToolModal = ({ isOpen, onClose, tool }) => {
   if (!tool) return null;
@@ -14,7 +15,10 @@ const ToolModal = ({ isOpen, onClose, tool }) => {
         <section className="modal-card-body">
           <div className="card-image">
             <figure className="image is-4by3">
-              <img src={tool.image_url} alt="Placeholder image" />
+              <img
+                src={tool.image_url || placeholderTool}
+                alt="Placeholder image"
+              />
             </figure>
           </div>
           <div>
