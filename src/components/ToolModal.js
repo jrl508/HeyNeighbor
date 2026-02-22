@@ -1,9 +1,11 @@
 import { Link } from "react-router-dom";
 import placeholderTool from "../images/placeholder_tools.png";
+import React, { useState } from "react";
+import BookingModal from "./BookingModal";
 
 const ToolModal = ({ isOpen, onClose, tool }) => {
+  const [bookingOpen, setBookingOpen] = useState(false);
   if (!tool) return null;
-  console.log(tool);
   return (
     <div className={`modal ${isOpen && "is-active"}`}>
       <div className="modal-background" onClick={onClose}></div>
@@ -26,7 +28,7 @@ const ToolModal = ({ isOpen, onClose, tool }) => {
               <div>
                 <p>Description: {tool.description}</p>
                 <p>Rental Rate: {tool.rental_price_per_day}</p>
-                {!tool.available && <p>Rented By: Some Neighbor</p>}
+                {!tool.availability && <p>Currently Unavailable</p>}
               </div>
             ) : null}
           </div>
@@ -35,8 +37,21 @@ const ToolModal = ({ isOpen, onClose, tool }) => {
           <Link to={`/dashboard/toolshed/edit/${tool.id}`} state={{ tool }}>
             <button className="button is-info">Edit Info</button>
           </Link>
+          <button
+            className="button is-primary"
+            onClick={() => setBookingOpen(true)}
+          >
+            Book Tool
+          </button>
         </footer>
       </div>
+      {bookingOpen && (
+        <BookingModal
+          tool={tool}
+          isOpen={bookingOpen}
+          onClose={() => setBookingOpen(false)}
+        />
+      )}
     </div>
   );
 };
