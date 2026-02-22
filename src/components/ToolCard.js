@@ -16,7 +16,7 @@ const ToolCard = ({ tool, onClick, classProps }) => {
       <div className="card-footer">
         <div className="card-footer-item">{tool.rental_price_per_day}</div>
         <div className="card-footer-item title is-6">
-          {tool.available ? (
+          {tool.availability ? (
             <div className="has-text-success">Available</div>
           ) : (
             <div className="has-text-danger">Unavailable</div>
