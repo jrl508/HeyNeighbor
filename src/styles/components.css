@@ -43,3 +43,25 @@
   transform: translateY(-50%);
   margin-left: 8px;
 }
+
+/* Tool List Grid Styles */
+.tool-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+  padding: 24px 0;
+  margin: 24px 0;
+}
+
+@media (max-width: 768px) {
+  .tool-list {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .tool-list {
+    grid-template-columns: 1fr;
+  }
+}

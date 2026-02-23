@@ -3,6 +3,7 @@ import Icon from "@mdi/react";
 import { mdiMagnify } from "@mdi/js";
 import ToolCard from "../../components/ToolCard";
 import ToolModal from "../../components/ToolModal";
+import BookingModal from "../../components/BookingModal";
 import Pagination from "../../components/Pagination";
 import { useAuth } from "../../hooks/useAuth";
 
@@ -14,6 +15,7 @@ const Listings = () => {
   const [filteredTools, setFilteredTools] = useState([]);
   const [openModal, setOpenModal] = useState(false);
   const [selectedTool, setSelectedTool] = useState(null);
+  const [bookingOpen, setBookingOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -46,7 +48,7 @@ const Listings = () => {
             headers: {
               Authorization: `Bearer ${token}`,
             },
-          }
+          },
         );
 
         if (!response.ok) {
@@ -54,7 +56,19 @@ const Listings = () => {
         }
 
         const data = await response.json();
-        setTools(Array.isArray(data) ? data : data.tools || []);
+        // Map backend tools to include .availability field and filter out user's own tools
+        const toolsWithAvailability = (
+          Array.isArray(data) ? data : data.tools || []
+        )
+          .filter((tool) => tool.user_id !== user?.id) // Exclude tools owned by current user
+          .map((tool) => ({
+            ...tool,
+            availability:
+              typeof tool.availability !== "undefined"
+                ? tool.availability
+                : tool.available,
+          }));
+        setTools(toolsWithAvailability);
       } catch (err) {
         console.error("Error fetching tools:", err);
         setError(err.message);
@@ -71,11 +85,13 @@ const Listings = () => {
   // Filter tools by search query
   useEffect(() => {
     setFilteredTools(
-      tools.filter((tool) =>
-        tool.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        tool.description?.toLowerCase().includes(searchQuery.toLowerCase()),
+      tools.filter(
+        (tool) =>
+          tool.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          tool.description?.toLowerCase().includes(searchQuery.toLowerCase()),
       ),
     );
+    setCurrentPage(1);
   }, [searchQuery, tools]);
 
   const handleSearchChange = (event) => {
@@ -90,6 +106,7 @@ const Listings = () => {
   const handleCloseModal = () => {
     setOpenModal(false);
     setSelectedTool(null);
+    setBookingOpen(false);
   };
 
   const handlePageChange = (pageNumber) => {
@@ -126,41 +143,34 @@ const Listings = () => {
             </p>
           </div>
           {error && <div className="notification is-danger">{error}</div>}
-      <div className="is-size-6">
-        There are{" "}
-        <span className="has-text-weight-semibold is-clickable">
-          {filteredTools.length}
-        </span>{" "}
-        listings within{" "}
-        <span className="has-text-weight-semibold is-clickable">{radius}</span>{" "}
-        miles of{" "}
-        <span className="has-text-weight-semibold is-clickable">{zip}</span>
-      </div>
-      {loading ? (
-        <div className="has-text-centered p-6">
-          <p>Loading tools...</p>
-        </div>
-      ) : (
-        <div
-          className="tool-list"
-          style={{
-            padding: "25px",
-            display: "flex",
-            flexFlow: "row wrap",
-            justifyContent: "space-evenly",
-            gap: "25px",
-          }}
-        >
-          {pageItems.map((tool) => (
-            <ToolCard key={tool.id} tool={tool} onClick={handleCardClick} />
-          ))}
-        </div>
-      )}
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={handlePageChange}
-      />
+          <div className="is-size-6">
+            There are{" "}
+            <span className="has-text-weight-semibold is-clickable">
+              {filteredTools.length}
+            </span>{" "}
+            listings within{" "}
+            <span className="has-text-weight-semibold is-clickable">
+              {radius}
+            </span>{" "}
+            miles of{" "}
+            <span className="has-text-weight-semibold is-clickable">{zip}</span>
+          </div>
+          {loading ? (
+            <div className="has-text-centered p-6">
+              <p>Loading tools...</p>
+            </div>
+          ) : (
+            <div className="tool-list">
+              {pageItems.map((tool) => (
+                <ToolCard key={tool.id} tool={tool} onClick={handleCardClick} />
+              ))}
+            </div>
+          )}
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
         </>
       )}
       <ToolModal
@@ -168,6 +178,13 @@ const Listings = () => {
         onClose={handleCloseModal}
         tool={selectedTool}
       />
+      {bookingOpen && selectedTool && (
+        <BookingModal
+          tool={selectedTool}
+          isOpen={bookingOpen}
+          onClose={() => setBookingOpen(false)}
+        />
+      )}
     </div>
   );
 };

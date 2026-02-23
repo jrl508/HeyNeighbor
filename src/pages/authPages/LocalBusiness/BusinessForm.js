@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import Icon from "@mdi/react";
 import { mdiMinus, mdiPlus } from "@mdi/js";
+import { createBusiness } from "../../../api/localBusiness";
 
-const BusinessForm = ({ setOpenBizForm }) => {
+const BusinessForm = ({ setOpenBizForm, onBusinessCreated }) => {
+  const token = localStorage.getItem("token");
   const [name, setName] = useState("");
   const [type, setType] = useState("");
   const [address, setAddress] = useState("");
@@ -32,6 +34,9 @@ const BusinessForm = ({ setOpenBizForm }) => {
       type: 1,
     },
   ]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   const linkField = {
     url: "",
@@ -79,6 +84,7 @@ const BusinessForm = ({ setOpenBizForm }) => {
     payload[event.target.name] = !days[event.target.name];
     setDays(payload);
   };
+
   const hours = Array.from({ length: 12 }, (_, i) => {
     const hour = (i + 1).toString().padStart(2, "0");
     return { value: hour, label: hour };
@@ -89,26 +95,137 @@ const BusinessForm = ({ setOpenBizForm }) => {
     return { value: minute, label: minute };
   });
 
-  const handleSubmit = () => {
-    const payload = {
-      name,
-      type,
-      address,
-      phone,
-      links,
-      schedule: {
-        startTime,
-        endTime,
-        days,
-      },
-    };
-    console.log("Submitting", payload);
-    setOpenBizForm(false);
+  // Ensure links have a protocol (http:// or https://)
+  const formatLink = (url) => {
+    if (!url) return url;
+    const trimmed = url.trim();
+    if (trimmed.match(/^https?:\/\//)) {
+      return trimmed; // Already has protocol
+    }
+    return `https://${trimmed}`; // Add https:// by default
+  };
+
+  const handleSubmit = async () => {
+    setError("");
+    setSuccessMessage("");
+
+    // Check if token exists
+    if (!token) {
+      setError("Authentication token not found. Please log in again.");
+      return;
+    }
+
+    // Validate required fields
+    if (!name.trim()) {
+      setError("Business name is required");
+      return;
+    }
+    if (!type.trim()) {
+      setError("Business type is required");
+      return;
+    }
+    if (!address.trim()) {
+      setError("Address is required");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const businessData = {
+        name: name.trim(),
+        type: type.trim(),
+        address: address.trim(),
+        phone: phone.trim() || null,
+        description: null,
+        hours: JSON.stringify({
+          startTime,
+          endTime,
+          days,
+        }),
+        links: JSON.stringify(
+          links
+            .filter((link) => link.url.trim())
+            .map((link) => ({
+              ...link,
+              url: formatLink(link.url),
+            })),
+        ),
+      };
+
+      console.log(
+        "[BusinessForm] Submitting with token:",
+        token ? "present" : "missing",
+      );
+      console.log("[BusinessForm] businessData=", businessData);
+
+      const response = await createBusiness(businessData, token);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to create business");
+      }
+
+      const createdBusiness = await response.json();
+      setSuccessMessage("Business recommendation submitted successfully!");
+
+      // Reset form
+      setName("");
+      setType("");
+      setAddress("");
+      setPhone("");
+      setStartTime({ hour: "12", minute: "00", mer: "AM" });
+      setEndTime({ hour: "12", minute: "00", mer: "AM" });
+      setDays({
+        mon: false,
+        tue: false,
+        wed: false,
+        thu: false,
+        fri: false,
+        sat: false,
+        sun: false,
+      });
+      setLinks([{ url: "", type: 1 }]);
+
+      // Notify parent component
+      if (onBusinessCreated) {
+        onBusinessCreated(createdBusiness);
+      }
+
+      // Close modal after a short delay
+      setTimeout(() => {
+        setOpenBizForm(false);
+      }, 1500);
+    } catch (err) {
+      console.error("[BusinessForm] error=", err);
+      const errorMsg =
+        err instanceof Error
+          ? err.message
+          : "An error occurred while creating the business";
+      setError(errorMsg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <>
       <div className="business-form modal-card-body">
+        {error && (
+          <div className="notification is-danger">
+            <button className="delete" onClick={() => setError("")}></button>
+            {error}
+          </div>
+        )}
+        {successMessage && (
+          <div className="notification is-success">
+            <button
+              className="delete"
+              onClick={() => setSuccessMessage("")}
+            ></button>
+            {successMessage}
+          </div>
+        )}
         <div className="field">
           <label className="label">Business Name</label>
           <div className="control">
@@ -170,18 +287,16 @@ const BusinessForm = ({ setOpenBizForm }) => {
           >
             <label className="label">Link</label>
             <div style={{ display: "flex", columnGap: "15px" }}>
-              <Icon
+              <span className="is-clickable" onClick={addLink} title="Add link">
+                <Icon path={mdiPlus} size={1} />
+              </span>
+              <span
                 className="is-clickable"
-                path={mdiPlus}
-                size={1}
-                onClick={addLink}
-              />
-              <Icon
-                className="is-clickable"
-                path={mdiMinus}
-                size={1}
                 onClick={removeLink}
-              />
+                title="Remove link"
+              >
+                <Icon path={mdiMinus} size={1} />
+              </span>
             </div>
           </div>
           {links.map((link, index) => (
@@ -453,12 +568,17 @@ const BusinessForm = ({ setOpenBizForm }) => {
       </div>
       <div className="modal-card-foot">
         <div className="buttons">
-          <button onClick={handleSubmit} className="button is-info">
+          <button
+            onClick={handleSubmit}
+            className={`button is-info ${loading ? "is-loading" : ""}`}
+            disabled={loading}
+          >
             Submit
           </button>
           <button
             onClick={() => setOpenBizForm(false)}
             className="button is-danger"
+            disabled={loading}
           >
             Cancel
           </button>
