@@ -56,16 +56,18 @@ const Listings = () => {
         }
 
         const data = await response.json();
-        // Map backend tools to include .availability field
+        // Map backend tools to include .availability field and filter out user's own tools
         const toolsWithAvailability = (
           Array.isArray(data) ? data : data.tools || []
-        ).map((tool) => ({
-          ...tool,
-          availability:
-            typeof tool.availability !== "undefined"
-              ? tool.availability
-              : tool.available,
-        }));
+        )
+          .filter((tool) => tool.user_id !== user?.id) // Exclude tools owned by current user
+          .map((tool) => ({
+            ...tool,
+            availability:
+              typeof tool.availability !== "undefined"
+                ? tool.availability
+                : tool.available,
+          }));
         setTools(toolsWithAvailability);
       } catch (err) {
         console.error("Error fetching tools:", err);
@@ -158,16 +160,7 @@ const Listings = () => {
               <p>Loading tools...</p>
             </div>
           ) : (
-            <div
-              className="tool-list"
-              style={{
-                padding: "25px",
-                display: "flex",
-                flexFlow: "row wrap",
-                justifyContent: "space-evenly",
-                gap: "25px",
-              }}
-            >
+            <div className="tool-list">
               {pageItems.map((tool) => (
                 <ToolCard key={tool.id} tool={tool} onClick={handleCardClick} />
               ))}
