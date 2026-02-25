@@ -32,6 +32,13 @@ const ToolForm: React.FC<ToolFormProps> = (props) => {
   const [deliveryAvailable, setDeliveryAvailable] = React.useState(
     tool.deliveryAvailable || false
   );
+  const [available, setAvailable] = React.useState(
+    typeof (props.tool as any)?.available !== "undefined"
+      ? (props.tool as any).available
+      : typeof (props.tool as any)?.availability !== "undefined"
+      ? (props.tool as any).availability
+      : true
+  );
 
   const handleToolNameChange = (e: React.ChangeEvent<HTMLInputElement>) =>
     setToolName(e.target.value);
@@ -52,6 +59,8 @@ const ToolForm: React.FC<ToolFormProps> = (props) => {
   const handleDeliveryAvailableChange = (
     e: React.ChangeEvent<HTMLInputElement>
   ) => setDeliveryAvailable(e.target.checked);
+  const handleAvailableChange = (e: React.ChangeEvent<HTMLInputElement>) =>
+    setAvailable(e.target.checked);
 
   const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -61,7 +70,7 @@ const ToolForm: React.FC<ToolFormProps> = (props) => {
     formData.append("description", toolDescription);
     formData.append("category", toolCategory);
     formData.append("rental_price_per_day", String(rentalRate));
-    formData.append("available", "true");
+    formData.append("available", String(available));
     formData.append("deliveryAvailable", String(deliveryAvailable));
 
     if (toolImage) {
@@ -151,29 +160,59 @@ const ToolForm: React.FC<ToolFormProps> = (props) => {
             </div>
           </div>
           <div className="field cell is-row-start-3 is-col-start-8 is-col-span-3">
-            <div style={{ display: "flex", alignItems: "center" }}>
-              <label className="checkbox">
-                <input
-                  type="checkbox"
-                  checked={deliveryAvailable}
-                  onChange={handleDeliveryAvailableChange}
-                />
-                <span className="ml-2 has-text-weight-medium">
-                  Delivery Available
-                </span>
-              </label>
-              <Tooltip
-                position="bottom"
-                content="Let others know if you are willing to deliver the tool to them. For an added fee, of course!"
-              >
-                <div>
-                  <Icon
-                    path={mdiInformationOutline}
-                    size={1}
-                    className="ml-2"
+            <div
+              className="is-flex is-flex-direction-column"
+              style={{ gap: "10px" }}
+            >
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <label className="checkbox">
+                  <input
+                    type="checkbox"
+                    checked={available}
+                    onChange={handleAvailableChange}
                   />
-                </div>
-              </Tooltip>
+                  <span className="ml-2 has-text-weight-medium">
+                    Available for Rent
+                  </span>
+                </label>
+                <Tooltip
+                  position="bottom"
+                  content="Uncheck this to temporarily hide your tool from the public listings."
+                >
+                  <div>
+                    <Icon
+                      path={mdiInformationOutline}
+                      size={1}
+                      className="ml-2"
+                    />
+                  </div>
+                </Tooltip>
+              </div>
+
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <label className="checkbox">
+                  <input
+                    type="checkbox"
+                    checked={deliveryAvailable}
+                    onChange={handleDeliveryAvailableChange}
+                  />
+                  <span className="ml-2 has-text-weight-medium">
+                    Delivery Available
+                  </span>
+                </label>
+                <Tooltip
+                  position="bottom"
+                  content="Let others know if you are willing to deliver the tool to them. For an added fee, of course!"
+                >
+                  <div>
+                    <Icon
+                      path={mdiInformationOutline}
+                      size={1}
+                      className="ml-2"
+                    />
+                  </div>
+                </Tooltip>
+              </div>
             </div>
           </div>
           <div className="field cell is-row-start-4">

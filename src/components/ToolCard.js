@@ -35,7 +35,7 @@ const ToolCard = ({ tool, onClick, classProps }) => {
           <span className="has-text-grey">/day</span>
         </div>
         <div className="tool-availability">
-          {tool.availability ? (
+          {tool.available ? (
             <span className="tag is-success is-light">Available</span>
           ) : (
             <span className="tag is-danger is-light">Unavailable</span>

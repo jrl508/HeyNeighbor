@@ -1,11 +1,16 @@
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import placeholderTool from "../images/placeholder_tools.png";
-import React, { useState } from "react";
 import BookingModal from "./BookingModal";
+import { useAuth } from "../hooks/useAuth";
 
 const ToolModal = ({ isOpen, onClose, tool }) => {
+  const { state } = useAuth();
+  const { user } = state;
   const [bookingOpen, setBookingOpen] = useState(false);
   if (!tool) return null;
+
+  const isOwner = user && tool.user_id === user.id;
   return (
     <div className={`modal ${isOpen && "is-active"}`}>
       <div className="modal-background" onClick={onClose}></div>
@@ -34,15 +39,18 @@ const ToolModal = ({ isOpen, onClose, tool }) => {
           </div>
         </section>
         <footer className="modal-card-foot">
-          <Link to={`/dashboard/toolshed/edit/${tool.id}`} state={{ tool }}>
-            <button className="button is-info">Edit Info</button>
-          </Link>
-          <button
-            className="button is-primary"
-            onClick={() => setBookingOpen(true)}
-          >
-            Book Tool
-          </button>
+          {isOwner ? (
+            <Link to={`/dashboard/toolshed/edit/${tool.id}`} state={{ tool }}>
+              <button className="button is-info">Edit Info</button>
+            </Link>
+          ) : (
+            <button
+              className="button is-primary"
+              onClick={() => setBookingOpen(true)}
+            >
+              Book Tool
+            </button>
+          )}
         </footer>
       </div>
       {bookingOpen && (
