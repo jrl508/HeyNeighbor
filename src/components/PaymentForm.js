@@ -28,7 +28,7 @@ const PaymentForm = ({
 
     try {
       console.log(
-        `[PaymentForm] processing payment: booking_id=${booking.id} amount=${payment.amount}`,
+        `[PaymentForm] processing payment: booking_id=${booking.id} amount=${payment.payment.amount}`,
       );
 
       // Confirm the payment with Stripe
@@ -119,7 +119,7 @@ const PaymentForm = ({
             }}
           >
             <span>Amount:</span>
-            <span>${payment.amount.toFixed(2)}</span>
+            <span>${Number(payment.payment.amount).toFixed(2)}</span>
           </div>
           <div style={{ borderTop: "1px solid #ddd", paddingTop: "10px" }}>
             <div
@@ -130,7 +130,7 @@ const PaymentForm = ({
               }}
             >
               <span>Total:</span>
-              <span>${payment.amount.toFixed(2)}</span>
+              <span>${Number(payment.payment.amount).toFixed(2)}</span>
             </div>
           </div>
         </div>
@@ -151,7 +151,7 @@ const PaymentForm = ({
             className={`button is-primary ${loading ? "is-loading" : ""}`}
             disabled={loading || !stripe}
           >
-            Pay ${payment.amount.toFixed(2)}
+            Pay ${Number(payment.payment.amount).toFixed(2)}
           </button>
         </div>
       </div>
