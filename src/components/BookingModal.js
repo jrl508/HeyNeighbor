@@ -31,7 +31,7 @@ const BookingModal = ({ tool, isOpen, onClose, onBooked }) => {
     try {
       const token = localStorage.getItem("token");
       console.log(
-        `[BookingModal] creating booking: tool=${tool.id} start=${startDate} end=${endDate}`
+        `[BookingModal] creating booking: tool=${tool.id} start=${startDate} end=${endDate}`,
       );
 
       // Create booking
@@ -64,14 +64,12 @@ const BookingModal = ({ tool, isOpen, onClose, onBooked }) => {
 
       if (!paymentRes.ok) {
         const errorData = await paymentRes.json();
-        throw new Error(
-          errorData.message || "Failed to create payment intent"
-        );
+        throw new Error(errorData.message || "Failed to create payment intent");
       }
 
       const paymentData = await paymentRes.json();
       console.log(
-        `[BookingModal] payment intent created: ${paymentData.paymentIntentId}`
+        `[BookingModal] payment intent created: ${paymentData.paymentIntentId}`,
       );
       setPayment(paymentData);
       setStep("payment");
@@ -92,9 +90,7 @@ const BookingModal = ({ tool, isOpen, onClose, onBooked }) => {
 
   const handlePaymentError = (err) => {
     console.error("[BookingModal] payment error:", err);
-    setError(
-      typeof err === "string" ? err : err.message || "Payment failed"
-    );
+    setError(typeof err === "string" ? err : err.message || "Payment failed");
   };
 
   const handleBack = () => {
@@ -186,21 +182,23 @@ const BookingModal = ({ tool, isOpen, onClose, onBooked }) => {
                   <strong>Booking Summary</strong>
                 </p>
                 <div style={{ marginTop: "10px", fontSize: "14px" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <div
+                    style={{ display: "flex", justifyContent: "space-between" }}
+                  >
                     <span>Duration:</span>
-                    <span>
-                      {calculateDays(startDate, endDate)} days
-                    </span>
+                    <span>{calculateDays(startDate, endDate)} days</span>
                   </div>
-                  <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <div
+                    style={{ display: "flex", justifyContent: "space-between" }}
+                  >
                     <span>Daily Rate:</span>
                     <span>${tool.rental_price_per_day}</span>
                   </div>
-                  <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <div
+                    style={{ display: "flex", justifyContent: "space-between" }}
+                  >
                     <span>Deposit (20%):</span>
-                    <span>
-                      ${(tool.rental_price_per_day * 0.2).toFixed(2)}
-                    </span>
+                    <span>${(tool.rental_price_per_day * 0.2).toFixed(2)}</span>
                   </div>
                   <div
                     style={{

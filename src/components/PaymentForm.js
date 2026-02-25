@@ -1,13 +1,14 @@
 import React, { useState } from "react";
-import {
-  CardElement,
-  useStripe,
-  useElements,
-} from "@stripe/react-stripe-js";
+import { CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import PropTypes from "prop-types";
 import { confirmPayment } from "../api/payments";
 
-const PaymentForm = ({ booking, payment, onPaymentSuccess, onPaymentError }) => {
+const PaymentForm = ({
+  booking,
+  payment,
+  onPaymentSuccess,
+  onPaymentError,
+}) => {
   const stripe = useStripe();
   const elements = useElements();
   const [loading, setLoading] = useState(false);
@@ -27,7 +28,7 @@ const PaymentForm = ({ booking, payment, onPaymentSuccess, onPaymentError }) => 
 
     try {
       console.log(
-        `[PaymentForm] processing payment: booking_id=${booking.id} amount=${payment.amount}`
+        `[PaymentForm] processing payment: booking_id=${booking.id} amount=${payment.amount}`,
       );
 
       // Confirm the payment with Stripe
@@ -48,15 +49,11 @@ const PaymentForm = ({ booking, payment, onPaymentSuccess, onPaymentError }) => 
       }
 
       console.log(
-        `[PaymentForm] payment intent status: ${paymentIntent.status}`
+        `[PaymentForm] payment intent status: ${paymentIntent.status}`,
       );
 
       // Confirm the payment on our backend
-      const res = await confirmPayment(
-        booking.id,
-        paymentIntent.id,
-        token
-      );
+      const res = await confirmPayment(booking.id, paymentIntent.id, token);
 
       if (!res.ok) {
         const errorData = await res.json();
@@ -159,7 +156,10 @@ const PaymentForm = ({ booking, payment, onPaymentSuccess, onPaymentError }) => 
         </div>
       </div>
 
-      <div className="has-text-grey-light is-size-7" style={{ marginTop: "10px" }}>
+      <div
+        className="has-text-grey-light is-size-7"
+        style={{ marginTop: "10px" }}
+      >
         This is a secure payment processed by Stripe. Your card information is
         never stored on our servers.
       </div>
