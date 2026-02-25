@@ -40,6 +40,16 @@ export const activateBooking = async (id, token) => {
   return response;
 };
 
+export const returnBooking = async (id, token) => {
+  const response = await fetch(`${api}/bookings/${id}/return`, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return response;
+};
+
 export const completeBooking = async (id, token) => {
   const response = await fetch(`${api}/bookings/${id}/complete`, {
     method: "PATCH",

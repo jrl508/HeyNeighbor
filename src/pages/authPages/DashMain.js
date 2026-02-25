@@ -79,6 +79,41 @@ const DashMain = () => {
     }
   };
 
+  const isPastEndDate = (endDate) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const end = new Date(endDate);
+    return end < today;
+  };
+
+  const handleActivate = async (bookingId) => {
+    try {
+      const response = await bookingsAPI.activateBooking(bookingId, token);
+      if (response.ok) {
+        fetchBookings();
+      } else {
+        const data = await response.json();
+        alert(data.message || "Failed to activate rental");
+      }
+    } catch (err) {
+      console.error("Error activating rental:", err);
+    }
+  };
+
+  const handleReturn = async (bookingId) => {
+    try {
+      const response = await bookingsAPI.returnBooking(bookingId, token);
+      if (response.ok) {
+        fetchBookings();
+      } else {
+        const data = await response.json();
+        alert(data.message || "Failed to mark as returned");
+      }
+    } catch (err) {
+      console.error("Error returning tool:", err);
+    }
+  };
+
   if (loading) return <div className="p-5">Loading your dashboard...</div>;
 
   const myRentals = bookings.filter(b => b.renter_id === user.id);
@@ -114,6 +149,26 @@ const DashMain = () => {
                         <span className="is-size-7 has-text-grey">
                           Payment: {booking.payment_status || 'pending'}
                         </span>
+                        {booking.status === 'active' && (
+                          <div className="mt-2">
+                            <button 
+                              className="button is-small is-info is-outlined"
+                              onClick={() => handleReturn(booking.id)}
+                            >
+                              Mark as Returned
+                            </button>
+                          </div>
+                        )}
+                        {booking.status === 'pending_payment' && (
+                          <div className="mt-2">
+                            <button 
+                              className="button is-small is-danger is-outlined"
+                              onClick={() => handleVoid(booking.id)}
+                            >
+                              Cancel Request
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </li>
@@ -153,14 +208,41 @@ const DashMain = () => {
                             Confirm Booking
                           </button>
                         )}
-                        
-                        {booking.payment_status === 'authorized' && (
+
+                        {booking.status === 'confirmed' && (
                           <button 
-                            className="button is-small is-link"
-                            onClick={() => handleCapture(booking.id)}
-                            title="Capture funds once tool is returned"
+                            className="button is-small is-info"
+                            onClick={() => handleActivate(booking.id)}
+                            title="Mark tool as handed over to renter"
                           >
-                            Capture Payment
+                            Mark Handed Over
+                          </button>
+                        )}
+                        
+                        {booking.status === 'active' && (
+                          <div className="is-flex is-align-items-center">
+                            <span className="is-size-7 has-text-grey-light is-italic mr-2">
+                              Rental in progress...
+                            </span>
+                            {isPastEndDate(booking.end_date) && (
+                              <button 
+                                className="button is-small is-danger is-light"
+                                onClick={() => handleCapture(booking.id)}
+                                title="Renter has not marked as returned, but the end date has passed. You can force completion."
+                              >
+                                Force Complete
+                              </button>
+                            )}
+                          </div>
+                        )}
+
+                        {booking.status === 'returning' && booking.payment_status === 'authorized' && (
+                          <button 
+                            className="button is-small is-success"
+                            onClick={() => handleCapture(booking.id)}
+                            title="Renter has returned the tool. Confirm receipt and capture funds."
+                          >
+                            Confirm Receipt & Capture
                           </button>
                         )}
 
@@ -203,9 +285,11 @@ const DashMain = () => {
 
 const getStatusColor = (status) => {
   switch (status) {
+    case 'pending_payment': return 'is-light';
     case 'requested': return 'is-warning is-light';
     case 'confirmed': return 'is-info is-light';
     case 'active': return 'is-primary';
+    case 'returning': return 'is-info';
     case 'completed': return 'is-success';
     case 'cancelled': return 'is-danger is-light';
     default: return 'is-light';
