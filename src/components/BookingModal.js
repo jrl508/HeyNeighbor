@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { useAuth } from "../hooks/useAuth";
 import { useTool } from "../hooks/useTool";
-import { createPaymentIntent } from "../api/payments";
+import { createPaymentIntent, voidPayment } from "../api/payments";
 import PaymentForm from "./PaymentForm";
 
 const BookingModal = ({ tool, isOpen, onClose, onBooked }) => {
@@ -17,6 +17,32 @@ const BookingModal = ({ tool, isOpen, onClose, onBooked }) => {
   const [payment, setPayment] = useState(null);
 
   if (!isOpen) return null;
+
+  const handleModalClose = async () => {
+    // If we've already created a booking but haven't paid, ask for confirmation
+    if (step === "payment" && booking) {
+      const confirmCancel = window.confirm(
+        "You have a pending booking. If you leave now, this request will be cancelled. Are you sure?"
+      );
+      
+      if (!confirmCancel) return;
+
+      // Clean up on backend
+      try {
+        const token = localStorage.getItem("token");
+        await voidPayment(booking.id, token);
+        console.log(`[BookingModal] Cleanup successful for booking ${booking.id}`);
+      } catch (err) {
+        console.error("[BookingModal] Cleanup failed:", err);
+      }
+    }
+    
+    // Reset state and call parent onClose
+    setStep("dates");
+    setBooking(null);
+    setPayment(null);
+    onClose();
+  };
 
   const calculateDays = (start, end) => {
     const s = new Date(start);
@@ -101,7 +127,7 @@ const BookingModal = ({ tool, isOpen, onClose, onBooked }) => {
 
   return (
     <div className="modal is-active">
-      <div className="modal-background" onClick={onClose}></div>
+      <div className="modal-background" onClick={handleModalClose}></div>
       <div className="modal-card">
         <header className="modal-card-head">
           <p className="modal-card-title">
@@ -112,7 +138,7 @@ const BookingModal = ({ tool, isOpen, onClose, onBooked }) => {
           <button
             className="delete"
             aria-label="close"
-            onClick={onClose}
+            onClick={handleModalClose}
           ></button>
         </header>
         <section className="modal-card-body">
@@ -211,7 +237,9 @@ const BookingModal = ({ tool, isOpen, onClose, onBooked }) => {
                     }}
                   >
                     <span>Total:</span>
-                    <span>${payment.amount.toFixed(2)}</span>
+                    <span>
+                      ${Number(payment.payment.amount).toFixed(2)}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -234,10 +262,10 @@ const BookingModal = ({ tool, isOpen, onClose, onBooked }) => {
                 <div className="control">
                   <button
                     type="button"
-                    onClick={handleBack}
+                    onClick={handleModalClose}
                     className="button is-light"
                   >
-                    Back
+                    Cancel Request
                   </button>
                 </div>
               </div>
