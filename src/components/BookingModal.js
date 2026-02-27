@@ -1,23 +1,50 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
+import { useNavigate } from "react-router-dom";
+import Icon from "@mdi/react";
+import { mdiMessageText } from "@mdi/js";
 import { useAuth } from "../hooks/useAuth";
 import { useTool } from "../hooks/useTool";
 import { createPaymentIntent, voidPayment } from "../api/payments";
+import { sendMessage } from "../api/messaging";
 import PaymentForm from "./PaymentForm";
 
 const BookingModal = ({ tool, isOpen, onClose, onBooked }) => {
   const { state: authState } = useAuth();
   const { dispatch } = useTool();
+  const navigate = useNavigate();
   const [step, setStep] = useState("dates"); // 'dates' or 'payment'
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [deliveryRequired, setDeliveryRequired] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [messageLoading, setMessageLoading] = useState(false);
   const [error, setError] = useState("");
   const [booking, setBooking] = useState(null);
   const [payment, setPayment] = useState(null);
 
   if (!isOpen) return null;
+
+  const handleMessageOwner = async () => {
+    setMessageLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      await sendMessage(
+        {
+          receiver_id: tool.user_id,
+          content: `Hi! I have a question about booking your ${tool.name}.`,
+        },
+        token
+      );
+      onClose();
+      navigate("/dashboard/inbox");
+    } catch (err) {
+      console.error("Error messaging owner:", err);
+      setError("Failed to send message.");
+    } finally {
+      setMessageLoading(false);
+    }
+  };
 
   const handleModalClose = async () => {
     // If we've already created a booking but haven't paid, ask for confirmation
@@ -213,6 +240,19 @@ const BookingModal = ({ tool, isOpen, onClose, onBooked }) => {
                     disabled={loading || !startDate || !endDate}
                   >
                     Continue to Payment
+                  </button>
+                </div>
+                <div className="control">
+                  <button
+                    type="button"
+                    className={`button is-info is-light ${
+                      messageLoading ? "is-loading" : ""
+                    }`}
+                    onClick={handleMessageOwner}
+                    disabled={messageLoading}
+                  >
+                    <Icon path={mdiMessageText} size={0.8} className="mr-2" />
+                    Message Owner
                   </button>
                 </div>
               </div>

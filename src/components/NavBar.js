@@ -5,12 +5,14 @@ import Icon from "@mdi/react";
 import { mdiInbox } from "@mdi/js";
 import ProfilePH from "../images/profile_ph.svg";
 import { useAuth } from "../hooks/useAuth";
+import { useChat } from "../contexts/ChatContext";
 import { LOGOUT } from "../actionTypes";
 import Avatar from "./Avatar";
 
 const NavBar = () => {
   const navigate = useNavigate();
   const { state, dispatch } = useAuth();
+  const { unreadCount } = useChat();
   const { isAuthenticated } = state;
   const handleLogout = () => {
     dispatch({ type: LOGOUT });
@@ -44,11 +46,36 @@ const NavBar = () => {
         {isAuthenticated ? (
           <>
             <div className="navbar-item is-hoverable">
-              <div className="icon">
+              <Link to="/dashboard/inbox" className="icon" style={{ position: "relative" }}>
                 <Icon path={mdiInbox} size={1} color="whitesmoke" />
-              </div>
+                {unreadCount > 0 && (
+                  <span
+                    style={{
+                      position: "absolute",
+                      top: "-5px",
+                      right: "-5px",
+                      background: "#ff3860",
+                      color: "white",
+                      borderRadius: "50%",
+                      padding: "2px 6px",
+                      fontSize: "10px",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    {unreadCount}
+                  </span>
+                )}
+              </Link>
               <div className="navbar-dropdown is-right">
-                <div className="navbar-item">You have no messages</div>
+                <div className="navbar-item">
+                  {unreadCount > 0
+                    ? `You have ${unreadCount} unread message(s)`
+                    : "You have no messages"}
+                </div>
+                <hr className="navbar-divider" />
+                <Link to="/dashboard/inbox" className="navbar-item">
+                  Go to Inbox
+                </Link>
               </div>
             </div>
 
