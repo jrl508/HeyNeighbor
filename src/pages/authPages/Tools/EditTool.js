@@ -4,9 +4,9 @@ import { Link, useLocation, useParams } from "react-router-dom";
 import { toolsAPI } from "../../../api";
 import { useTool } from "../../../hooks/useTool";
 import {
-  ADD_TOOL,
-  ADD_TOOL_FAIL,
-  ADD_TOOL_SUCCESS,
+  UPDATE_TOOL,
+  UPDATE_TOOL_FAIL,
+  UPDATE_TOOL_SUCCESS,
 } from "../../../actionTypes";
 import ToolForm from "./ToolForm";
 import { useState } from "react";
@@ -32,11 +32,14 @@ function EditTool() {
         tool={tool}
         submitLabel="Update Tool"
         submitFunc={async (formData) => {
-          dispatch({ type: ADD_TOOL });
+          dispatch({ type: UPDATE_TOOL });
           const res = await toolsAPI.updateTool(toolId, formData, token);
-          const data = res.json();
-          if (!res.ok) dispatch({ type: ADD_TOOL_FAIL, payload: data });
-          dispatch({ type: ADD_TOOL_SUCCESS, payload: data });
+          const data = await res.json();
+          if (!res.ok) {
+            dispatch({ type: UPDATE_TOOL_FAIL, payload: data });
+          } else {
+            dispatch({ type: UPDATE_TOOL_SUCCESS, payload: data });
+          }
         }}
       />
     </div>

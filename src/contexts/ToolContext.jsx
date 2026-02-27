@@ -5,6 +5,7 @@ export const ToolContext = createContext();
 
 const initialState = {
   tools: [],
+  bookings: [],
   loading: null,
   error: null,
   hasFetched: false,

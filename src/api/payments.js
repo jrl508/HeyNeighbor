@@ -19,7 +19,7 @@ export const createPaymentIntent = async (booking_id, token) => {
 export const confirmPayment = async (
   booking_id,
   stripe_payment_intent_id,
-  token
+  token,
 ) => {
   const response = await fetch(`${api}/payments/confirm`, {
     method: "POST",
@@ -30,6 +30,36 @@ export const confirmPayment = async (
     body: JSON.stringify({
       booking_id,
       stripe_payment_intent_id,
+    }),
+  });
+  return response;
+};
+
+// Capture authorized payment (Owner action)
+export const capturePayment = async (booking_id, token) => {
+  const response = await fetch(`${api}/payments/capture`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      booking_id,
+    }),
+  });
+  return response;
+};
+
+// Void (cancel) authorized payment
+export const voidPayment = async (booking_id, token) => {
+  const response = await fetch(`${api}/payments/void`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      booking_id,
     }),
   });
   return response;

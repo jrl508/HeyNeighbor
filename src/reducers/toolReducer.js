@@ -11,6 +11,7 @@ import {
   DELETE_TOOL,
   DELETE_TOOL_FAIL,
   DELETE_TOOL_SUCCESS,
+  ADD_BOOKING,
 } from "../actionTypes";
 
 const toolReducer = (state, action) => {
@@ -40,6 +41,11 @@ const toolReducer = (state, action) => {
       return {
         ...state,
         tools: state.tools.filter((t) => t.id !== action.payload),
+      };
+    case ADD_BOOKING:
+      return {
+        ...state,
+        bookings: [action.payload, ...(state.bookings || [])],
       };
     case ADD_TOOL_FAIL:
     case UPDATE_TOOL_FAIL:

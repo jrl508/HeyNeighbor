@@ -22,9 +22,7 @@ import AuthRoutes from "./components/AuthRoutes";
 import EditTool from "./pages/authPages/Tools/EditTool";
 
 // Initialize Stripe
-const stripePromise = loadStripe(
-  process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY
-);
+const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
 
 const App = () => {
   return (

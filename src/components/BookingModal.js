@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { useAuth } from "../hooks/useAuth";
 import { useTool } from "../hooks/useTool";
-import { createPaymentIntent } from "../api/payments";
+import { createPaymentIntent, voidPayment } from "../api/payments";
 import PaymentForm from "./PaymentForm";
 
 const BookingModal = ({ tool, isOpen, onClose, onBooked }) => {
@@ -18,6 +18,32 @@ const BookingModal = ({ tool, isOpen, onClose, onBooked }) => {
 
   if (!isOpen) return null;
 
+  const handleModalClose = async () => {
+    // If we've already created a booking but haven't paid, ask for confirmation
+    if (step === "payment" && booking) {
+      const confirmCancel = window.confirm(
+        "You have a pending booking. If you leave now, this request will be cancelled. Are you sure?"
+      );
+      
+      if (!confirmCancel) return;
+
+      // Clean up on backend
+      try {
+        const token = localStorage.getItem("token");
+        await voidPayment(booking.id, token);
+        console.log(`[BookingModal] Cleanup successful for booking ${booking.id}`);
+      } catch (err) {
+        console.error("[BookingModal] Cleanup failed:", err);
+      }
+    }
+    
+    // Reset state and call parent onClose
+    setStep("dates");
+    setBooking(null);
+    setPayment(null);
+    onClose();
+  };
+
   const calculateDays = (start, end) => {
     const s = new Date(start);
     const e = new Date(end);
@@ -31,7 +57,7 @@ const BookingModal = ({ tool, isOpen, onClose, onBooked }) => {
     try {
       const token = localStorage.getItem("token");
       console.log(
-        `[BookingModal] creating booking: tool=${tool.id} start=${startDate} end=${endDate}`
+        `[BookingModal] creating booking: tool=${tool.id} start=${startDate} end=${endDate}`,
       );
 
       // Create booking
@@ -64,14 +90,12 @@ const BookingModal = ({ tool, isOpen, onClose, onBooked }) => {
 
       if (!paymentRes.ok) {
         const errorData = await paymentRes.json();
-        throw new Error(
-          errorData.message || "Failed to create payment intent"
-        );
+        throw new Error(errorData.message || "Failed to create payment intent");
       }
 
       const paymentData = await paymentRes.json();
       console.log(
-        `[BookingModal] payment intent created: ${paymentData.paymentIntentId}`
+        `[BookingModal] payment intent created: ${paymentData.paymentIntentId}`,
       );
       setPayment(paymentData);
       setStep("payment");
@@ -92,9 +116,7 @@ const BookingModal = ({ tool, isOpen, onClose, onBooked }) => {
 
   const handlePaymentError = (err) => {
     console.error("[BookingModal] payment error:", err);
-    setError(
-      typeof err === "string" ? err : err.message || "Payment failed"
-    );
+    setError(typeof err === "string" ? err : err.message || "Payment failed");
   };
 
   const handleBack = () => {
@@ -105,7 +127,7 @@ const BookingModal = ({ tool, isOpen, onClose, onBooked }) => {
 
   return (
     <div className="modal is-active">
-      <div className="modal-background" onClick={onClose}></div>
+      <div className="modal-background" onClick={handleModalClose}></div>
       <div className="modal-card">
         <header className="modal-card-head">
           <p className="modal-card-title">
@@ -116,7 +138,7 @@ const BookingModal = ({ tool, isOpen, onClose, onBooked }) => {
           <button
             className="delete"
             aria-label="close"
-            onClick={onClose}
+            onClick={handleModalClose}
           ></button>
         </header>
         <section className="modal-card-body">
@@ -186,21 +208,23 @@ const BookingModal = ({ tool, isOpen, onClose, onBooked }) => {
                   <strong>Booking Summary</strong>
                 </p>
                 <div style={{ marginTop: "10px", fontSize: "14px" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <div
+                    style={{ display: "flex", justifyContent: "space-between" }}
+                  >
                     <span>Duration:</span>
-                    <span>
-                      {calculateDays(startDate, endDate)} days
-                    </span>
+                    <span>{calculateDays(startDate, endDate)} days</span>
                   </div>
-                  <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <div
+                    style={{ display: "flex", justifyContent: "space-between" }}
+                  >
                     <span>Daily Rate:</span>
                     <span>${tool.rental_price_per_day}</span>
                   </div>
-                  <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <div
+                    style={{ display: "flex", justifyContent: "space-between" }}
+                  >
                     <span>Deposit (20%):</span>
-                    <span>
-                      ${(tool.rental_price_per_day * 0.2).toFixed(2)}
-                    </span>
+                    <span>${(tool.rental_price_per_day * 0.2).toFixed(2)}</span>
                   </div>
                   <div
                     style={{
@@ -213,7 +237,9 @@ const BookingModal = ({ tool, isOpen, onClose, onBooked }) => {
                     }}
                   >
                     <span>Total:</span>
-                    <span>${payment.amount.toFixed(2)}</span>
+                    <span>
+                      ${Number(payment.payment.amount).toFixed(2)}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -236,10 +262,10 @@ const BookingModal = ({ tool, isOpen, onClose, onBooked }) => {
                 <div className="control">
                   <button
                     type="button"
-                    onClick={handleBack}
+                    onClick={handleModalClose}
                     className="button is-light"
                   >
-                    Back
+                    Cancel Request
                   </button>
                 </div>
               </div>
