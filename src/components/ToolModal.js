@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import Icon from "@mdi/react";
+import { mdiTruckDelivery } from "@mdi/js";
 import placeholderTool from "../images/placeholder_tools.png";
+import Tooltip from "./Tooltip";
 import BookingModal from "./BookingModal";
 import { useAuth } from "../hooks/useAuth";
 
@@ -28,13 +31,24 @@ const ToolModal = ({ isOpen, onClose, tool }) => {
               />
             </figure>
           </div>
-          <div>
+          <div className="content">
             {tool ? (
-              <div>
-                <p>Description: {tool.description}</p>
-                <p>Rental Rate: {tool.rental_price_per_day}</p>
-                {!tool.availability && <p>Currently Unavailable</p>}
-              </div>
+              <>
+                <p><strong>Description:</strong> {tool.description}</p>
+                <p><strong>Rental Rate:</strong> ${tool.rental_price_per_day}/day</p>
+                {!tool.availability && <p className="has-text-danger">Currently Unavailable</p>}
+                {tool.deliveryAvailable && (
+                  <Tooltip
+                    position="right"
+                    content="Delivery is subject to owner approval"
+                  >
+                    <span className="tag is-info is-light mt-2 is-clickable">
+                      <Icon path={mdiTruckDelivery} size={0.7} className="mr-1" />
+                      Delivery Available
+                    </span>
+                  </Tooltip>
+                )}
+              </>
             ) : null}
           </div>
         </section>

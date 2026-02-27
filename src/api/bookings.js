@@ -20,12 +20,14 @@ export const getBookingById = async (id, token) => {
   return response;
 };
 
-export const confirmBooking = async (id, token) => {
+export const confirmBooking = async (id, deliveryDecision, token) => {
   const response = await fetch(`${api}/bookings/${id}/confirm`, {
     method: "PATCH",
     headers: {
+      "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
+    body: JSON.stringify({ deliveryDecision }),
   });
   return response;
 };

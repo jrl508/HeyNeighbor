@@ -35,18 +35,18 @@ const DashMain = () => {
     }
   }, [token]);
 
-  const handleCapture = async (bookingId) => {
+  const handleComplete = async (bookingId) => {
     try {
-      const response = await paymentsAPI.capturePayment(bookingId, token);
+      const response = await bookingsAPI.completeBooking(bookingId, token);
       if (response.ok) {
         fetchBookings(); // Refresh list
       } else {
         const data = await response.json();
-        alert(data.message || "Failed to capture payment");
+        alert(data.message || "Failed to complete booking");
       }
     } catch (err) {
-      console.error("Error capturing payment:", err);
-      alert("An error occurred while capturing payment");
+      console.error("Error completing booking:", err);
+      alert("An error occurred while completing the booking");
     }
   };
 
@@ -68,14 +68,18 @@ const DashMain = () => {
     }
   };
 
-  const handleConfirmBooking = async (bookingId) => {
+  const handleConfirmBooking = async (bookingId, deliveryDecision) => {
     try {
-      const response = await bookingsAPI.confirmBooking(bookingId, token);
+      const response = await bookingsAPI.confirmBooking(bookingId, deliveryDecision, token);
       if (response.ok) {
         fetchBookings();
+      } else {
+        const data = await response.json();
+        alert(data.message || "Failed to confirm booking");
       }
     } catch (err) {
       console.error("Error confirming booking:", err);
+      alert("An error occurred while confirming the booking.");
     }
   };
 
@@ -200,14 +204,29 @@ const DashMain = () => {
                         </span>
                       </div>
                       <div className="buttons">
-                        {booking.status === 'requested' && (
+                        {booking.status === 'requested' && booking.delivery_status === 'requested' ? (
+                          <>
+                            <button
+                              className="button is-small is-success"
+                              onClick={() => handleConfirmBooking(booking.id, 'accept')}
+                            >
+                              Accept with Delivery
+                            </button>
+                            <button
+                              className="button is-small is-info"
+                              onClick={() => handleConfirmBooking(booking.id, 'reject')}
+                            >
+                              Accept (Pickup Only)
+                            </button>
+                          </>
+                        ) : booking.status === 'requested' ? (
                           <button 
                             className="button is-small is-success"
-                            onClick={() => handleConfirmBooking(booking.id)}
+                            onClick={() => handleConfirmBooking(booking.id, 'accept')}
                           >
                             Confirm Booking
                           </button>
-                        )}
+                        ) : null}
 
                         {booking.status === 'confirmed' && (
                           <button 
@@ -227,7 +246,7 @@ const DashMain = () => {
                             {isPastEndDate(booking.end_date) && (
                               <button 
                                 className="button is-small is-danger is-light"
-                                onClick={() => handleCapture(booking.id)}
+                                onClick={() => handleComplete(booking.id)}
                                 title="Renter has not marked as returned, but the end date has passed. You can force completion."
                               >
                                 Force Complete
@@ -236,13 +255,13 @@ const DashMain = () => {
                           </div>
                         )}
 
-                        {booking.status === 'returning' && booking.payment_status === 'authorized' && (
+                        {booking.status === 'returning' && (
                           <button 
                             className="button is-small is-success"
-                            onClick={() => handleCapture(booking.id)}
-                            title="Renter has returned the tool. Confirm receipt and capture funds."
+                            onClick={() => handleComplete(booking.id)}
+                            title="Renter has returned the tool. Confirm receipt and finalize."
                           >
-                            Confirm Receipt & Capture
+                            Confirm Return & Complete
                           </button>
                         )}
 
@@ -274,6 +293,11 @@ const DashMain = () => {
             {myToolsRented.filter(b => b.status === 'requested').map(b => (
               <div key={b.id} className="notification is-info is-light is-size-7 p-2 mb-2">
                 New request for <strong>{b.tool_name}</strong> from {b.renter_first_name}.
+              </div>
+            ))}
+            {myToolsRented.filter(b => b.status === 'returning').map(b => (
+              <div key={b.id} className="notification is-success is-light is-size-7 p-2 mb-2">
+                <strong>{b.renter_first_name}</strong> has returned <strong>{b.tool_name}</strong>. Please confirm receipt.
               </div>
             ))}
           </div>
