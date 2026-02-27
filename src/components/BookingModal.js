@@ -11,6 +11,7 @@ const BookingModal = ({ tool, isOpen, onClose, onBooked }) => {
   const [step, setStep] = useState("dates"); // 'dates' or 'payment'
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [deliveryRequired, setDeliveryRequired] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [booking, setBooking] = useState(null);
@@ -71,7 +72,7 @@ const BookingModal = ({ tool, isOpen, onClose, onBooked }) => {
           tool_id: tool.id,
           start_date: startDate,
           end_date: endDate,
-          delivery_required: false,
+          delivery_required: deliveryRequired,
         }),
       });
 
@@ -169,8 +170,23 @@ const BookingModal = ({ tool, isOpen, onClose, onBooked }) => {
                 </div>
               </div>
 
+              {tool.deliveryAvailable && (
+                <div className="field">
+                  <label className="checkbox">
+                    <input
+                      type="checkbox"
+                      checked={deliveryRequired}
+                      onChange={(e) => setDeliveryRequired(e.target.checked)}
+                    />
+                    <span className="ml-2">
+                      Request Delivery (+${tool.delivery_fee} fee, pending owner approval)
+                    </span>
+                  </label>
+                </div>
+              )}
+
               {startDate && endDate && (
-                <div className="notification is-info">
+                <div className="notification is-info mt-4">
                   <p>
                     <strong>
                       Rental Duration: {calculateDays(startDate, endDate)} days
@@ -226,6 +242,14 @@ const BookingModal = ({ tool, isOpen, onClose, onBooked }) => {
                     <span>Deposit (20%):</span>
                     <span>${(tool.rental_price_per_day * 0.2).toFixed(2)}</span>
                   </div>
+                  {booking?.delivery_fee > 0 && (
+                    <div
+                      style={{ display: "flex", justifyContent: "space-between" }}
+                    >
+                      <span>Delivery Fee:</span>
+                      <span>${Number(booking.delivery_fee).toFixed(2)}</span>
+                    </div>
+                  )}
                   <div
                     style={{
                       display: "flex",

@@ -32,6 +32,9 @@ const ToolForm: React.FC<ToolFormProps> = (props) => {
   const [deliveryAvailable, setDeliveryAvailable] = React.useState(
     tool.deliveryAvailable || false
   );
+  const [deliveryFee, setDeliveryFee] = React.useState(
+    (tool as any).delivery_fee || ""
+  );
   const [available, setAvailable] = React.useState(
     typeof (props.tool as any)?.available !== "undefined"
       ? (props.tool as any).available
@@ -59,6 +62,8 @@ const ToolForm: React.FC<ToolFormProps> = (props) => {
   const handleDeliveryAvailableChange = (
     e: React.ChangeEvent<HTMLInputElement>
   ) => setDeliveryAvailable(e.target.checked);
+  const handleDeliveryFeeChange = (e: React.ChangeEvent<HTMLInputElement>) =>
+    setDeliveryFee(e.target.value);
   const handleAvailableChange = (e: React.ChangeEvent<HTMLInputElement>) =>
     setAvailable(e.target.checked);
 
@@ -72,6 +77,9 @@ const ToolForm: React.FC<ToolFormProps> = (props) => {
     formData.append("rental_price_per_day", String(rentalRate));
     formData.append("available", String(available));
     formData.append("deliveryAvailable", String(deliveryAvailable));
+    if (deliveryAvailable) {
+      formData.append("delivery_fee", String(deliveryFee));
+    }
 
     if (toolImage) {
       formData.append("tool_image", toolImage);
@@ -213,6 +221,23 @@ const ToolForm: React.FC<ToolFormProps> = (props) => {
                   </div>
                 </Tooltip>
               </div>
+
+              {deliveryAvailable && (
+                <div className="field">
+                  <label className="label">Delivery Fee</label>
+                  <div className="control">
+                    <input
+                      className="input"
+                      type="number"
+                      placeholder="0.00"
+                      step="0.01"
+                      min="0.00"
+                      value={deliveryFee}
+                      onChange={handleDeliveryFeeChange}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           </div>
           <div className="field cell is-row-start-4">

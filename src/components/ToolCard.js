@@ -1,6 +1,9 @@
 // Card.js
 import React from "react";
+import Icon from "@mdi/react";
+import { mdiTruckDelivery, mdiInformationOutline } from "@mdi/js";
 import placeholderTool from "../images/placeholder_tools.png";
+import Tooltip from "./Tooltip";
 import "../styles/ToolCard.css";
 
 const ToolCard = ({ tool, onClick, classProps }) => {
@@ -39,6 +42,17 @@ const ToolCard = ({ tool, onClick, classProps }) => {
             <span className="tag is-success is-light">Available</span>
           ) : (
             <span className="tag is-danger is-light">Unavailable</span>
+          )}
+          {tool.deliveryAvailable && (
+            <Tooltip
+              position="top"
+              content="Delivery is subject to owner approval"
+            >
+              <span className="tag is-info is-light ml-2 is-clickable">
+                <Icon path={mdiTruckDelivery} size={0.7} className="mr-1" />
+                Delivery
+              </span>
+            </Tooltip>
           )}
         </div>
       </div>
