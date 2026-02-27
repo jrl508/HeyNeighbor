@@ -1,0 +1,184 @@
+.inbox-container {
+  display: flex;
+  height: calc(100vh - 150px);
+  background: white;
+  border: 1px solid #dbdbdb;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.inbox-sidebar {
+  width: 350px;
+  border-right: 1px solid #dbdbdb;
+  display: flex;
+  flex-direction: column;
+}
+
+.inbox-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid #dbdbdb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.conversation-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.conversation-item {
+  display: flex;
+  padding: 1rem;
+  border-bottom: 1px solid #f5f5f5;
+  cursor: pointer;
+  transition: background 0.2s;
+  align-items: center;
+}
+
+.conversation-item:hover {
+  background: #fafafa;
+}
+
+.conversation-item.active {
+  background: #f0f0f0;
+  border-left: 4px solid #00d1b2;
+}
+
+.conversation-item.unread {
+  background: #f5fffd;
+}
+
+.conv-info {
+  margin-left: 1rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.conv-top {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.25rem;
+}
+
+.user-name {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.conv-date {
+  font-size: 0.75rem;
+  color: #7a7a7a;
+}
+
+.conv-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.last-message {
+  font-size: 0.85rem;
+  color: #7a7a7a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  margin-right: 0.5rem;
+}
+
+.unread-badge {
+  background: #00d1b2;
+  color: white;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  font-size: 0.7rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+}
+
+.inbox-chat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #f9f9f9;
+}
+
+.no-chat-selected {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.chat-window {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.chat-header {
+  padding: 1rem;
+  background: white;
+  border-bottom: 1px solid #dbdbdb;
+  display: flex;
+  align-items: center;
+}
+
+.chat-messages {
+  flex: 1;
+  padding: 1.5rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.message-bubble {
+  max-width: 70%;
+  padding: 0.75rem 1rem;
+  border-radius: 15px;
+  margin-bottom: 1rem;
+  position: relative;
+  font-size: 0.95rem;
+}
+
+.message-bubble.me {
+  align-self: flex-end;
+  background: #00d1b2;
+  color: white;
+  border-bottom-right-radius: 2px;
+}
+
+.message-bubble.them {
+  align-self: flex-start;
+  background: white;
+  border: 1px solid #dbdbdb;
+  border-bottom-left-radius: 2px;
+}
+
+.message-time {
+  font-size: 0.7rem;
+  margin-top: 0.25rem;
+  opacity: 0.7;
+  text-align: right;
+}
+
+.chat-input {
+  padding: 1rem;
+  background: white;
+  border-top: 1px solid #dbdbdb;
+}
+
+.notification .delete.chat-error-delete {
+  position: absolute;
+  top: 50%;
+  right: 0.5em; /* Keep Bulma's default horizontal positioning */
+  transform: translateY(-50%);
+  margin-left: 0; /* Override any ml-auto */
+  margin-right: 0;
+}

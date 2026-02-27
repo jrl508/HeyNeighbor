@@ -3,6 +3,7 @@ import styles from "../../styles/Dashboard.module.css";
 import ProfilePH from "../../images/profile_ph.svg";
 import { Link, Outlet } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth.js";
+import { useChat } from "../../contexts/ChatContext.js";
 import { capitalize } from "../../util/UtilFunctions.js";
 import Avatar from "../../components/Avatar";
 
@@ -62,6 +63,7 @@ Tools to search for specific tools or filter based on categories, location, or o
 
 const Dashboard = () => {
   const { state } = useAuth();
+  const { unreadCount } = useChat();
 
   const { user } = state;
 
@@ -112,6 +114,16 @@ const Dashboard = () => {
             </li>
             <li className="side-menu-item">
               <Link to="profile">Profile</Link>
+            </li>
+            <li className="side-menu-item">
+              <Link to="inbox">
+                Messages
+                {unreadCount > 0 && (
+                  <span className="tag is-danger is-rounded is-small ml-2">
+                    {unreadCount}
+                  </span>
+                )}
+              </Link>
             </li>
             <li className="side-menu-item">
               <Link to="toolshed">Toolshed</Link>

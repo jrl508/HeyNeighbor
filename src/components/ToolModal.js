@@ -1,17 +1,42 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Icon from "@mdi/react";
-import { mdiTruckDelivery } from "@mdi/js";
+import { mdiTruckDelivery, mdiMessageText } from "@mdi/js";
 import placeholderTool from "../images/placeholder_tools.png";
 import Tooltip from "./Tooltip";
 import BookingModal from "./BookingModal";
 import { useAuth } from "../hooks/useAuth";
+import { sendMessage } from "../api/messaging";
 
 const ToolModal = ({ isOpen, onClose, tool }) => {
   const { state } = useAuth();
   const { user } = state;
+  const navigate = useNavigate();
   const [bookingOpen, setBookingOpen] = useState(false);
+  const [messageLoading, setMessageLoading] = useState(false);
+
   if (!tool) return null;
+
+  const handleMessageOwner = async () => {
+    setMessageLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      await sendMessage(
+        {
+          receiver_id: tool.user_id,
+          content: `Hi! I'm interested in your ${tool.name}. Is it available?`,
+        },
+        token
+      );
+      onClose();
+      navigate("/dashboard/inbox");
+    } catch (err) {
+      console.error("Error messaging owner:", err);
+      alert("Failed to send message. Please try again.");
+    } finally {
+      setMessageLoading(false);
+    }
+  };
 
   const isOwner = user && tool.user_id === user.id;
   return (
@@ -58,12 +83,24 @@ const ToolModal = ({ isOpen, onClose, tool }) => {
               <button className="button is-info">Edit Info</button>
             </Link>
           ) : (
-            <button
-              className="button is-primary"
-              onClick={() => setBookingOpen(true)}
-            >
-              Book Tool
-            </button>
+            <>
+              <button
+                className={`button is-info is-light ${
+                  messageLoading ? "is-loading" : ""
+                }`}
+                onClick={handleMessageOwner}
+                disabled={messageLoading}
+              >
+                <Icon path={mdiMessageText} size={0.8} className="mr-2" />
+                Message Owner
+              </button>
+              <button
+                className="button is-primary"
+                onClick={() => setBookingOpen(true)}
+              >
+                Book Tool
+              </button>
+            </>
           )}
         </footer>
       </div>

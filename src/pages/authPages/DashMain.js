@@ -1,15 +1,41 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Icon from "@mdi/react";
+import { mdiMessageText } from "@mdi/js";
 import styles from "../../styles/Dashboard.module.css";
 import { bookingsAPI, paymentsAPI } from "../../api";
+import { sendMessage } from "../../api/messaging";
 import { useAuth } from "../../hooks/useAuth";
 
 const DashMain = () => {
   const { state } = useAuth();
   const { user } = state;
+  const navigate = useNavigate();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [messageLoading, setMessageLoading] = useState(false);
   const token = localStorage.getItem("token");
+
+  const handleMessageUser = async (receiverId, toolName, bookingId) => {
+    setMessageLoading(true);
+    try {
+      await sendMessage(
+        {
+          receiver_id: receiverId,
+          booking_id: bookingId,
+          content: `Hi! I have a question about the booking for ${toolName}.`,
+        },
+        token
+      );
+      navigate("/dashboard/inbox");
+    } catch (err) {
+      console.error("Error messaging user:", err);
+      alert("Failed to send message. Please try again.");
+    } finally {
+      setMessageLoading(false);
+    }
+  };
 
   const fetchBookings = async () => {
     setLoading(true);
@@ -118,6 +144,22 @@ const DashMain = () => {
     }
   };
 
+  const canMessage = (booking) => {
+    const { status, completed_at, updated_at } = booking;
+    
+    // If it's an open booking, always allow messaging
+    if (!["completed", "cancelled"].includes(status)) {
+      return true;
+    }
+
+    // For completed/cancelled, allow a 48-hour grace period
+    const lastActiveDate = new Date(completed_at || updated_at);
+    const now = new Date();
+    const fortyEightHoursInMs = 48 * 60 * 60 * 1000;
+
+    return now - lastActiveDate < fortyEightHoursInMs;
+  };
+
   if (loading) return <div className="p-5">Loading your dashboard...</div>;
 
   const myRentals = bookings.filter(b => b.renter_id === user.id);
@@ -153,26 +195,42 @@ const DashMain = () => {
                         <span className="is-size-7 has-text-grey">
                           Payment: {booking.payment_status || 'pending'}
                         </span>
-                        {booking.status === 'active' && (
-                          <div className="mt-2">
-                            <button 
+                        <div className="mt-2 buttons is-right">
+                          {canMessage(booking) && (
+                            <button
+                              className={`button is-small is-info is-light ${
+                                messageLoading ? "is-loading" : ""
+                              }`}
+                              onClick={() =>
+                                handleMessageUser(
+                                  booking.owner_id,
+                                  booking.tool_name,
+                                  booking.id
+                                )
+                              }
+                              disabled={messageLoading}
+                            >
+                              <Icon path={mdiMessageText} size={0.6} className="mr-1" />
+                              Message Owner
+                            </button>
+                          )}
+                          {booking.status === "active" && (
+                            <button
                               className="button is-small is-info is-outlined"
                               onClick={() => handleReturn(booking.id)}
                             >
                               Mark as Returned
                             </button>
-                          </div>
-                        )}
-                        {booking.status === 'pending_payment' && (
-                          <div className="mt-2">
-                            <button 
+                          )}
+                          {booking.status === "pending_payment" && (
+                            <button
                               className="button is-small is-danger is-outlined"
                               onClick={() => handleVoid(booking.id)}
                             >
                               Cancel Request
                             </button>
-                          </div>
-                        )}
+                          )}
+                        </div>
                       </div>
                     </div>
                   </li>
@@ -203,8 +261,28 @@ const DashMain = () => {
                           Payment Status: <strong>{booking.payment_status}</strong>
                         </span>
                       </div>
-                      <div className="buttons">
-                        {booking.status === 'requested' && booking.delivery_status === 'requested' ? (
+                      <div className="buttons is-right">
+                        {canMessage(booking) && (
+                          <button
+                            className={`button is-small is-info is-light ${
+                              messageLoading ? "is-loading" : ""
+                            }`}
+                            onClick={() =>
+                              handleMessageUser(
+                                booking.renter_id,
+                                booking.tool_name,
+                                booking.id
+                              )
+                            }
+                            disabled={messageLoading}
+                          >
+                            <Icon path={mdiMessageText} size={0.6} className="mr-1" />
+                            Message Renter
+                          </button>
+                        )}
+
+                        {booking.status === "requested" &&
+                        booking.delivery_status === "requested" ? (
                           <>
                             <button
                               className="button is-small is-success"
