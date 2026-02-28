@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Icon from "@mdi/react";
-import { mdiTruckDelivery, mdiMessageText } from "@mdi/js";
+import { mdiTruckDelivery, mdiMessageText, mdiStar } from "@mdi/js";
 import placeholderTool from "../images/placeholder_tools.png";
 import Tooltip from "./Tooltip";
 import BookingModal from "./BookingModal";
@@ -61,6 +61,20 @@ const ToolModal = ({ isOpen, onClose, tool }) => {
               <>
                 <p><strong>Description:</strong> {tool.description}</p>
                 <p><strong>Rental Rate:</strong> ${tool.rental_price_per_day}/day</p>
+                {(() => {
+                  const rating = parseFloat(tool.owner_average_rating);
+                  return !isNaN(rating) && rating > 0 ? (
+                    <div className="owner-rating mb-3">
+                      <span className="icon-text has-text-warning">
+                        <span className="icon">
+                          <Icon path={mdiStar} size={0.7} />
+                        </span>
+                        <span>{rating.toFixed(1)}</span>
+                      </span>
+                      <span className="has-text-grey is-size-7 ml-1">Owner Rating</span>
+                    </div>
+                  ) : null;
+                })()}
                 {!tool.availability && <p className="has-text-danger">Currently Unavailable</p>}
                 {tool.deliveryAvailable && (
                   <Tooltip

@@ -5,6 +5,9 @@ import { mdiMessageText } from "@mdi/js";
 import styles from "../../styles/Dashboard.module.css";
 import { bookingsAPI, paymentsAPI } from "../../api";
 import { sendMessage } from "../../api/messaging";
+import { getReviewsForBooking } from "../../api/reviews";
+import ReviewModal from "../../components/ReviewModal";
+import ReviewButton from "../../components/ReviewButton";
 import { useAuth } from "../../hooks/useAuth";
 
 const DashMain = () => {
@@ -15,6 +18,10 @@ const DashMain = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [messageLoading, setMessageLoading] = useState(false);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [reviewingBookingId, setReviewingBookingId] = useState(null);
+  const [reviewingReviewedUserId, setReviewingReviewedUserId] = useState(null);
+  const [reviewingReviewedUserName, setReviewingReviewedUserName] = useState(null);
   const token = localStorage.getItem("token");
 
   const handleMessageUser = async (receiverId, toolName, bookingId) => {
@@ -160,6 +167,25 @@ const DashMain = () => {
     return now - lastActiveDate < fortyEightHoursInMs;
   };
 
+  const openReviewModal = (bookingId, reviewedUserId, reviewedUserName) => {
+    setReviewingBookingId(bookingId);
+    setReviewingReviewedUserId(reviewedUserId);
+    setReviewingReviewedUserName(reviewedUserName);
+    setIsReviewModalOpen(true);
+  };
+
+  const closeReviewModal = () => {
+    setIsReviewModalOpen(false);
+    setReviewingBookingId(null);
+    setReviewingReviewedUserId(null);
+    setReviewingReviewedUserName(null);
+  };
+
+  const handleReviewSubmitted = () => {
+    fetchBookings(); // Refresh bookings to update review status
+    closeReviewModal();
+  };
+
   if (loading) return <div className="p-5">Loading your dashboard...</div>;
 
   const myRentals = bookings.filter(b => b.renter_id === user.id);
@@ -221,6 +247,17 @@ const DashMain = () => {
                             >
                               Mark as Returned
                             </button>
+                          )}
+                          {booking.status === "completed" && (
+                            <ReviewButton
+                              booking={booking}
+                              reviewerId={user.id}
+                              reviewedId={booking.owner_id}
+                              reviewedName={booking.owner_first_name}
+                              openReviewModal={openReviewModal}
+                              token={token}
+                              key={`renter-review-${booking.id}`}
+                            />
                           )}
                           {booking.status === "pending_payment" && (
                             <button
@@ -343,6 +380,18 @@ const DashMain = () => {
                           </button>
                         )}
 
+                        {booking.status === "completed" && (
+                          <ReviewButton
+                            booking={booking}
+                            reviewerId={user.id}
+                            reviewedId={booking.renter_id}
+                            reviewedName={booking.renter_first_name}
+                            openReviewModal={openReviewModal}
+                            token={token}
+                            key={`owner-review-${booking.id}`}
+                          />
+                        )}
+
                         {['requested', 'confirmed'].includes(booking.status) && (
                           <button 
                             className="button is-small is-danger is-outlined"
@@ -381,6 +430,14 @@ const DashMain = () => {
           </div>
         </div>
       </div>
+      <ReviewModal
+        isOpen={isReviewModalOpen}
+        onClose={closeReviewModal}
+        bookingId={reviewingBookingId}
+        reviewedUserId={reviewingReviewedUserId}
+        reviewedUserName={reviewingReviewedUserName}
+        onReviewSubmitted={handleReviewSubmitted}
+      />
     </div>
   );
 };

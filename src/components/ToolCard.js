@@ -1,7 +1,6 @@
-// Card.js
 import React from "react";
 import Icon from "@mdi/react";
-import { mdiTruckDelivery, mdiInformationOutline } from "@mdi/js";
+import { mdiTruckDelivery, mdiInformationOutline, mdiStar } from "@mdi/js";
 import placeholderTool from "../images/placeholder_tools.png";
 import Tooltip from "./Tooltip";
 import "../styles/ToolCard.css";
@@ -29,6 +28,20 @@ const ToolCard = ({ tool, onClick, classProps }) => {
             {tool.description.substring(0, 60)}...
           </p>
         )}
+        {(() => {
+          const rating = parseFloat(tool.owner_average_rating);
+          return !isNaN(rating) && rating > 0 ? (
+            <div className="owner-rating mt-auto">
+              <span className="icon-text has-text-warning">
+                <span className="icon">
+                  <Icon path={mdiStar} size={0.7} />
+                </span>
+                <span>{rating.toFixed(1)}</span>
+              </span>
+              <span className="has-text-grey is-size-7 ml-1">Owner Rating</span>
+            </div>
+          ) : null;
+        })()}
       </div>
       <div className="card-footer is-flex-direction-column">
         <div className="tool-price">

@@ -2,6 +2,8 @@ import React from "react";
 import styles from "../../styles/Dashboard.module.css";
 import ProfilePH from "../../images/profile_ph.svg";
 import { Link, Outlet } from "react-router-dom";
+import Icon from "@mdi/react";
+import { mdiStar } from "@mdi/js";
 import { useAuth } from "../../hooks/useAuth.js";
 import { useChat } from "../../contexts/ChatContext.js";
 import { capitalize } from "../../util/UtilFunctions.js";
@@ -67,6 +69,8 @@ const Dashboard = () => {
 
   const { user } = state;
 
+  console.log("USER:", user);
+
   if (state.loading) return;
 
   return (
@@ -95,7 +99,25 @@ const Dashboard = () => {
           <div className="has-text-weight-bold">
             {`${capitalize(user.first_name + " " + user.last_name)}`}
           </div>
-          <div>4.8/5 stars</div>
+          <div>
+            {(() => {
+              const rating = parseFloat(user.average_rating);
+              return !isNaN(rating) && rating > 0 ? (
+                <span className="is-flex is-align-items-center">
+                  <Icon
+                    path={mdiStar}
+                    size={0.7}
+                    color="#ffc107"
+                    className="mr-2"
+                  />
+
+                  {rating.toFixed(1)}
+                </span>
+              ) : (
+                "No ratings yet"
+              );
+            })()}
+          </div>
           <div>{`${user.city + ", " + user.state}`}</div>
         </div>
 

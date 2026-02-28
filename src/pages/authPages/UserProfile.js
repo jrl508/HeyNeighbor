@@ -8,8 +8,9 @@ import {
   UPDATE_USER_SUCCESS,
 } from "../../actionTypes.js";
 import Icon from "@mdi/react";
-import { mdiUpload } from "@mdi/js";
+import { mdiUpload, mdiStar } from "@mdi/js";
 import ProfilePicModal from "../../components/ProfilePicModal.js";
+import { getReviewsForUser } from "../../api/reviews.js";
 
 // ************************ TODO: Error Handling, Profile Picture Logic ********************************
 
@@ -26,11 +27,12 @@ const UserProfile = () => {
     city,
     state: stateGeo,
     zip_code,
+    average_rating,
   } = user || {};
 
   const [editMode, setEditMode] = useState(false);
   const [image, setImage] = useState(
-    profile_image || "https://placehold.co/500x500?text=Profile+Image"
+    profile_image || "https://placehold.co/500x500?text=Profile+Image",
   );
   const [preview, setPreview] = useState("");
   const [firstName, setFirstName] = useState(first_name || "");
@@ -41,6 +43,9 @@ const UserProfile = () => {
   const [imageFile, setImageFile] = useState(null);
   const [fileInputKey, setFileInputKey] = useState(Date.now());
   const [openModal, setOpenModal] = useState(false);
+  const [reviews, setReviews] = useState([]);
+  const [reviewsLoading, setReviewsLoading] = useState(true);
+  const [reviewsError, setReviewsError] = useState(null);
 
   useEffect(() => {
     if (!user) return;
@@ -50,9 +55,29 @@ const UserProfile = () => {
     setEmail(user.email || "");
     setZipCode(user.zip_code || "");
     setImage(
-      user.profile_image || "https://placehold.co/500x500?text=Profile+Image"
+      user.profile_image || "https://placehold.co/500x500?text=Profile+Image",
     );
-  }, [user]);
+
+    // Fetch reviews for this user
+    const fetchReviews = async () => {
+      setReviewsLoading(true);
+      try {
+        const fetchedReviews = await getReviewsForUser(user.id, token);
+        if (Array.isArray(fetchedReviews)) {
+          setReviews(fetchedReviews);
+        } else {
+          setReviewsError("Failed to fetch reviews.");
+        }
+      } catch (err) {
+        console.error("Error fetching reviews:", err);
+        setReviewsError("An error occurred while fetching reviews.");
+      } finally {
+        setReviewsLoading(false);
+      }
+    };
+
+    fetchReviews();
+  }, [user, token]);
 
   const handleOpenModal = () => {
     setOpenModal(true);
@@ -96,7 +121,7 @@ const UserProfile = () => {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
           body: formData,
-        }
+        },
       );
 
       if (response.ok) {
@@ -141,7 +166,7 @@ const UserProfile = () => {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
           body: JSON.stringify(payload),
-        }
+        },
       );
       if (response.ok) {
         const data = await response.json();
@@ -169,11 +194,12 @@ const UserProfile = () => {
     return <div>Error: {error.message}</div>;
   }
 
+  console.log("Reviews", reviews);
   return (
     <div>
       <div className="title is-5">Profile</div>
       <div className="card">
-        <div className="card-top" style={{ display: "flex" }}>
+        <div className="card-top" style={{ display: "flex", flexWrap: "wrap" }}>
           <div className="card-image is-clickable" onClick={handleOpenModal}>
             <figure className="image">
               <img
@@ -269,6 +295,23 @@ const UserProfile = () => {
                   />
                 </div>
               </div>
+              <div className="field">
+                <label className="label">Average Rating</label>
+                <div className="control">
+                  {(() => {
+                    const rating = parseFloat(average_rating);
+                    return !isNaN(rating) && rating > 0 ? (
+                      <span className="tag is-info is-medium">
+                        {rating.toFixed(1)} / 5
+                      </span>
+                    ) : (
+                      <span className="tag is-light is-medium">
+                        No ratings yet
+                      </span>
+                    );
+                  })()}
+                </div>
+              </div>
               <div
                 className={`edit-mode-buttons mt-5 ${
                   !editMode
@@ -343,11 +386,81 @@ const UserProfile = () => {
           </div>
         </div>
       </div>
+
+      <div className="title is-5 mt-5">Reviews Received</div>
+      <div className="card">
+        {reviewsLoading ? (
+          <div className="p-4">Loading reviews...</div>
+        ) : reviewsError ? (
+          <div className="p-4 has-text-danger">{reviewsError}</div>
+        ) : reviews.length === 0 ? (
+          <div className="p-4">No reviews yet.</div>
+        ) : (
+          <div>
+            {reviews.map((review) => (
+              <div key={review.id} className="box mb-3">
+                <p>
+                  <strong>Reviewer:</strong> {review.reviewer_username}
+                </p>
+                <div className="is-flex is-align-items-center mb-2">
+                  <span className="mr-2">Overall:</span>
+                  {renderStars(review.rating_overall)}
+                </div>
+                <div className="is-flex is-align-items-center mb-2">
+                  <span className="mr-2">Condition:</span>
+                  {renderStars(review.rating_condition)}
+                </div>
+                <div className="is-flex is-align-items-center mb-2">
+                  <span className="mr-2">Communication:</span>
+                  {renderStars(review.rating_communication)}
+                </div>
+                <div className="is-flex is-align-items-center mb-2">
+                  <span className="mr-2">Punctuality:</span>
+                  {renderStars(review.rating_punctuality)}
+                </div>
+                {review.comment && (
+                  <p className="mt-2">
+                    <em>"{review.comment}"</em>
+                  </p>
+                )}
+                <p className="has-text-grey is-size-7 mt-2">
+                  Reviewed on:{" "}
+                  {new Date(review.created_at).toLocaleDateString()}
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       <ProfilePicModal
         isOpen={openModal}
         handleClose={handleCloseModal}
         user={user}
       />
+    </div>
+  );
+};
+
+const renderStars = (rating) => {
+  return (
+    <div className="star-rating is-flex">
+      {[...Array(5)].map((star, i) => {
+        const ratingValue = i + 1;
+        return (
+          <span
+            key={i}
+            className="star"
+            style={{
+              color: ratingValue <= rating ? "#ffc107" : "#e4e5e9",
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            <Icon path={mdiStar} size={0.8} />
+          </span>
+        );
+      })}
     </div>
   );
 };
