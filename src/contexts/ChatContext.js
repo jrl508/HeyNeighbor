@@ -1,4 +1,10 @@
-import React, { createContext, useState, useEffect, useCallback, useContext } from "react";
+import React, {
+  createContext,
+  useState,
+  useEffect,
+  useCallback,
+  useContext,
+} from "react";
 import { io } from "socket.io-client";
 import { useAuth } from "../hooks/useAuth";
 import { getConversations } from "../api/messaging";
@@ -19,9 +25,11 @@ export const ChatProvider = ({ children }) => {
     try {
       setLoading(true);
       const data = await getConversations(token);
-      console.log("Fetched conversations (after archive action):", data); // DEBUG
       setConversations(data);
-      const totalUnread = data.reduce((acc, conv) => acc + parseInt(conv.unread_count || 0), 0);
+      const totalUnread = data.reduce(
+        (acc, conv) => acc + parseInt(conv.unread_count || 0),
+        0,
+      );
       setUnreadCount(totalUnread);
     } catch (err) {
       console.error("Error fetching conversations:", err);
