@@ -5,6 +5,7 @@ import { mdiTruckDelivery, mdiMessageText, mdiStar } from "@mdi/js";
 import placeholderTool from "../images/placeholder_tools.png";
 import Tooltip from "./Tooltip";
 import BookingModal from "./BookingModal";
+import AvailabilityModal from "./AvailabilityModal";
 import { useAuth } from "../hooks/useAuth";
 import { sendMessage } from "../api/messaging";
 
@@ -13,6 +14,7 @@ const ToolModal = ({ isOpen, onClose, tool }) => {
   const { user } = state;
   const navigate = useNavigate();
   const [bookingOpen, setBookingOpen] = useState(false);
+  const [availabilityOpen, setAvailabilityOpen] = useState(false);
   const [messageLoading, setMessageLoading] = useState(false);
 
   if (!tool) return null;
@@ -26,7 +28,7 @@ const ToolModal = ({ isOpen, onClose, tool }) => {
           receiver_id: tool.user_id,
           content: `Hi! I'm interested in your ${tool.name}. Is it available?`,
         },
-        token
+        token,
       );
       onClose();
       navigate("/dashboard/inbox");
@@ -59,8 +61,12 @@ const ToolModal = ({ isOpen, onClose, tool }) => {
           <div className="content">
             {tool ? (
               <>
-                <p><strong>Description:</strong> {tool.description}</p>
-                <p><strong>Rental Rate:</strong> ${tool.rental_price_per_day}/day</p>
+                <p>
+                  <strong>Description:</strong> {tool.description}
+                </p>
+                <p>
+                  <strong>Rental Rate:</strong> ${tool.rental_price_per_day}/day
+                </p>
                 {(() => {
                   const rating = parseFloat(tool.owner_average_rating);
                   return !isNaN(rating) && rating > 0 ? (
@@ -71,18 +77,26 @@ const ToolModal = ({ isOpen, onClose, tool }) => {
                         </span>
                         <span>{rating.toFixed(1)}</span>
                       </span>
-                      <span className="has-text-grey is-size-7 ml-1">Owner Rating</span>
+                      <span className="has-text-grey is-size-7 ml-1">
+                        Owner Rating
+                      </span>
                     </div>
                   ) : null;
                 })()}
-                {!tool.availability && <p className="has-text-danger">Currently Unavailable</p>}
+                {!tool.available && (
+                  <p className="has-text-danger">Currently Unavailable</p>
+                )}
                 {tool.deliveryAvailable && (
                   <Tooltip
                     position="right"
                     content="Delivery is subject to owner approval"
                   >
                     <span className="tag is-info is-light mt-2 is-clickable">
-                      <Icon path={mdiTruckDelivery} size={0.7} className="mr-1" />
+                      <Icon
+                        path={mdiTruckDelivery}
+                        size={0.7}
+                        className="mr-1"
+                      />
                       Delivery Available
                     </span>
                   </Tooltip>
@@ -93,9 +107,17 @@ const ToolModal = ({ isOpen, onClose, tool }) => {
         </section>
         <footer className="modal-card-foot">
           {isOwner ? (
-            <Link to={`/dashboard/toolshed/edit/${tool.id}`} state={{ tool }}>
-              <button className="button is-info">Edit Info</button>
-            </Link>
+            <>
+              <Link to={`/dashboard/toolshed/edit/${tool.id}`} state={{ tool }}>
+                <button className="button is-info">Edit Info</button>
+              </Link>
+              <button
+                className="button is-warning ml-2"
+                onClick={() => setAvailabilityOpen(true)}
+              >
+                Manage Availability
+              </button>
+            </>
           ) : (
             <>
               <button
@@ -123,6 +145,13 @@ const ToolModal = ({ isOpen, onClose, tool }) => {
           tool={tool}
           isOpen={bookingOpen}
           onClose={() => setBookingOpen(false)}
+        />
+      )}
+      {availabilityOpen && (
+        <AvailabilityModal
+          tool={tool}
+          isOpen={availabilityOpen}
+          onClose={() => setAvailabilityOpen(false)}
         />
       )}
     </div>
