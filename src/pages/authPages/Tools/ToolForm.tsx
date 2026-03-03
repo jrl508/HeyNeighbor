@@ -38,8 +38,6 @@ const ToolForm: React.FC<ToolFormProps> = (props) => {
   const [available, setAvailable] = React.useState(
     typeof (props.tool as any)?.available !== "undefined"
       ? (props.tool as any).available
-      : typeof (props.tool as any)?.availability !== "undefined"
-      ? (props.tool as any).availability
       : true
   );
 

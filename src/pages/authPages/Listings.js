@@ -56,19 +56,11 @@ const Listings = () => {
         }
 
         const data = await response.json();
-        // Map backend tools to include .availability field and filter out user's own tools
-        const toolsWithAvailability = (
+        // Filter out user's own tools and set tools state
+        const filteredTools = (
           Array.isArray(data) ? data : data.tools || []
-        )
-          .filter((tool) => tool.user_id !== user?.id) // Exclude tools owned by current user
-          .map((tool) => ({
-            ...tool,
-            availability:
-              typeof tool.availability !== "undefined"
-                ? tool.availability
-                : tool.available,
-          }));
-        setTools(toolsWithAvailability);
+        ).filter((tool) => tool.user_id !== user?.id); // Exclude tools owned by current user
+        setTools(filteredTools);
       } catch (err) {
         console.error("Error fetching tools:", err);
         setError(err.message);
