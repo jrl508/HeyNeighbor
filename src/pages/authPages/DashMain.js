@@ -8,6 +8,7 @@ import { sendMessage } from "../../api/messaging";
 import { getReviewsForBooking } from "../../api/reviews";
 import ReviewModal from "../../components/ReviewModal";
 import ReviewButton from "../../components/ReviewButton";
+import RescheduleModal from "../../components/RescheduleModal";
 import { useAuth } from "../../hooks/useAuth";
 
 const DashMain = () => {
@@ -22,6 +23,8 @@ const DashMain = () => {
   const [reviewingBookingId, setReviewingBookingId] = useState(null);
   const [reviewingReviewedUserId, setReviewingReviewedUserId] = useState(null);
   const [reviewingReviewedUserName, setReviewingReviewedUserName] = useState(null);
+  const [isRescheduleModalOpen, setIsRescheduleModalOpen] = useState(false);
+  const [reschedulingBooking, setReschedulingBooking] = useState(null);
   const token = localStorage.getItem("token");
 
   const handleMessageUser = async (receiverId, toolName, bookingId) => {
@@ -151,6 +154,20 @@ const DashMain = () => {
     }
   };
 
+  const handleRespondToReschedule = async (bookingId, action) => {
+    try {
+      const response = await bookingsAPI.respondToReschedule(bookingId, action, token);
+      if (response.ok) {
+        fetchBookings();
+      } else {
+        const data = await response.json();
+        alert(data.message || `Failed to ${action} reschedule request`);
+      }
+    } catch (err) {
+      console.error(`Error ${action}ing reschedule request:`, err);
+    }
+  };
+
   const canMessage = (booking) => {
     const { status, completed_at, updated_at } = booking;
     
@@ -186,6 +203,16 @@ const DashMain = () => {
     closeReviewModal();
   };
 
+  const openRescheduleModal = (booking) => {
+    setReschedulingBooking(booking);
+    setIsRescheduleModalOpen(true);
+  };
+
+  const handleRescheduleSuccess = () => {
+    fetchBookings();
+    setIsRescheduleModalOpen(false);
+  };
+
   if (loading) return <div className="p-5">Loading your dashboard...</div>;
 
   const myRentals = bookings.filter(b => b.renter_id === user.id);
@@ -212,10 +239,17 @@ const DashMain = () => {
                         <span className="is-size-7 has-text-grey">
                           {booking.start_date} to {booking.end_date}
                         </span>
+                        {booking.status === "reschedule_pending" && (
+                          <div className="mt-1">
+                            <span className="is-size-7 has-text-info is-italic">
+                              Requested Reschedule: <strong>{booking.new_start_date} to {booking.new_end_date}</strong> (Pending approval)
+                            </span>
+                          </div>
+                        )}
                       </div>
                       <div className="has-text-right">
                         <span className={`tag ${getStatusColor(booking.status)}`}>
-                          {booking.status.toUpperCase()}
+                          {booking.status.toUpperCase().replace('_', ' ')}
                         </span>
                         <br />
                         <span className="is-size-7 has-text-grey">
@@ -238,6 +272,14 @@ const DashMain = () => {
                             >
                               <Icon path={mdiMessageText} size={0.6} className="mr-1" />
                               Message Owner
+                            </button>
+                          )}
+                          {booking.status === "confirmed" && (
+                            <button
+                              className="button is-small is-primary is-outlined"
+                              onClick={() => openRescheduleModal(booking)}
+                            >
+                              Request Reschedule
                             </button>
                           )}
                           {booking.status === "active" && (
@@ -316,6 +358,26 @@ const DashMain = () => {
                             <Icon path={mdiMessageText} size={0.6} className="mr-1" />
                             Message Renter
                           </button>
+                        )}
+
+                        {booking.status === "reschedule_pending" && (
+                          <>
+                            <div className="notification is-info is-light is-size-7 p-2 mb-0 mr-2">
+                              New Proposed Dates: <strong>{booking.new_start_date} to {booking.new_end_date}</strong>
+                            </div>
+                            <button
+                              className="button is-small is-success"
+                              onClick={() => handleRespondToReschedule(booking.id, 'accept')}
+                            >
+                              Accept Change
+                            </button>
+                            <button
+                              className="button is-small is-danger is-light"
+                              onClick={() => handleRespondToReschedule(booking.id, 'decline')}
+                            >
+                              Decline
+                            </button>
+                          </>
                         )}
 
                         {booking.status === "requested" &&
@@ -422,6 +484,11 @@ const DashMain = () => {
                 New request for <strong>{b.tool_name}</strong> from {b.renter_first_name}.
               </div>
             ))}
+            {myToolsRented.filter(b => b.status === 'reschedule_pending').map(b => (
+              <div key={b.id} className="notification is-warning is-light is-size-7 p-2 mb-2">
+                <strong>{b.renter_first_name}</strong> wants to reschedule <strong>{b.tool_name}</strong>.
+              </div>
+            ))}
             {myToolsRented.filter(b => b.status === 'returning').map(b => (
               <div key={b.id} className="notification is-success is-light is-size-7 p-2 mb-2">
                 <strong>{b.renter_first_name}</strong> has returned <strong>{b.tool_name}</strong>. Please confirm receipt.
@@ -438,6 +505,14 @@ const DashMain = () => {
         reviewedUserName={reviewingReviewedUserName}
         onReviewSubmitted={handleReviewSubmitted}
       />
+      {isRescheduleModalOpen && reschedulingBooking && (
+        <RescheduleModal
+          isOpen={isRescheduleModalOpen}
+          booking={reschedulingBooking}
+          onClose={() => setIsRescheduleModalOpen(false)}
+          onSuccess={handleRescheduleSuccess}
+        />
+      )}
     </div>
   );
 };
@@ -451,6 +526,7 @@ const getStatusColor = (status) => {
     case 'returning': return 'is-info';
     case 'completed': return 'is-success';
     case 'cancelled': return 'is-danger is-light';
+    case 'reschedule_pending': return 'is-info is-light';
     default: return 'is-light';
   }
 };
