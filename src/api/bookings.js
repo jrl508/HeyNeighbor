@@ -73,3 +73,27 @@ export const cancelBooking = async (id, reason, token) => {
   });
   return response;
 };
+
+export const rescheduleBooking = async (id, newDates, token) => {
+  const response = await fetch(`${api}/bookings/${id}/reschedule`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(newDates),
+  });
+  return response;
+};
+
+export const respondToReschedule = async (id, action, token) => {
+  const response = await fetch(`${api}/bookings/${id}/reschedule/respond`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ action }),
+  });
+  return response;
+};
