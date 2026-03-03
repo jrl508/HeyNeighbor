@@ -69,8 +69,6 @@ const Dashboard = () => {
 
   const { user } = state;
 
-  console.log("USER:", user);
-
   if (state.loading) return;
 
   return (

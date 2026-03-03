@@ -19,7 +19,6 @@ const Toolshed = () => {
   const { state, dispatch } = useTool();
   const hasRun = useRef(false);
   const { tools } = state;
-  console.log("TOOLS:", tools);
   const token = localStorage.getItem("token");
 
   const getTools = async () => {
