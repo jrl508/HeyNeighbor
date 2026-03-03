@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { useNavigate } from "react-router-dom";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import Icon from "@mdi/react";
-import { mdiMessageText } from "@mdi/js";
+import { mdiMessageText, mdiCalendar } from "@mdi/js";
 import { useAuth } from "../hooks/useAuth";
 import { useTool } from "../hooks/useTool";
 import { createPaymentIntent, voidPayment } from "../api/payments";
@@ -14,14 +16,49 @@ const BookingModal = ({ tool, isOpen, onClose, onBooked }) => {
   const { dispatch } = useTool();
   const navigate = useNavigate();
   const [step, setStep] = useState("dates"); // 'dates' or 'payment'
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
+  const [blockedDates, setBlockedDates] = useState([]);
   const [deliveryRequired, setDeliveryRequired] = useState(false);
   const [loading, setLoading] = useState(false);
   const [messageLoading, setMessageLoading] = useState(false);
   const [error, setError] = useState("");
   const [booking, setBooking] = useState(null);
   const [payment, setPayment] = useState(null);
+
+  useEffect(() => {
+    if (isOpen && tool) {
+      fetchBlockedDates();
+    }
+  }, [isOpen, tool]);
+
+  const fetchBlockedDates = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/tools/${tool.id}/availability`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const ranges = await res.json();
+        const dates = [];
+        ranges.forEach(range => {
+          let current = new Date(range.start);
+          const end = new Date(range.end);
+          // Normalize to midnight local time to avoid TZ issues
+          current.setHours(0, 0, 0, 0);
+          end.setHours(0, 0, 0, 0);
+
+          while (current <= end) {
+            dates.push(new Date(current));
+            current.setDate(current.getDate() + 1);
+          }
+        });
+        setBlockedDates(dates);
+      }
+    } catch (err) {
+      console.error("Error fetching blocked dates:", err);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -67,25 +104,48 @@ const BookingModal = ({ tool, isOpen, onClose, onBooked }) => {
     
     // Reset state and call parent onClose
     setStep("dates");
+    setStartDate(null);
+    setEndDate(null);
     setBooking(null);
     setPayment(null);
     onClose();
   };
 
   const calculateDays = (start, end) => {
+    if (!start || !end) return 0;
     const s = new Date(start);
     const e = new Date(end);
+    s.setHours(0, 0, 0, 0);
+    e.setHours(0, 0, 0, 0);
     return Math.ceil((e - s) / (1000 * 60 * 60 * 24)) + 1;
+  };
+
+  const formatDate = (date) => {
+    if (!date) return "";
+    const d = new Date(date);
+    let month = "" + (d.getMonth() + 1);
+    let day = "" + d.getDate();
+    const year = d.getFullYear();
+
+    if (month.length < 2) month = "0" + month;
+    if (day.length < 2) day = "0" + day;
+
+    return [year, month, day].join("-");
   };
 
   const handleDatesSubmit = async (e) => {
     e.preventDefault();
+    if (!startDate || !endDate) return;
+
     setLoading(true);
     setError("");
     try {
       const token = localStorage.getItem("token");
+      const startStr = formatDate(startDate);
+      const endStr = formatDate(endDate);
+
       console.log(
-        `[BookingModal] creating booking: tool=${tool.id} start=${startDate} end=${endDate}`,
+        `[BookingModal] creating booking: tool=${tool.id} start=${startStr} end=${endStr}`,
       );
 
       // Create booking
@@ -97,8 +157,8 @@ const BookingModal = ({ tool, isOpen, onClose, onBooked }) => {
         },
         body: JSON.stringify({
           tool_id: tool.id,
-          start_date: startDate,
-          end_date: endDate,
+          start_date: startStr,
+          end_date: endStr,
           delivery_required: deliveryRequired,
         }),
       });
@@ -147,14 +207,14 @@ const BookingModal = ({ tool, isOpen, onClose, onBooked }) => {
     setError(typeof err === "string" ? err : err.message || "Payment failed");
   };
 
-  const handleBack = () => {
-    setStep("dates");
-    setPayment(null);
-    setBooking(null);
+  const onChange = (dates) => {
+    const [start, end] = dates;
+    setStartDate(start);
+    setEndDate(end);
   };
 
   return (
-    <div className="modal is-active">
+    <div className={`modal ${isOpen ? "is-active" : ""}`}>
       <div className="modal-background" onClick={handleModalClose}></div>
       <div className="modal-card">
         <header className="modal-card-head">
@@ -173,25 +233,17 @@ const BookingModal = ({ tool, isOpen, onClose, onBooked }) => {
           {step === "dates" ? (
             <form onSubmit={handleDatesSubmit}>
               <div className="field">
-                <label className="label">Start Date</label>
-                <div className="control">
-                  <input
-                    type="date"
-                    className="input"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    required
-                  />
-                </div>
-              </div>
-              <div className="field">
-                <label className="label">End Date</label>
-                <div className="control">
-                  <input
-                    type="date"
-                    className="input"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
+                <label className="label">Select Dates</label>
+                <div className="control has-icons-left">
+                  <DatePicker
+                    selected={startDate}
+                    onChange={onChange}
+                    startDate={startDate}
+                    endDate={endDate}
+                    excludeDates={blockedDates}
+                    selectsRange
+                    inline
+                    minDate={new Date()}
                     required
                   />
                 </div>
@@ -220,17 +272,18 @@ const BookingModal = ({ tool, isOpen, onClose, onBooked }) => {
                     </strong>
                   </p>
                   <p>Daily Rate: ${tool.rental_price_per_day}</p>
+                  <p>Estimated Total: ${(calculateDays(startDate, endDate) * tool.rental_price_per_day).toFixed(2)}</p>
                 </div>
               )}
 
               {error && (
                 <div className="notification is-danger">
-                  <button className="delete"></button>
+                  <button className="delete" onClick={() => setError("")}></button>
                   {error}
                 </div>
               )}
 
-              <div className="field is-grouped">
+              <div className="field is-grouped mt-5">
                 <div className="control">
                   <button
                     className={`button is-primary ${
@@ -317,7 +370,7 @@ const BookingModal = ({ tool, isOpen, onClose, onBooked }) => {
 
               {error && (
                 <div className="notification is-danger">
-                  <button className="delete"></button>
+                  <button className="delete" onClick={() => setError("")}></button>
                   {error}
                 </div>
               )}
