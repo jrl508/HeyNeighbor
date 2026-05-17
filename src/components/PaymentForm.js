@@ -28,11 +28,11 @@ const PaymentForm = ({
 
     try {
       console.log(
-        `[PaymentForm] processing payment: booking_id=${booking.id} amount=${payment.payment.amount}`,
+        `[PaymentForm] processing dual payments: booking_id=${booking.id} rental=${payment.payment.rental_amount} deposit=${payment.payment.deposit_amount}`,
       );
 
-      // Confirm the payment with Stripe
-      const { error: stripeError, paymentIntent } =
+      // 1. Confirm the RENTAL payment with Stripe
+      const { error: rentalError, paymentIntent: rentalIntent } =
         await stripe.confirmCardPayment(payment.clientSecret, {
           payment_method: {
             card: elements.getElement(CardElement),
@@ -40,20 +40,41 @@ const PaymentForm = ({
           },
         });
 
-      if (stripeError) {
-        console.error("[PaymentForm] stripe error:", stripeError.message);
-        setError(stripeError.message);
-        onPaymentError && onPaymentError(stripeError);
+      if (rentalError) {
+        console.error("[PaymentForm] rental stripe error:", rentalError.message);
+        setError(rentalError.message);
+        onPaymentError && onPaymentError(rentalError);
+        setLoading(false);
+        return;
+      }
+
+      console.log(`[PaymentForm] rental intent authorized: ${rentalIntent.id}`);
+
+      // 2. Confirm the DEPOSIT payment with Stripe using the same PaymentMethod
+      const { error: depositError, paymentIntent: depositIntent } =
+        await stripe.confirmCardPayment(payment.depositClientSecret, {
+          payment_method: rentalIntent.payment_method, // Reuse the same payment method
+        });
+
+      if (depositError) {
+        console.error("[PaymentForm] deposit stripe error:", depositError.message);
+        setError(`Rental authorized, but deposit failed: ${depositError.message}`);
+        onPaymentError && onPaymentError(depositError);
         setLoading(false);
         return;
       }
 
       console.log(
-        `[PaymentForm] payment intent status: ${paymentIntent.status}`,
+        `[PaymentForm] deposit intent authorized: ${depositIntent.id}`,
       );
 
-      // Confirm the payment on our backend
-      const res = await confirmPayment(booking.id, paymentIntent.id, token);
+      // 3. Confirm both on our backend
+      const res = await confirmPayment(
+        booking.id, 
+        rentalIntent.id, 
+        depositIntent.id, 
+        token
+      );
 
       if (!res.ok) {
         const errorData = await res.json();
@@ -115,11 +136,23 @@ const PaymentForm = ({
             style={{
               display: "flex",
               justifyContent: "space-between",
-              marginBottom: "10px",
+              marginBottom: "5px",
             }}
           >
-            <span>Amount:</span>
-            <span>${Number(payment.payment.amount).toFixed(2)}</span>
+            <span>Rental Fee Due:</span>
+            <span>${Number(payment.payment.rental_amount).toFixed(2)}</span>
+          </div>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              marginBottom: "10px",
+              color: "#666",
+              fontStyle: "italic"
+            }}
+          >
+            <span>Security Hold (Refundable):</span>
+            <span>${Number(payment.payment.deposit_amount).toFixed(2)}</span>
           </div>
           <div style={{ borderTop: "1px solid #ddd", paddingTop: "10px" }}>
             <div
@@ -129,7 +162,7 @@ const PaymentForm = ({
                 fontWeight: "bold",
               }}
             >
-              <span>Total:</span>
+              <span>Total Authorization:</span>
               <span>${Number(payment.payment.amount).toFixed(2)}</span>
             </div>
           </div>
@@ -138,7 +171,7 @@ const PaymentForm = ({
 
       {error && (
         <div className="notification is-danger">
-          <button className="delete"></button>
+          <button className="delete" onClick={() => setError("")}></button>
           {error}
         </div>
       )}
@@ -151,7 +184,7 @@ const PaymentForm = ({
             className={`button is-primary ${loading ? "is-loading" : ""}`}
             disabled={loading || !stripe}
           >
-            Pay ${Number(payment.payment.amount).toFixed(2)}
+            Authorize Payment
           </button>
         </div>
       </div>
@@ -170,11 +203,15 @@ const PaymentForm = ({
 PaymentForm.propTypes = {
   booking: PropTypes.shape({
     id: PropTypes.number.isRequired,
-    total_amount: PropTypes.number.isRequired,
   }).isRequired,
   payment: PropTypes.shape({
     clientSecret: PropTypes.string.isRequired,
-    amount: PropTypes.number.isRequired,
+    depositClientSecret: PropTypes.string.isRequired,
+    payment: PropTypes.shape({
+      amount: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+      rental_amount: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      deposit_amount: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    }).isRequired,
   }).isRequired,
   onPaymentSuccess: PropTypes.func,
   onPaymentError: PropTypes.func,

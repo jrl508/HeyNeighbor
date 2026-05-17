@@ -97,3 +97,15 @@ export const respondToReschedule = async (id, action, token) => {
   });
   return response;
 };
+
+export const claimDeposit = async (id, claimData, token) => {
+  const response = await fetch(`${api}/bookings/${id}/claim-deposit`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(claimData),
+  });
+  return response;
+};

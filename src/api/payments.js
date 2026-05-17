@@ -19,6 +19,7 @@ export const createPaymentIntent = async (booking_id, token) => {
 export const confirmPayment = async (
   booking_id,
   stripe_payment_intent_id,
+  stripe_deposit_intent_id,
   token,
 ) => {
   const response = await fetch(`${api}/payments/confirm`, {
@@ -30,6 +31,7 @@ export const confirmPayment = async (
     body: JSON.stringify({
       booking_id,
       stripe_payment_intent_id,
+      stripe_deposit_intent_id,
     }),
   });
   return response;
