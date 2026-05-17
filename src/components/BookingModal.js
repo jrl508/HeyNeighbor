@@ -35,13 +35,16 @@ const BookingModal = ({ tool, isOpen, onClose, onBooked }) => {
   const fetchBlockedDates = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`${process.env.REACT_APP_API_URL}/tools/${tool.id}/availability`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await fetch(
+        `${process.env.REACT_APP_API_URL}/tools/${tool.id}/availability`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
       if (res.ok) {
         const ranges = await res.json();
         const dates = [];
-        ranges.forEach(range => {
+        ranges.forEach((range) => {
           let current = new Date(range.start);
           const end = new Date(range.end);
           // Normalize to midnight local time to avoid TZ issues
@@ -71,7 +74,7 @@ const BookingModal = ({ tool, isOpen, onClose, onBooked }) => {
           receiver_id: tool.user_id,
           content: `Hi! I have a question about booking your ${tool.name}.`,
         },
-        token
+        token,
       );
       onClose();
       navigate("/dashboard/inbox");
@@ -87,21 +90,23 @@ const BookingModal = ({ tool, isOpen, onClose, onBooked }) => {
     // If we've already created a booking but haven't paid, ask for confirmation
     if (step === "payment" && booking) {
       const confirmCancel = window.confirm(
-        "You have a pending booking. If you leave now, this request will be cancelled. Are you sure?"
+        "You have a pending booking. If you leave now, this request will be cancelled. Are you sure?",
       );
-      
+
       if (!confirmCancel) return;
 
       // Clean up on backend
       try {
         const token = localStorage.getItem("token");
         await voidPayment(booking.id, token);
-        console.log(`[BookingModal] Cleanup successful for booking ${booking.id}`);
+        console.log(
+          `[BookingModal] Cleanup successful for booking ${booking.id}`,
+        );
       } catch (err) {
         console.error("[BookingModal] Cleanup failed:", err);
       }
     }
-    
+
     // Reset state and call parent onClose
     setStep("dates");
     setStartDate(null);
@@ -200,6 +205,7 @@ const BookingModal = ({ tool, isOpen, onClose, onBooked }) => {
     dispatch({ type: "ADD_BOOKING", payload: data.booking });
     onBooked && onBooked(data.booking);
     onClose();
+    navigate("/dashboard");
   };
 
   const handlePaymentError = (err) => {
@@ -258,7 +264,8 @@ const BookingModal = ({ tool, isOpen, onClose, onBooked }) => {
                       onChange={(e) => setDeliveryRequired(e.target.checked)}
                     />
                     <span className="ml-2">
-                      Request Delivery (+${tool.delivery_fee} fee, pending owner approval)
+                      Request Delivery (+${tool.delivery_fee} fee, pending owner
+                      approval)
                     </span>
                   </label>
                 </div>
@@ -272,13 +279,22 @@ const BookingModal = ({ tool, isOpen, onClose, onBooked }) => {
                     </strong>
                   </p>
                   <p>Daily Rate: ${tool.rental_price_per_day}</p>
-                  <p>Estimated Total: ${(calculateDays(startDate, endDate) * tool.rental_price_per_day).toFixed(2)}</p>
+                  <p>
+                    Estimated Total: $
+                    {(
+                      calculateDays(startDate, endDate) *
+                      tool.rental_price_per_day
+                    ).toFixed(2)}
+                  </p>
                 </div>
               )}
 
               {error && (
                 <div className="notification is-danger">
-                  <button className="delete" onClick={() => setError("")}></button>
+                  <button
+                    className="delete"
+                    onClick={() => setError("")}
+                  ></button>
                   {error}
                 </div>
               )}
@@ -320,42 +336,70 @@ const BookingModal = ({ tool, isOpen, onClose, onBooked }) => {
                   <div
                     style={{ display: "flex", justifyContent: "space-between" }}
                   >
-                    <span>Duration:</span>
-                    <span>{calculateDays(startDate, endDate)} days</span>
+                    <span>
+                      Rental Fee ({calculateDays(startDate, endDate)} days):
+                    </span>
+                    <span>
+                      $
+                      {(
+                        calculateDays(startDate, endDate) *
+                        tool.rental_price_per_day
+                      ).toFixed(2)}
+                    </span>
                   </div>
-                  <div
-                    style={{ display: "flex", justifyContent: "space-between" }}
-                  >
-                    <span>Daily Rate:</span>
-                    <span>${tool.rental_price_per_day}</span>
-                  </div>
-                  <div
-                    style={{ display: "flex", justifyContent: "space-between" }}
-                  >
-                    <span>Deposit (20%):</span>
-                    <span>${(tool.rental_price_per_day * 0.2).toFixed(2)}</span>
-                  </div>
+
                   {booking?.delivery_fee > 0 && (
                     <div
-                      style={{ display: "flex", justifyContent: "space-between" }}
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                      }}
                     >
                       <span>Delivery Fee:</span>
                       <span>${Number(booking.delivery_fee).toFixed(2)}</span>
                     </div>
                   )}
+
                   <div
                     style={{
                       display: "flex",
                       justifyContent: "space-between",
-                      borderTop: "1px solid #ddd",
+                      color: "#4a4a4a",
+                      borderBottom: "1px solid #ddd",
+                      paddingBottom: "5px",
+                    }}
+                  >
+                    <span>Security Deposit (Refundable):</span>
+                    <span>
+                      ${Number(payment.payment.deposit_amount).toFixed(2)}
+                    </span>
+                  </div>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
                       paddingTop: "10px",
-                      marginTop: "10px",
+                      marginTop: "5px",
                       fontWeight: "bold",
                     }}
                   >
-                    <span>Total:</span>
+                    <span>Rental Fee Due:</span>
                     <span>
-                      ${Number(payment.payment.amount).toFixed(2)}
+                      ${Number(payment.payment.rental_amount).toFixed(2)}
+                    </span>
+                  </div>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      fontSize: "12px",
+                      color: "#666",
+                    }}
+                  >
+                    <span>Security Hold (Refundable):</span>
+                    <span>
+                      ${Number(payment.payment.deposit_amount).toFixed(2)}
                     </span>
                   </div>
                 </div>
@@ -370,7 +414,10 @@ const BookingModal = ({ tool, isOpen, onClose, onBooked }) => {
 
               {error && (
                 <div className="notification is-danger">
-                  <button className="delete" onClick={() => setError("")}></button>
+                  <button
+                    className="delete"
+                    onClick={() => setError("")}
+                  ></button>
                   {error}
                 </div>
               )}

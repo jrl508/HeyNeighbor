@@ -74,10 +74,11 @@ const DashMain = () => {
   const handleComplete = async (bookingId) => {
     try {
       const response = await bookingsAPI.completeBooking(bookingId, token);
+      const data = await response.json();
       if (response.ok) {
+        alert(data.message || "Booking completed successfully");
         fetchBookings(); // Refresh list
       } else {
-        const data = await response.json();
         alert(data.message || "Failed to complete booking");
       }
     } catch (err) {
@@ -168,6 +169,31 @@ const DashMain = () => {
     }
   };
 
+  const handleClaimDeposit = async (bookingId) => {
+    const reason = window.prompt("Reason for claiming deposit (damage details):");
+    if (reason === null) return; // Cancelled prompt
+
+    const amountStr = window.prompt("Amount to claim (leave empty for full deposit):");
+    if (amountStr === null) return;
+
+    try {
+      const response = await bookingsAPI.claimDeposit(
+        bookingId, 
+        { reason, amount: amountStr ? parseFloat(amountStr) : null }, 
+        token
+      );
+      if (response.ok) {
+        alert("Deposit claim initiated successfully.");
+        fetchBookings();
+      } else {
+        const data = await response.json();
+        alert(data.message || "Failed to claim deposit");
+      }
+    } catch (err) {
+      console.error("Error claiming deposit:", err);
+    }
+  };
+
   const canMessage = (booking) => {
     const { status, completed_at, updated_at } = booking;
     
@@ -255,6 +281,18 @@ const DashMain = () => {
                         <span className="is-size-7 has-text-grey">
                           Payment: {booking.payment_status || 'pending'}
                         </span>
+                        {booking.deposit_status && booking.deposit_status !== 'none' && (
+                          <div className="mt-1">
+                            <span 
+                              className={`tag is-small ${getDepositStatusColor(booking.deposit_status)}`}
+                              title={getDepositStatusTitle(booking.deposit_status)}
+                            >
+                              {['captured', 'claimed'].includes(booking.deposit_status) 
+                                ? 'DEPOSIT CLAIMED' 
+                                : `Deposit: ${booking.deposit_status.toUpperCase()}`}
+                            </span>
+                          </div>
+                        )}
                         <div className="mt-2 buttons is-right">
                           {canMessage(booking) && (
                             <button
@@ -301,12 +339,12 @@ const DashMain = () => {
                               key={`renter-review-${booking.id}`}
                             />
                           )}
-                          {booking.status === "pending_payment" && (
+                          {["pending_payment", "requested"].includes(booking.status) && (
                             <button
                               className="button is-small is-danger is-outlined"
                               onClick={() => handleVoid(booking.id)}
                             >
-                              Cancel Request
+                              Withdraw Request
                             </button>
                           )}
                         </div>
@@ -339,6 +377,18 @@ const DashMain = () => {
                         <span className="is-size-7">
                           Payment Status: <strong>{booking.payment_status}</strong>
                         </span>
+                        {booking.deposit_status && booking.deposit_status !== 'none' && (
+                          <div className="mt-1">
+                            <span 
+                              className={`tag is-small ${getDepositStatusColor(booking.deposit_status)}`}
+                              title={getDepositStatusTitle(booking.deposit_status)}
+                            >
+                              {['captured', 'claimed'].includes(booking.deposit_status) 
+                                ? 'DEPOSIT CLAIMED' 
+                                : `Deposit: ${booking.deposit_status.toUpperCase()}`}
+                            </span>
+                          </div>
+                        )}
                       </div>
                       <div className="buttons is-right">
                         {canMessage(booking) && (
@@ -442,6 +492,17 @@ const DashMain = () => {
                           </button>
                         )}
 
+                        {['returning', 'completed'].includes(booking.status) && 
+                         booking.deposit_status === 'authorized' && (
+                          <button 
+                            className="button is-small is-danger is-outlined"
+                            onClick={() => handleClaimDeposit(booking.id)}
+                            title="Initiate a claim against the security deposit hold"
+                          >
+                            Claim Damage Deposit
+                          </button>
+                        )}
+
                         {booking.status === "completed" && (
                           <ReviewButton
                             booking={booking}
@@ -528,6 +589,26 @@ const getStatusColor = (status) => {
     case 'cancelled': return 'is-danger is-light';
     case 'reschedule_pending': return 'is-info is-light';
     default: return 'is-light';
+  }
+};
+
+const getDepositStatusColor = (status) => {
+  switch (status) {
+    case 'authorized': return 'is-info is-light';
+    case 'captured': return 'is-danger is-light';
+    case 'released': return 'is-success is-light';
+    case 'claimed': return 'is-danger';
+    default: return 'is-light';
+  }
+};
+
+const getDepositStatusTitle = (status) => {
+  switch (status) {
+    case 'authorized': return 'Funds are being held by Stripe and will be released 48h after completion if no claim is filed.';
+    case 'captured': 
+    case 'claimed': return 'A claim was filed against this deposit for damages.';
+    case 'released': return 'The security hold has been released back to the renter.';
+    default: return '';
   }
 };
 
