@@ -11,6 +11,7 @@ import Icon from "@mdi/react";
 import { mdiUpload, mdiStar } from "@mdi/js";
 import ProfilePicModal from "../../components/ProfilePicModal.js";
 import { getReviewsForUser } from "../../api/reviews.js";
+import { formatDisplayDate } from "../../util/dateUtils.js";
 
 // ************************ TODO: Error Handling, Profile Picture Logic ********************************
 
@@ -198,14 +199,22 @@ const UserProfile = () => {
   return (
     <div>
       <div className="title is-5">Profile</div>
-      <div className="card">
+      <div className="card" style={{ overflow: "hidden" }}>
         <div className="card-top" style={{ display: "flex", flexWrap: "wrap" }}>
-          <div className="card-image is-clickable" onClick={handleOpenModal}>
-            <figure className="image">
+          <div 
+            className="card-image is-clickable" 
+            onClick={handleOpenModal}
+          >
+            <figure className="image" style={{ height: "100%", margin: 0 }}>
               <img
                 src={image}
                 alt="Placeholder image"
-                style={{ width: "auto", width: "500px", height: "500px" }}
+                style={{ 
+                  width: "500px", 
+                  height: "100%", 
+                  objectFit: "cover", 
+                  borderRadius: "0" 
+                }}
               />
             </figure>
           </div>
@@ -425,7 +434,7 @@ const UserProfile = () => {
                 )}
                 <p className="has-text-grey is-size-7 mt-2">
                   Reviewed on:{" "}
-                  {new Date(review.created_at).toLocaleDateString()}
+                  {formatDisplayDate(review.created_at)}
                 </p>
               </div>
             ))}
