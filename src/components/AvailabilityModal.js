@@ -5,6 +5,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import Icon from "@mdi/react";
 import { mdiDelete, mdiCalendarPlus } from "@mdi/js";
 import { getToolAvailability, addToolAvailability, deleteToolAvailability } from "../api/tools";
+import { formatApiDate, formatDisplayDate } from "../util/dateUtils";
 
 const AvailabilityModal = ({ tool, isOpen, onClose }) => {
   const [blockedRanges, setBlockedRanges] = useState([]);
@@ -41,8 +42,8 @@ const AvailabilityModal = ({ tool, isOpen, onClose }) => {
     setError("");
     try {
       const res = await addToolAvailability(tool.id, {
-        start_date: formatDate(startDate),
-        end_date: formatDate(endDate),
+        start_date: formatApiDate(startDate),
+        end_date: formatApiDate(endDate),
         reason: "owner_unavailable",
         notes: "Owner manual blackout"
       }, token);
@@ -75,19 +76,6 @@ const AvailabilityModal = ({ tool, isOpen, onClose }) => {
     } catch (err) {
       console.error("Error deleting blackout:", err);
     }
-  };
-
-  const formatDate = (date) => {
-    if (!date) return "";
-    const d = new Date(date);
-    let month = "" + (d.getMonth() + 1);
-    let day = "" + d.getDate();
-    const year = d.getFullYear();
-
-    if (month.length < 2) month = "0" + month;
-    if (day.length < 2) day = "0" + day;
-
-    return [year, month, day].join("-");
   };
 
   const onDateChange = (dates) => {
@@ -139,7 +127,7 @@ const AvailabilityModal = ({ tool, isOpen, onClose }) => {
                   blockedRanges.map((range, idx) => (
                     <div key={idx} className="box p-2 mb-2 is-flex is-justify-content-space-between is-align-items-center">
                       <div className="is-size-7">
-                        <p><strong>{new Date(range.start).toLocaleDateString()} - {new Date(range.end).toLocaleDateString()}</strong></p>
+                        <p><strong>{formatDisplayDate(range.start)} - {formatDisplayDate(range.end)}</strong></p>
                         <p className="has-text-grey">{range.reason === 'booking' ? '🔒 Booked' : '🚫 Blackout'}</p>
                       </div>
                       {range.reason !== 'booking' && (

@@ -5,6 +5,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import Icon from "@mdi/react";
 import { mdiCalendarSync } from "@mdi/js";
 import { rescheduleBooking } from "../api/bookings";
+import { formatApiDate, formatDisplayDate } from "../util/dateUtils";
 
 const RescheduleModal = ({ booking, isOpen, onClose, onSuccess }) => {
   const [startDate, setStartDate] = useState(null);
@@ -51,19 +52,6 @@ const RescheduleModal = ({ booking, isOpen, onClose, onSuccess }) => {
     }
   };
 
-  const formatDate = (date) => {
-    if (!date) return "";
-    const d = new Date(date);
-    let month = "" + (d.getMonth() + 1);
-    let day = "" + d.getDate();
-    const year = d.getFullYear();
-
-    if (month.length < 2) month = "0" + month;
-    if (day.length < 2) day = "0" + day;
-
-    return [year, month, day].join("-");
-  };
-
   const handleReschedule = async (e) => {
     e.preventDefault();
     if (!startDate || !endDate) return;
@@ -72,8 +60,8 @@ const RescheduleModal = ({ booking, isOpen, onClose, onSuccess }) => {
     setError("");
     try {
       const res = await rescheduleBooking(booking.id, {
-        new_start_date: formatDate(startDate),
-        new_end_date: formatDate(endDate)
+        new_start_date: formatApiDate(startDate),
+        new_end_date: formatApiDate(endDate)
       }, token);
 
       if (res.ok) {
@@ -108,7 +96,7 @@ const RescheduleModal = ({ booking, isOpen, onClose, onSuccess }) => {
         </header>
         <section className="modal-card-body">
           <div className="notification is-info is-light">
-            <p className="is-size-7">Current Dates: <strong>{booking.start_date} to {booking.end_date}</strong></p>
+            <p className="is-size-7">Current Dates: <strong>{formatDisplayDate(booking.start_date)} to {formatDisplayDate(booking.end_date)}</strong></p>
             <p className="is-size-7 mt-1">Select new dates below. The owner will need to approve this change.</p>
           </div>
 

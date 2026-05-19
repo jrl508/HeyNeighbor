@@ -10,6 +10,7 @@ import { useTool } from "../hooks/useTool";
 import { createPaymentIntent, voidPayment } from "../api/payments";
 import { sendMessage } from "../api/messaging";
 import PaymentForm from "./PaymentForm";
+import { formatApiDate } from "../util/dateUtils";
 
 const BookingModal = ({ tool, isOpen, onClose, onBooked }) => {
   const { state: authState } = useAuth();
@@ -125,19 +126,6 @@ const BookingModal = ({ tool, isOpen, onClose, onBooked }) => {
     return Math.ceil((e - s) / (1000 * 60 * 60 * 24)) + 1;
   };
 
-  const formatDate = (date) => {
-    if (!date) return "";
-    const d = new Date(date);
-    let month = "" + (d.getMonth() + 1);
-    let day = "" + d.getDate();
-    const year = d.getFullYear();
-
-    if (month.length < 2) month = "0" + month;
-    if (day.length < 2) day = "0" + day;
-
-    return [year, month, day].join("-");
-  };
-
   const handleDatesSubmit = async (e) => {
     e.preventDefault();
     if (!startDate || !endDate) return;
@@ -146,8 +134,8 @@ const BookingModal = ({ tool, isOpen, onClose, onBooked }) => {
     setError("");
     try {
       const token = localStorage.getItem("token");
-      const startStr = formatDate(startDate);
-      const endStr = formatDate(endDate);
+      const startStr = formatApiDate(startDate);
+      const endStr = formatApiDate(endDate);
 
       console.log(
         `[BookingModal] creating booking: tool=${tool.id} start=${startStr} end=${endStr}`,
