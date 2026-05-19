@@ -10,6 +10,7 @@ import ReviewModal from "../../components/ReviewModal";
 import ReviewButton from "../../components/ReviewButton";
 import RescheduleModal from "../../components/RescheduleModal";
 import { useAuth } from "../../hooks/useAuth";
+import { formatDisplayDate, formatRelativeTime } from "../../util/dateUtils";
 
 const DashMain = () => {
   const { state } = useAuth();
@@ -263,12 +264,12 @@ const DashMain = () => {
                         <strong>{booking.tool_name}</strong> (Owner: {booking.owner_first_name})
                         <br />
                         <span className="is-size-7 has-text-grey">
-                          {booking.start_date} to {booking.end_date}
+                          {formatDisplayDate(booking.start_date)} to {formatDisplayDate(booking.end_date)}
                         </span>
                         {booking.status === "reschedule_pending" && (
                           <div className="mt-1">
                             <span className="is-size-7 has-text-info is-italic">
-                              Requested Reschedule: <strong>{booking.new_start_date} to {booking.new_end_date}</strong> (Pending approval)
+                              Requested Reschedule: <strong>{formatDisplayDate(booking.new_start_date)} to {formatDisplayDate(booking.new_end_date)}</strong> (Pending approval)
                             </span>
                           </div>
                         )}
@@ -371,7 +372,7 @@ const DashMain = () => {
                         <strong>{booking.tool_name}</strong> (Renter: {booking.renter_first_name})
                         <br />
                         <span className="is-size-7 has-text-grey">
-                          {booking.start_date} to {booking.end_date}
+                          {formatDisplayDate(booking.start_date)} to {formatDisplayDate(booking.end_date)}
                         </span>
                         <br />
                         <span className="is-size-7">
@@ -413,7 +414,7 @@ const DashMain = () => {
                         {booking.status === "reschedule_pending" && (
                           <>
                             <div className="notification is-info is-light is-size-7 p-2 mb-0 mr-2">
-                              New Proposed Dates: <strong>{booking.new_start_date} to {booking.new_end_date}</strong>
+                              New Proposed Dates: <strong>{formatDisplayDate(booking.new_start_date)} to {formatDisplayDate(booking.new_end_date)}</strong>
                             </div>
                             <button
                               className="button is-small is-success"
@@ -543,16 +544,22 @@ const DashMain = () => {
             {myToolsRented.filter(b => b.status === 'requested').map(b => (
               <div key={b.id} className="notification is-info is-light is-size-7 p-2 mb-2">
                 New request for <strong>{b.tool_name}</strong> from {b.renter_first_name}.
+                <br />
+                <span className="has-text-grey-light">{formatRelativeTime(b.updated_at)}</span>
               </div>
             ))}
             {myToolsRented.filter(b => b.status === 'reschedule_pending').map(b => (
               <div key={b.id} className="notification is-warning is-light is-size-7 p-2 mb-2">
                 <strong>{b.renter_first_name}</strong> wants to reschedule <strong>{b.tool_name}</strong>.
+                <br />
+                <span className="has-text-grey-light">{formatRelativeTime(b.updated_at)}</span>
               </div>
             ))}
             {myToolsRented.filter(b => b.status === 'returning').map(b => (
               <div key={b.id} className="notification is-success is-light is-size-7 p-2 mb-2">
                 <strong>{b.renter_first_name}</strong> has returned <strong>{b.tool_name}</strong>. Please confirm receipt.
+                <br />
+                <span className="has-text-grey-light">{formatRelativeTime(b.updated_at)}</span>
               </div>
             ))}
           </div>
