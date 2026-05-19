@@ -3,10 +3,17 @@
   background-image: url("../../public/tools-splash.jpg"); /* Set the background image here */
   background-size: cover;
   background-position: center;
-  height: 80vh; /* Adjust the height as per your requirements */
-  min-height: 550px;
+  height: 60vh; /* Adjust the height for mobile */
+  min-height: 400px;
   display: flex;
   align-items: center;
+}
+
+@media screen and (min-width: 769px) {
+  .banner {
+    height: 80vh;
+    min-height: 550px;
+  }
 }
 
 .content {
@@ -14,32 +21,53 @@
   display: flex;
   flex-flow: column nowrap;
   align-items: center;
+  padding: 0 20px;
+  text-align: center;
 }
 
 .title {
-  font-size: 3rem;
+  font-size: 2rem;
   color: #ffffff; /* Customize the color */
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-wrap: wrap;
+}
+
+@media screen and (min-width: 769px) {
+  .title {
+    font-size: 3rem;
+  }
 }
 
 .subtitle {
-  font-size: 1.5rem;
+  font-size: 1.1rem;
   color: #ffffff; /* Customize the color */
   margin-bottom: 20px;
+}
+
+@media screen and (min-width: 769px) {
+  .subtitle {
+    font-size: 1.5rem;
+  }
 }
 
 .button {
   box-sizing: border-box;
   width: fit-content;
   padding: 12px 24px;
-  font-size: 1.2rem;
+  font-size: 1rem;
   background: none;
   color: #ffffff; /* Customize the text color */
   border: 1px solid #ffffff;
   border-radius: 4px;
   cursor: pointer;
+}
+
+@media screen and (min-width: 769px) {
+  .button {
+    font-size: 1.2rem;
+  }
 }
 
 .button:hover {
@@ -48,6 +76,14 @@
 }
 
 .icon {
-  height: 60px;
-  width: 60px;
+  height: 40px;
+  width: 40px;
+  margin-right: 10px;
+}
+
+@media screen and (min-width: 769px) {
+  .icon {
+    height: 60px;
+    width: 60px;
+  }
 }

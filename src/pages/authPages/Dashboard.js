@@ -1,6 +1,5 @@
 import React from "react";
 import styles from "../../styles/Dashboard.module.css";
-import ProfilePH from "../../images/profile_ph.svg";
 import { Link, Outlet } from "react-router-dom";
 import Icon from "@mdi/react";
 import { mdiStar } from "@mdi/js";
@@ -9,89 +8,26 @@ import { useChat } from "../../contexts/ChatContext.js";
 import { capitalize } from "../../util/UtilFunctions.js";
 import Avatar from "../../components/Avatar";
 
-/*
-
-Dashboard Components:
-
-    1. User Profile Overview:
-        Display user details like name, profile picture, and contact information.
-        Overview of the user's rental history, both as an owner and a renter.
-
-    2.Current Listings: 
-        Tools currently available for rent by the user.
-        Include details like tool name, description, rental status, and rental price.
-    
-    3. Renting History:
-        A section displaying tools the user has rented in the past.
-        Include details such as the rental period, cost, and feedback from the owner.
-
-    4. Owned Tools:
-        A list of tools the user owns and has listed for rent.
-        Include details like tool name, description, availability status, and rental income.
-
-    5. Transaction History:
-        A log of financial transactions related to tool rentals.
-        Details should include dates, amounts, and the status of the transaction.
-    
-    6. Messages and Notifications:
-        A messaging system for communication between users.
-        Notifications for new rental requests, messages, and important updates.
-    
-    7. Rental Requests:
-        A section displaying pending and accepted rental requests.
-        Include details like tool name, requester's details, and rental dates.
-    
-    8. Settings and Preferences:
-        Allow users to manage account settings.
-        Preferences for notifications, privacy settings, and payment methods.
-    
-    9. Reviews and Ratings:
-        A place to view and leave reviews and ratings for both tool owners and renters.
-        Encourages trust and transparency within the community.
-    
-    10. Help and Support:
-
-Access to a help center or FAQ section.
-Contact options for customer support.
-    11. Verification and Security:
-
-Ensure the user's account is verified and secure.
-Options for two-factor authentication and password management.
-    12. Search and Filters:
-
-Tools to search for specific tools or filter based on categories, location, or other relevant criteria.
-
-*/
-
 const Dashboard = () => {
   const { state } = useAuth();
   const { unreadCount } = useChat();
 
   const { user } = state;
 
-  if (state.loading) return;
+  if (state.loading) return null;
 
   return (
     <div className={styles.wrapper}>
-      <div
-        className={styles.left}
-        style={{
-          borderRight: "solid gray 1px",
-        }}
-      >
+      {/* Sidebar - Visible on Desktop only via CSS */}
+      <div className={`${styles.left} is-hidden-touch`}>
         <div
-          className="fixed-grid has-1-cols"
           style={{
             borderBottom: "solid gray 1px",
             paddingBottom: "25px",
+            textAlign: "center"
           }}
         >
-          <div
-            style={{
-              textAlign: "center",
-              marginBottom: "25px",
-            }}
-          >
+          <div style={{ marginBottom: "25px" }}>
             <Avatar src={user.profile_image} size="xl" />
           </div>
           <div className="has-text-weight-bold">
@@ -101,14 +37,13 @@ const Dashboard = () => {
             {(() => {
               const rating = parseFloat(user.average_rating);
               return !isNaN(rating) && rating > 0 ? (
-                <span className="is-flex is-align-items-center">
+                <span className="is-flex is-align-items-center is-justify-content-center">
                   <Icon
                     path={mdiStar}
                     size={0.7}
                     color="#ffc107"
                     className="mr-2"
                   />
-
                   {rating.toFixed(1)}
                 </span>
               ) : (
@@ -119,23 +54,12 @@ const Dashboard = () => {
           <div>{`${user.city + ", " + user.state}`}</div>
         </div>
 
-        {/* Side Nav component Start, TODO: Make them auth routes */}
-
-        <aside
-          className="menu"
-          style={{
-            marginTop: "25px",
-          }}
-        >
+        <aside className="menu" style={{ marginTop: "25px" }}>
           <p className="menu-label">General</p>
-          <ul>
-            <li className="side-menu-item">
-              <Link to="/dashboard">Dashboard</Link>
-            </li>
-            <li className="side-menu-item">
-              <Link to="profile">Profile</Link>
-            </li>
-            <li className="side-menu-item">
+          <ul className="menu-list">
+            <li><Link to="/dashboard">Dashboard</Link></li>
+            <li><Link to="profile">Profile</Link></li>
+            <li>
               <Link to="inbox">
                 Messages
                 {unreadCount > 0 && (
@@ -145,42 +69,25 @@ const Dashboard = () => {
                 )}
               </Link>
             </li>
-            <li className="side-menu-item">
-              <Link to="toolshed">Toolshed</Link>
-            </li>
+            <li><Link to="toolshed">Toolshed</Link></li>
           </ul>
           <p className="menu-label">Neighborhood</p>
-          <ul>
-            <li className="side-menu-item">
-              <Link to="listings">Listings</Link>
-            </li>
-            <li className="side-menu-item">
-              <Link to="local-biz">Local Business</Link>
-            </li>
+          <ul className="menu-list">
+            <li><Link to="listings">Listings</Link></li>
+            <li><Link to="local-biz">Local Business</Link></li>
           </ul>
           <p className="menu-label">Transactions</p>
-          <ul>
-            <li className="side-menu-item">
-              <Link to="transaction-history">Transaction History</Link>
-            </li>
-            <li className="side-menu-item">
-              <Link to="balance">Balance</Link>
-            </li>
+          <ul className="menu-list">
+            <li><Link to="transaction-history">Transaction History</Link></li>
+            <li><Link to="balance">Balance</Link></li>
           </ul>
         </aside>
-        {/* Side nav End */}
       </div>
 
-      {/* Render auth components here */}
-      <div
-        style={{
-          width: "80%",
-          padding: "2%",
-        }}
-      >
+      {/* Content Area */}
+      <div className={styles.center_content_wrapper} style={{ flexGrow: 1, padding: "2%", width: "100%" }}>
         <Outlet />
       </div>
-      {/* Render Auth Components End */}
     </div>
   );
 };
