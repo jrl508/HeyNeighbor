@@ -54,7 +54,9 @@ const DashMain = () => {
       const response = await bookingsAPI.getBookings(token);
       if (response.ok) {
         const data = await response.json();
-        setBookings(data);
+        // Only show ongoing transactions in the main dashboard
+        const ongoingBookings = data.filter(b => !["completed", "cancelled"].includes(b.status));
+        setBookings(ongoingBookings);
       } else {
         setError("Failed to fetch bookings");
       }
