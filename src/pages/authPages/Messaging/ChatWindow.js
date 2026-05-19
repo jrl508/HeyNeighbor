@@ -12,6 +12,7 @@ import {
 } from "../../../api/messaging";
 import Avatar from "../../../components/Avatar";
 import { capitalize } from "../../../util/UtilFunctions";
+import { formatMessageTimestamp } from "../../../util/dateUtils";
 import Icon from "@mdi/react";
 import {
   mdiSend,
@@ -296,10 +297,7 @@ const ChatWindow = ({ conversation }) => {
                 >
                   <div className="message-content">{msg.content}</div>
                   <div className="message-time">
-                    {new Date(msg.created_at).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
+                    {formatMessageTimestamp(msg.created_at)}
                   </div>
                 </div>
               );
