@@ -85,7 +85,7 @@ const Dashboard = () => {
       </div>
 
       {/* Content Area */}
-      <div className={styles.center_content_wrapper} style={{ flexGrow: 1, padding: "2%", width: "100%" }}>
+      <div className={styles.center_content_wrapper} style={{ flexGrow: 1, padding: "2%" }}>
         <Outlet />
       </div>
     </div>

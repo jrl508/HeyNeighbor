@@ -5,6 +5,7 @@
   flex-direction: column;
   padding: 15px 0;
   min-height: calc(100vh - 65px);
+  overflow-x: hidden;
 }
 
 @media screen and (min-width: 1024px) {
