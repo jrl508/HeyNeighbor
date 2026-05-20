@@ -19,9 +19,13 @@ const Inbox = () => {
     setSelectedConversation(conv);
   };
 
+  const handleBackToList = () => {
+    setSelectedConversation(null);
+  };
+
   return (
     <div className="inbox-container">
-      <div className="inbox-sidebar">
+      <div className={`inbox-sidebar ${selectedConversation ? "is-hidden-mobile" : ""}`}>
         <div className="inbox-header">
           <h2 className="title is-4">Messages</h2>
           {unreadCount > 0 && (
@@ -69,14 +73,15 @@ const Inbox = () => {
           )}
         </div>
       </div>
-      <div className="inbox-chat">
+      <div className={`inbox-chat ${selectedConversation ? "is-active-mobile" : ""}`}>
         {selectedConversation ? (
           <ChatWindow
             conversation={selectedConversation}
             key={selectedConversation.id}
+            onBack={handleBackToList}
           />
         ) : (
-          <div className="no-chat-selected">
+          <div className="no-chat-selected is-hidden-mobile">
             <div className="has-text-centered">
               <i className="mdi mdi-forum-outline is-size-1 has-text-grey-lighter"></i>
               <p className="has-text-grey">Select a conversation to start chatting</p>
