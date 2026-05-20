@@ -20,6 +20,7 @@ import Inbox from "./pages/authPages/Messaging/Inbox";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ToolProvider } from "./contexts/ToolContext";
 import { ChatProvider } from "./contexts/ChatContext";
+import { BookingProvider } from "./contexts/BookingContext";
 import AuthRoutes from "./components/AuthRoutes";
 import EditTool from "./pages/authPages/Tools/EditTool";
 
@@ -29,35 +30,37 @@ const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
 const App = () => {
   return (
     <AuthProvider>
-      <ToolProvider>
-        <ChatProvider>
-          <Elements stripe={stripePromise}>
-            <Router>
-              <NavigationBar />
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/login" element={<Login />} />
-                <Route element={<AuthRoutes />}>
-                  <Route path="dashboard" element={<Dashboard />}>
-                    <Route index element={<DashMain />} />
-                    <Route path="profile" element={<UserProfile />} />
-                    <Route path="inbox" element={<Inbox />} />
-                    <Route path="local-biz" element={<LocalBiz />} />
-                    <Route path="balance" element={<Balance />} />
-                    <Route path="listings" element={<Listings />} />
-                    <Route path="toolshed">
-                      <Route index element={<Toolshed />} />
-                      <Route path="new" element={<AddTool />} />
-                      <Route path="edit/:toolId" element={<EditTool />} />
+      <BookingProvider>
+        <ToolProvider>
+          <ChatProvider>
+            <Elements stripe={stripePromise}>
+              <Router>
+                <NavigationBar />
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route element={<AuthRoutes />}>
+                    <Route path="dashboard" element={<Dashboard />}>
+                      <Route index element={<DashMain />} />
+                      <Route path="profile" element={<UserProfile />} />
+                      <Route path="inbox" element={<Inbox />} />
+                      <Route path="local-biz" element={<LocalBiz />} />
+                      <Route path="balance" element={<Balance />} />
+                      <Route path="listings" element={<Listings />} />
+                      <Route path="toolshed">
+                        <Route index element={<Toolshed />} />
+                        <Route path="new" element={<AddTool />} />
+                        <Route path="edit/:toolId" element={<EditTool />} />
+                      </Route>
+                      <Route path="transaction-history" element={<TranHist />} />
                     </Route>
-                    <Route path="transaction-history" element={<TranHist />} />
                   </Route>
-                </Route>
-              </Routes>
-            </Router>
-          </Elements>
-        </ChatProvider>
-      </ToolProvider>
+                </Routes>
+              </Router>
+            </Elements>
+          </ChatProvider>
+        </ToolProvider>
+      </BookingProvider>
     </AuthProvider>
   );
 };

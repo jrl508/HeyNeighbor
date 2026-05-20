@@ -10,15 +10,17 @@ import ReviewModal from "../../components/ReviewModal";
 import ReviewButton from "../../components/ReviewButton";
 import RescheduleModal from "../../components/RescheduleModal";
 import { useAuth } from "../../hooks/useAuth";
+import { useBookings } from "../../contexts/BookingContext";
 import { formatDisplayDate, formatRelativeTime } from "../../util/dateUtils";
 
 const DashMain = () => {
   const { state } = useAuth();
   const { user } = state;
   const navigate = useNavigate();
-  const [bookings, setBookings] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const { state: bookingState, fetchBookings } = useBookings();
+  const bookings = bookingState.bookings;
+  const loading = bookingState.loading;
+  
   const [messageLoading, setMessageLoading] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [reviewingBookingId, setReviewingBookingId] = useState(null);
@@ -48,31 +50,11 @@ const DashMain = () => {
     }
   };
 
-  const fetchBookings = async () => {
-    setLoading(true);
-    try {
-      const response = await bookingsAPI.getBookings(token);
-      if (response.ok) {
-        const data = await response.json();
-        // Only show ongoing transactions in the main dashboard
-        const ongoingBookings = data.filter(b => !["completed", "cancelled"].includes(b.status));
-        setBookings(ongoingBookings);
-      } else {
-        setError("Failed to fetch bookings");
-      }
-    } catch (err) {
-      console.error("Error fetching bookings:", err);
-      setError("An error occurred while fetching bookings");
-    } finally {
-      setLoading(false);
+  const refreshData = () => {
+    if (token) {
+      fetchBookings(token);
     }
   };
-
-  useEffect(() => {
-    if (token) {
-      fetchBookings();
-    }
-  }, [token]);
 
   const handleComplete = async (bookingId) => {
     try {
@@ -80,7 +62,7 @@ const DashMain = () => {
       const data = await response.json();
       if (response.ok) {
         alert(data.message || "Booking completed successfully");
-        fetchBookings(); // Refresh list
+        refreshData();
       } else {
         alert(data.message || "Failed to complete booking");
       }
@@ -95,9 +77,8 @@ const DashMain = () => {
     try {
       const response = await paymentsAPI.voidPayment(bookingId, token);
       if (response.ok) {
-        // Also cancel the booking record if it hasn't been already
         await bookingsAPI.cancelBooking(bookingId, "Cancelled via dashboard", token);
-        fetchBookings(); // Refresh list
+        refreshData();
       } else {
         const data = await response.json();
         alert(data.message || "Failed to void payment");
@@ -112,7 +93,7 @@ const DashMain = () => {
     try {
       const response = await bookingsAPI.confirmBooking(bookingId, deliveryDecision, token);
       if (response.ok) {
-        fetchBookings();
+        refreshData();
       } else {
         const data = await response.json();
         alert(data.message || "Failed to confirm booking");
@@ -134,7 +115,7 @@ const DashMain = () => {
     try {
       const response = await bookingsAPI.activateBooking(bookingId, token);
       if (response.ok) {
-        fetchBookings();
+        refreshData();
       } else {
         const data = await response.json();
         alert(data.message || "Failed to activate rental");
@@ -148,7 +129,7 @@ const DashMain = () => {
     try {
       const response = await bookingsAPI.returnBooking(bookingId, token);
       if (response.ok) {
-        fetchBookings();
+        refreshData();
       } else {
         const data = await response.json();
         alert(data.message || "Failed to mark as returned");
@@ -162,7 +143,7 @@ const DashMain = () => {
     try {
       const response = await bookingsAPI.respondToReschedule(bookingId, action, token);
       if (response.ok) {
-        fetchBookings();
+        refreshData();
       } else {
         const data = await response.json();
         alert(data.message || `Failed to ${action} reschedule request`);
@@ -187,7 +168,7 @@ const DashMain = () => {
       );
       if (response.ok) {
         alert("Deposit claim initiated successfully.");
-        fetchBookings();
+        refreshData();
       } else {
         const data = await response.json();
         alert(data.message || "Failed to claim deposit");
@@ -199,17 +180,10 @@ const DashMain = () => {
 
   const canMessage = (booking) => {
     const { status, completed_at, updated_at } = booking;
-    
-    // If it's an open booking, always allow messaging
-    if (!["completed", "cancelled"].includes(status)) {
-      return true;
-    }
-
-    // For completed/cancelled, allow a 48-hour grace period
+    if (!["completed", "cancelled"].includes(status)) return true;
     const lastActiveDate = new Date(completed_at || updated_at);
     const now = new Date();
     const fortyEightHoursInMs = 48 * 60 * 60 * 1000;
-
     return now - lastActiveDate < fortyEightHoursInMs;
   };
 
@@ -228,7 +202,7 @@ const DashMain = () => {
   };
 
   const handleReviewSubmitted = () => {
-    fetchBookings(); // Refresh bookings to update review status
+    refreshData();
     closeReviewModal();
   };
 
@@ -238,14 +212,19 @@ const DashMain = () => {
   };
 
   const handleRescheduleSuccess = () => {
-    fetchBookings();
+    refreshData();
     setIsRescheduleModalOpen(false);
   };
 
-  if (loading) return <div className="p-5">Loading your dashboard...</div>;
+  if (loading && bookings.length === 0) return <div className="p-5">Loading your dashboard...</div>;
 
-  const myRentals = bookings.filter(b => b.renter_id === user.id);
-  const myToolsRented = bookings.filter(b => b.owner_id === user.id);
+  const ongoingBookings = bookings.filter(b => !["completed", "cancelled"].includes(b.status));
+  const myRentals = ongoingBookings.filter(b => b.renter_id === user?.id);
+  const myToolsRented = ongoingBookings.filter(b => b.owner_id === user?.id);
+
+  const notificationBookings = bookings.filter(
+    (b) => b.owner_id === user?.id && ["requested", "reschedule_pending", "returning"].includes(b.status)
+  );
 
   return (
     <div className="columns is-multiline">
@@ -436,20 +415,26 @@ const DashMain = () => {
         </div>
       </div>
 
-      <div className="column is-12-tablet is-4-desktop">
+      <div className="column is-4-desktop is-hidden-touch">
         <div className="title is-5" style={{ margin: "0 0 1em" }}>
           Notification Center
         </div>
         <div className={styles.card}>
           <div className="p-4">
             <p className="is-size-7 has-text-grey mb-3">Recent activity will appear here.</p>
-            {myToolsRented.filter(b => b.status === 'requested').map(b => (
-              <div key={b.id} className="notification is-info is-light is-size-7 p-2 mb-2">
-                New request for <strong>{b.tool_name}</strong> from {b.renter_first_name}.
-                <br />
-                <span className="has-text-grey-light">{formatRelativeTime(b.updated_at)}</span>
-              </div>
-            ))}
+            {notificationBookings.length === 0 ? (
+               <div className="is-size-7 has-text-grey">No current notifications.</div>
+            ) : (
+              notificationBookings.map(b => (
+                <div key={b.id} className="notification is-info is-light is-size-7 p-2 mb-2">
+                  {b.status === 'requested' && `New request for ${b.tool_name} from ${b.renter_first_name}`}
+                  {b.status === 'reschedule_pending' && `${b.renter_first_name} wants to reschedule ${b.tool_name}`}
+                  {b.status === 'returning' && `${b.renter_first_name} has returned ${b.tool_name}`}
+                  <br />
+                  <span className="has-text-grey-light">{formatRelativeTime(b.updated_at)}</span>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>
