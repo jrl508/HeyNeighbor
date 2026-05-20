@@ -5,6 +5,7 @@ import {
   mdiFacebook,
   mdiLinkVariant,
   mdiPhone,
+  mdiPlus,
   mdiWeb,
 } from "@mdi/js";
 import BusinessForm from "./BusinessForm";
@@ -161,98 +162,107 @@ const LocalBiz = () => {
   };
 
   return (
-    <div>
-      <div className="level">
-        <div className="level-left">
-          <div className="level-item">
-            <div>
-              <p className="title is-5">Local Business</p>
-              <p>Find and share local businesses in your area.</p>
+    <div className="container px-2">
+      <div className="is-flex is-align-items-center is-justify-content-space-between mb-4">
+        <div>
+          <h1 className="title is-4 mb-1">Local Business</h1>
+          <p className="is-size-7-mobile is-hidden-mobile">Find and share local businesses in your area.</p>
+        </div>
+        
+        {/* Mobile Plus Button */}
+        <button
+          onClick={() => setOpenBizForm(true)}
+          className="button is-dark is-outlined is-hidden-tablet"
+          style={{ border: "none" }}
+        >
+          <Icon path={mdiPlus} size={1.5} />
+        </button>
+
+        {/* Desktop/Tablet Full Button */}
+        <button
+          onClick={() => setOpenBizForm(true)}
+          className="button is-dark is-outlined is-hidden-mobile"
+        >
+          Recommend Business
+        </button>
+      </div>
+      
+      <p className="is-size-7 mb-4 is-hidden-tablet">Find and share local businesses in your area.</p>
+
+      {/* Search Bar */}
+      <div className="box p-3">
+        <div className="field is-horizontal-tablet">
+          <div className="field-body">
+            <div className="field has-addons mb-2-mobile">
+              <p className="control is-expanded">
+                <input
+                  className="input"
+                  type="text"
+                  placeholder="ZIP code"
+                  value={searchZip}
+                  onChange={(e) => setSearchZip(e.target.value)}
+                  onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+                />
+              </p>
+              <p className="control">
+                <span className="select">
+                  <select
+                    value={searchRadius}
+                    onChange={(e) => setSearchRadius(Number(e.target.value))}
+                  >
+                    <option value={5}>5 mi</option>
+                    <option value={10}>10 mi</option>
+                    <option value={25}>25 mi</option>
+                    <option value={50}>50 mi</option>
+                  </select>
+                </span>
+              </p>
+            </div>
+            <div className="field is-grouped">
+              <p className="control is-expanded">
+                <button onClick={handleSearch} className="button is-info is-fullwidth">
+                  Search
+                </button>
+              </p>
+              {isSearching && (
+                <p className="control">
+                  <button onClick={handleClearSearch} className="button is-light">
+                    Clear
+                  </button>
+                </p>
+              )}
             </div>
           </div>
         </div>
-        <div className="level-right">
-          <button
-            onClick={() => setOpenBizForm(true)}
-            className="level-item button is-ghost"
-          >
-            Recommend Business
-          </button>
-        </div>
       </div>
 
-      {/* Search Bar */}
-      <div className="box">
-        <div className="field has-addons">
-          <p className="control is-expanded">
-            <input
-              className="input"
-              type="text"
-              placeholder="Enter ZIP code to search..."
-              value={searchZip}
-              onChange={(e) => setSearchZip(e.target.value)}
-              onKeyPress={(e) => e.key === "Enter" && handleSearch()}
-            />
-          </p>
-          <p className="control">
-            <span className="select">
-              <select
-                value={searchRadius}
-                onChange={(e) => setSearchRadius(Number(e.target.value))}
-              >
-                <option value={5}>5 miles</option>
-                <option value={10}>10 miles</option>
-                <option value={25}>25 miles</option>
-                <option value={50}>50 miles</option>
-              </select>
-            </span>
-          </p>
-          <p className="control">
-            <button onClick={handleSearch} className="button is-info">
-              Search
-            </button>
-          </p>
-          {isSearching && (
-            <p className="control">
-              <button onClick={handleClearSearch} className="button is-light">
-                Clear
-              </button>
-            </p>
-          )}
-        </div>
-      </div>
-
-      {/* Error Message */}
+      {/* Messages */}
       {error && (
-        <div className="notification is-danger">
+        <div className="notification is-danger is-light p-3 mb-4">
           <button className="delete" onClick={() => setError("")}></button>
           {error}
         </div>
       )}
-
-      {/* Loading State */}
       {loading && (
-        <div className="notification is-info">
+        <div className="notification is-info is-light p-3 mb-4">
           <p>Loading businesses...</p>
         </div>
       )}
 
+      {/* Info context */}
+      {!loading && businesses.length > 0 && (
+         <div className="is-size-7 has-text-grey mb-4">
+            Showing results for <span className="has-text-weight-bold">{isSearching ? `${searchRadius} miles of ${searchZip}` : "all areas"}</span>
+         </div>
+      )}
+
       {/* Businesses List */}
-      <div
-        className="biz-list"
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(500px, 1fr))",
-          gap: "20px",
-          marginBottom: "20px",
-        }}
-      >
+      <div className="columns is-multiline">
         {businesses.length === 0 && !loading && (
-          <div
-            className="notification is-warning"
-            style={{ gridColumn: "1 / -1" }}
-          >
-            No businesses found. Try searching by ZIP code or recommend one!
+          <div className="column is-12">
+            <div className="notification is-warning is-light has-text-centered py-6">
+              No businesses found. Try searching by ZIP code or recommend one!
+            </div>
           </div>
         )}
 
@@ -261,105 +271,79 @@ const LocalBiz = () => {
           const linksList = parseLinks(business.links);
 
           return (
-            <div
-              key={business.id}
-              className="card"
-              style={{
-                height: "100%",
-              }}
-            >
-              <div className="card-header">
-                <p className="card-header-title is-5">{business.name}</p>
-              </div>
-              <div className="card-content">
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <div className="left">
-                    <p className="job-type">{business.type}</p>
-                    <p className="ratings">
-                      {Number.parseFloat(business.rating || 0).toFixed(1)} ⭐ (
-                      {business.review_count || 0} reviews)
-                    </p>
-                    <p className="location">{business.address}</p>
-
-                    <p
-                      style={{
-                        display: showPhone[business.id] ? "inherit" : "none",
-                      }}
-                    >
-                      {business.phone || "Phone not available"}
-                    </p>
-
-                    {/* Owner info could be shown here if needed */}
-                    {business.owner_first_name && business.owner_last_name && (
-                      <p
-                        style={{
-                          display: showEmail[business.id] ? "inherit" : "none",
-                          fontSize: "0.9rem",
-                          color: "#666",
-                        }}
-                      >
-                        Recommended by: {business.owner_first_name}{" "}
-                        {business.owner_last_name}
-                      </p>
-                    )}
-
-                    <div
-                      style={{
-                        display: showLinks[business.id] ? "flex" : "none",
-                        columnGap: "5px",
-                        marginTop: "10px",
-                      }}
-                    >
-                      {linksList.map((link, idx) => (
-                        <a
-                          key={idx}
-                          href={link.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="is-clickable"
-                          title={link.url}
-                        >
-                          <Icon path={getLinkIcon(link.type)} size={1} />
-                        </a>
-                      ))}
-                    </div>
-
-                    <div style={{ marginTop: "10px" }}>
-                      <ul>
-                        <strong>Hours:</strong>
-                        <li>{renderHours(hoursObj)}</li>
-                      </ul>
-                    </div>
+            <div key={business.id} className="column is-12-tablet is-6-desktop">
+              <div className="card h-100 shadow-none-mobile" style={{ border: "1px solid #efefef" }}>
+                <header className="card-header">
+                  <p className="card-header-title is-size-5">{business.name}</p>
+                  <div className="card-header-icon">
+                     <span className="tag is-info is-light">{business.type}</span>
                   </div>
+                </header>
+                <div className="card-content">
+                  <div className="columns is-mobile is-multiline">
+                    <div className="column is-12-mobile is-8-tablet">
+                      <p className="is-size-6 has-text-weight-semibold">
+                        {Number.parseFloat(business.rating || 0).toFixed(1)} ⭐ 
+                        <span className="has-text-grey is-size-7 ml-2">({business.review_count || 0} reviews)</span>
+                      </p>
+                      <p className="is-size-7 has-text-grey mb-3">{business.address}</p>
 
-                  <div className="right">
-                    <div className="buttons has-addons">
-                      <button
-                        className="button"
-                        onClick={() => toggleVisibility(business.id, "phone")}
-                        title="Toggle phone"
-                      >
-                        <Icon className="icon" path={mdiPhone} size={1} />
-                      </button>
-                      <button
-                        className="button"
-                        onClick={() => toggleVisibility(business.id, "email")}
-                        title="Toggle owner info"
-                      >
-                        <Icon className="icon" path={mdiEmail} size={1} />
-                      </button>
-                      <button
-                        className="button"
-                        onClick={() => toggleVisibility(business.id, "links")}
-                        title="Toggle links"
-                      >
-                        <Icon className="icon" path={mdiLinkVariant} size={1} />
-                      </button>
+                      {showPhone[business.id] && (
+                        <div className="notification is-light p-2 mb-2 is-size-7">
+                          <strong>Phone:</strong> {business.phone || "Not available"}
+                        </div>
+                      )}
+
+                      {showEmail[business.id] && business.owner_first_name && (
+                        <div className="notification is-light p-2 mb-2 is-size-7">
+                          <strong>Recommended by:</strong> {business.owner_first_name} {business.owner_last_name}
+                        </div>
+                      )}
+
+                      {showLinks[business.id] && linksList.length > 0 && (
+                        <div className="is-flex mb-3" style={{ gap: "10px" }}>
+                          {linksList.map((link, idx) => (
+                            <a
+                              key={idx}
+                              href={link.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="button is-small is-light"
+                              title={link.url}
+                            >
+                              <Icon path={getLinkIcon(link.type)} size={0.7} />
+                              <span className="ml-1">Visit</span>
+                            </a>
+                          ))}
+                        </div>
+                      )}
+
+                      <div className="is-size-7">
+                        <strong>Hours:</strong> {renderHours(hoursObj)}
+                      </div>
+                    </div>
+
+                    <div className="column is-12-mobile is-4-tablet has-text-right-tablet mt-3-mobile">
+                      <div className="buttons is-right-tablet is-centered-mobile">
+                        <button
+                          className={`button is-small ${showPhone[business.id] ? 'is-info' : ''}`}
+                          onClick={() => toggleVisibility(business.id, "phone")}
+                        >
+                          <Icon path={mdiPhone} size={0.6} />
+                        </button>
+                        <button
+                          className={`button is-small ${showEmail[business.id] ? 'is-info' : ''}`}
+                          onClick={() => toggleVisibility(business.id, "email")}
+                        >
+                          <Icon path={mdiEmail} size={0.6} />
+                        </button>
+                        <button
+                          className={`button is-small ${showLinks[business.id] ? 'is-info' : ''}`}
+                          onClick={() => toggleVisibility(business.id, "links")}
+                        >
+                          <Icon path={mdiLinkVariant} size={0.6} />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -371,7 +355,7 @@ const LocalBiz = () => {
 
       {/* Pagination */}
       {pagination.pages > 1 && !isSearching && (
-        <nav className="pagination" role="navigation">
+        <nav className="pagination is-centered mt-5" role="navigation">
           <button
             className="pagination-previous"
             disabled={pagination.offset === 0}
@@ -394,16 +378,12 @@ const LocalBiz = () => {
               )
             }
           >
-            Next page
+            Next
           </button>
-          <ul className="pagination-list">
-            <li>
-              <span className="pagination-ellipsis">&hellip;</span>
-            </li>
+          <ul className="pagination-list is-hidden-mobile">
             <li>
               <span>
-                Page {Math.floor(pagination.offset / pagination.limit) + 1} of{" "}
-                {pagination.pages}
+                Page {Math.floor(pagination.offset / pagination.limit) + 1} of {pagination.pages}
               </span>
             </li>
           </ul>
@@ -412,29 +392,28 @@ const LocalBiz = () => {
 
       {/* Modal */}
       <div className={`modal ${openBizForm ? "is-active" : ""}`}>
-        <div
-          className="modal-background"
-          onClick={() => setOpenBizForm(false)}
-        ></div>
-        <div className="modal-card">
+        <div className="modal-background" onClick={() => setOpenBizForm(false)}></div>
+        <div className="modal-card px-2-mobile">
           <header className="modal-card-head">
-            <div className="modal-card-title">Recommend a Business</div>
+            <p className="modal-card-title is-size-5">Recommend a Business</p>
             <button
               className="delete"
               aria-label="close"
               onClick={() => setOpenBizForm(false)}
             ></button>
           </header>
-          <BusinessForm
-            setOpenBizForm={setOpenBizForm}
-            onBusinessCreated={(newBusiness) => {
-              setBusinesses([newBusiness, ...businesses]);
-              setPagination({
-                ...pagination,
-                total: pagination.total + 1,
-              });
-            }}
-          />
+          <section className="modal-card-body p-0">
+             <BusinessForm
+                setOpenBizForm={setOpenBizForm}
+                onBusinessCreated={(newBusiness) => {
+                  setBusinesses([newBusiness, ...businesses]);
+                  setPagination({
+                    ...pagination,
+                    total: pagination.total + 1,
+                  });
+                }}
+              />
+          </section>
         </div>
       </div>
     </div>

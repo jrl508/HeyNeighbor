@@ -47,5 +47,9 @@ code {
   .is-flex-grow-1-mobile {
     flex-grow: 1 !important;
   }
+
+  .w-100-mobile {
+    width: 100% !important;
+  }
 }
 
