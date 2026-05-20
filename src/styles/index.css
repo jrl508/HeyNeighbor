@@ -28,3 +28,24 @@ code {
 .tool-list .cell:last-child {
   margin-bottom: 1.5rem;
 }
+
+@media screen and (max-width: 768px) {
+  .p-4-mobile {
+    padding: 1rem !important;
+  }
+  
+  .shadow-none-mobile {
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  .is-fullwidth-mobile {
+    width: 100% !important;
+    display: flex !important;
+  }
+
+  .is-flex-grow-1-mobile {
+    flex-grow: 1 !important;
+  }
+}
+

@@ -8,6 +8,7 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
   cursor: pointer;
+  background: white;
 }
 
 .tool-card:hover {
@@ -27,7 +28,7 @@
 }
 
 .tool-card .card-image figure {
-  margin: 0;
+  margin: 0 !important;
   overflow: hidden;
 }
 
@@ -44,7 +45,7 @@
 
 .tool-card .card-content {
   flex-grow: 1;
-  padding: 16px;
+  padding: 12px;
   display: flex;
   flex-direction: column;
 }
@@ -52,8 +53,8 @@
 .tool-name {
   font-size: 16px;
   font-weight: 600;
-  margin: 0 0 8px 0;
-  line-height: 1.4;
+  margin: 0 0 4px 0;
+  line-height: 1.2;
   color: #2c2c2c;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -64,7 +65,7 @@
 .tool-description {
   font-size: 13px;
   color: #666;
-  margin: 0;
+  margin: 0 0 8px 0;
   line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -73,96 +74,78 @@
 }
 
 .tool-card .card-footer {
-  padding: 12px 16px;
+  padding: 8px 12px;
   background-color: #fafafa;
   border-top: 1px solid #efefef;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
   margin-top: auto;
 }
 
 .tool-price {
   display: flex;
   align-items: baseline;
-  gap: 4px;
-  font-size: 18px;
+  gap: 2px;
+  font-size: 16px;
   color: #3273dc;
 }
 
 .tool-price span:first-child {
-  font-size: 20px;
+  font-size: 18px;
+  font-weight: 700;
 }
 
 .tool-price span:last-child {
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .tool-availability {
   display: flex;
   justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 4px;
 }
 
 .tool-availability .tag {
-  font-size: 12px;
+  font-size: 10px;
   font-weight: 600;
-  padding: 6px 10px;
-  border-radius: 4px;
+  padding: 4px 8px;
+  height: auto;
 }
 
 /* Tool List Grid Styles */
 .tool-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 24px;
-  padding: 24px 0;
-  margin: 24px 0;
+  gap: 20px;
+  padding: 15px 0;
 }
 
 @media (max-width: 768px) {
   .tool-list {
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+    padding: 10px 0;
+  }
+
+  /* Simplify card for mobile */
+  .tool-card .tool-description,
+  .tool-card .card-footer,
+  .tool-card .owner-rating {
+    display: none !important;
   }
 
   .tool-card .card-content {
-    padding: 12px;
+    padding: 8px;
+    min-height: 50px;
+    justify-content: center;
   }
 
-  .tool-card .card-footer {
-    padding: 10px 12px;
-  }
-}
-
-@media (max-width: 480px) {
-  .tool-list {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-
-  .tool-card {
-    display: flex;
-    flex-direction: row;
-  }
-
-  .tool-card .card-image {
-    min-width: 120px;
-    width: 120px;
-  }
-
-  .tool-card .card-image figure {
-    aspect-ratio: 1 / 1;
-  }
-
-  .tool-card .card-content {
-    padding: 12px;
-  }
-
-  .tool-name {
-    font-size: 15px;
-  }
-
-  .tool-description {
-    display: none;
+  .tool-card .tool-name {
+    font-size: 14px;
+    text-align: center;
+    -webkit-line-clamp: 1;
+    margin-bottom: 0;
   }
 }
