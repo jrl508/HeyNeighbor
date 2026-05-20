@@ -38,7 +38,9 @@ const NavBar = () => {
   const closeMenu = () => setIsActive(false);
 
   const notifications = bookingState.bookings.filter(
-    (b) => b.owner_id === user?.id && ["requested", "reschedule_pending", "returning"].includes(b.status)
+    (b) =>
+      b.owner_id === user?.id &&
+      ["requested", "reschedule_pending", "returning"].includes(b.status),
   );
 
   const isDashboard = location.pathname.startsWith("/dashboard");
@@ -66,8 +68,8 @@ const NavBar = () => {
               Hey Neighbor
             </span>
           </Link>
-          
-          <div className="is-flex is-align-items-center is-hidden-desktop ml-auto mr-2">
+
+          <div className="is-flex is-align-items-center is-hidden-desktop ml-auto">
             {isAuthenticated && isDashboard && (
               <div className="notification-bell-wrapper mr-2">
                 <button
@@ -87,11 +89,13 @@ const NavBar = () => {
                     </div>
                     <div className="notification-list">
                       {notifications.length === 0 ? (
-                        <div className="p-3 is-size-7 has-text-grey">No new notifications</div>
+                        <div className="p-3 is-size-7 has-text-grey">
+                          No new notifications
+                        </div>
                       ) : (
                         notifications.map((b) => (
-                          <div 
-                            key={b.id} 
+                          <div
+                            key={b.id}
                             className="notification-item p-2 border-bottom is-clickable"
                             onClick={() => {
                               navigate("/dashboard");
@@ -99,9 +103,12 @@ const NavBar = () => {
                             }}
                           >
                             <div className="is-size-7">
-                              {b.status === 'requested' && `New request for ${b.tool_name} from ${b.renter_first_name}`}
-                              {b.status === 'reschedule_pending' && `${b.renter_first_name} wants to reschedule ${b.tool_name}`}
-                              {b.status === 'returning' && `${b.renter_first_name} has returned ${b.tool_name}`}
+                              {b.status === "requested" &&
+                                `New request for ${b.tool_name} from ${b.renter_first_name}`}
+                              {b.status === "reschedule_pending" &&
+                                `${b.renter_first_name} wants to reschedule ${b.tool_name}`}
+                              {b.status === "returning" &&
+                                `${b.renter_first_name} has returned ${b.tool_name}`}
                             </div>
                             <div className="is-size-7 has-text-grey-light">
                               {formatRelativeTime(b.updated_at)}
@@ -120,7 +127,11 @@ const NavBar = () => {
               aria-label="menu"
               aria-expanded="false"
               onClick={() => setIsActive(!isActive)}
-              style={{ background: "none", border: "none", color: "whitesmoke" }}
+              style={{
+                background: "none",
+                border: "none",
+                color: "whitesmoke",
+              }}
             >
               <span aria-hidden="true"></span>
               <span aria-hidden="true"></span>
@@ -135,14 +146,21 @@ const NavBar = () => {
             {isAuthenticated ? (
               <>
                 <div className="navbar-item is-hoverable">
-                  <Link 
-                    to="/dashboard/inbox" 
-                    className="icon" 
+                  <Link
+                    to="/dashboard/inbox"
+                    className="icon"
                     style={{ position: "relative" }}
                   >
                     <Icon path={mdiInbox} size={1} color="whitesmoke" />
                     {unreadCount > 0 && (
-                      <span className="tag is-danger is-rounded is-small" style={{ position: "absolute", top: "-5px", right: "-5px" }}>
+                      <span
+                        className="tag is-danger is-rounded is-small"
+                        style={{
+                          position: "absolute",
+                          top: "-5px",
+                          right: "-5px",
+                        }}
+                      >
                         {unreadCount}
                       </span>
                     )}
@@ -166,9 +184,14 @@ const NavBar = () => {
                   </div>
                   <div className="navbar-dropdown is-right">
                     <div className="navbar-item is-clickable">About Us</div>
-                    <div className="navbar-item is-clickable">Help & Support</div>
+                    <div className="navbar-item is-clickable">
+                      Help & Support
+                    </div>
                     <hr className="navbar-divider" />
-                    <div className="navbar-item is-clickable" onClick={handleLogout}>
+                    <div
+                      className="navbar-item is-clickable"
+                      onClick={handleLogout}
+                    >
                       Log Out
                     </div>
                   </div>
@@ -177,13 +200,20 @@ const NavBar = () => {
             ) : (
               <>
                 <div className="navbar-item">
-                  <Link to="/" className="navbar-item">About Us</Link>
+                  <Link to="/" className="navbar-item">
+                    About Us
+                  </Link>
                 </div>
                 <div className="navbar-item">
-                  <Link to="/" className="navbar-item">Contact</Link>
+                  <Link to="/" className="navbar-item">
+                    Contact
+                  </Link>
                 </div>
                 <div className="navbar-item">
-                  <button className="button is-primary is-outlined" onClick={() => navigate("/login")}>
+                  <button
+                    className="button is-primary is-outlined"
+                    onClick={() => navigate("/login")}
+                  >
                     Login
                   </button>
                 </div>
@@ -204,8 +234,17 @@ const NavBar = () => {
                 {capitalize(`${user.first_name} ${user.last_name}`)}
               </div>
               <div className="is-flex is-align-items-center is-justify-content-center mt-1">
-                <Icon path={mdiStar} size={0.7} color="#ffc107" className="mr-1" />
-                <span>{user.average_rating > 0 ? parseFloat(user.average_rating).toFixed(1) : "No ratings"}</span>
+                <Icon
+                  path={mdiStar}
+                  size={0.7}
+                  color="#ffc107"
+                  className="mr-1"
+                />
+                <span>
+                  {user.average_rating > 0
+                    ? parseFloat(user.average_rating).toFixed(1)
+                    : "No ratings"}
+                </span>
               </div>
             </div>
           )}
@@ -215,41 +254,89 @@ const NavBar = () => {
               <>
                 <p className="menu-label">General</p>
                 <ul className="menu-list">
-                  <li><Link to="/dashboard" onClick={closeMenu}>Dashboard</Link></li>
                   <li>
-                    <Link to="/dashboard/inbox" onClick={closeMenu}>
-                      Messages {unreadCount > 0 && <span className="tag is-danger is-rounded is-small ml-2">{unreadCount}</span>}
+                    <Link to="/dashboard" onClick={closeMenu}>
+                      Dashboard
                     </Link>
                   </li>
-                  <li><Link to="/dashboard/toolshed" onClick={closeMenu}>Toolshed</Link></li>
+                  <li>
+                    <Link to="/dashboard/inbox" onClick={closeMenu}>
+                      Messages{" "}
+                      {unreadCount > 0 && (
+                        <span className="tag is-danger is-rounded is-small ml-2">
+                          {unreadCount}
+                        </span>
+                      )}
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/dashboard/toolshed" onClick={closeMenu}>
+                      Toolshed
+                    </Link>
+                  </li>
                 </ul>
                 <p className="menu-label">Neighborhood</p>
                 <ul className="menu-list">
-                  <li><Link to="/dashboard/listings" onClick={closeMenu}>Listings</Link></li>
-                  <li><Link to="/dashboard/local-biz" onClick={closeMenu}>Local Business</Link></li>
+                  <li>
+                    <Link to="/dashboard/listings" onClick={closeMenu}>
+                      Listings
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/dashboard/local-biz" onClick={closeMenu}>
+                      Local Business
+                    </Link>
+                  </li>
                 </ul>
                 <p className="menu-label">Account</p>
                 <ul className="menu-list">
-                  <li><Link to="/dashboard/profile" onClick={closeMenu}>Profile</Link></li>
-                  <li><Link to="/dashboard/transaction-history" onClick={closeMenu}>Transaction History</Link></li>
-                  <li><Link to="/dashboard/balance" onClick={closeMenu}>Balance</Link></li>
+                  <li>
+                    <Link to="/dashboard/profile" onClick={closeMenu}>
+                      Profile
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/dashboard/transaction-history"
+                      onClick={closeMenu}
+                    >
+                      Transaction History
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/dashboard/balance" onClick={closeMenu}>
+                      Balance
+                    </Link>
+                  </li>
                 </ul>
                 <hr className="navbar-divider" />
                 <ul className="menu-list">
-                  <li><a onClick={handleLogout} className="has-text-danger">Log Out</a></li>
+                  <li>
+                    <a onClick={handleLogout} className="has-text-danger">
+                      Log Out
+                    </a>
+                  </li>
                 </ul>
               </>
             )}
             {!isAuthenticated && (
               <ul className="menu-list">
-                <li><Link to="/" onClick={closeMenu}>Home</Link></li>
-                <li><Link to="/login" onClick={closeMenu}>Login</Link></li>
+                <li>
+                  <Link to="/" onClick={closeMenu}>
+                    Home
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/login" onClick={closeMenu}>
+                    Login
+                  </Link>
+                </li>
               </ul>
             )}
           </aside>
         </div>
       </div>
-      
+
       {/* Spacer for fixed top nav */}
       <div style={{ height: "65px" }}></div>
     </>
