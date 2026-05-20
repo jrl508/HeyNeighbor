@@ -191,11 +191,11 @@ const UserProfile = () => {
       <div className="title is-4 mb-5">Profile Settings</div>
       <div className="card shadow-none-mobile" style={{ overflow: "hidden", border: "1px solid #efefef" }}>
         <div className="columns is-gapless mb-0 is-multiline">
-          <div className="column is-12-mobile is-4-tablet">
+          <div className="column is-12-mobile is-narrow-tablet is-flex">
             <div 
               className="card-image is-clickable h-100" 
               onClick={handleOpenModal}
-              style={{ minHeight: "250px" }}
+              style={{ minHeight: "250px", aspectRatio: "1 / 1" }}
             >
               <figure className="image h-100" style={{ margin: 0 }}>
                 <img
@@ -210,7 +210,7 @@ const UserProfile = () => {
               </figure>
             </div>
           </div>
-          <div className="column is-12-mobile is-8-tablet">
+          <div className="column is-12-mobile">
             <div className="card-content">
               <form>
                 <div className="field">
@@ -383,7 +383,7 @@ const UserProfile = () => {
         ) : (
           <div className="columns is-multiline">
             {reviews.map((review) => (
-              <div key={review.id} className="column is-12-tablet is-6-desktop">
+              <div key={review.id} className="column is-12-tablet is-6-desktop is-flex">
                 <div className="box h-100 shadow-none-mobile" style={{ border: "1px solid #efefef", overflowWrap: "break-word", wordBreak: "break-word" }}>
                   <div className="is-flex is-justify-content-space-between mb-2">
                     <p className="has-text-weight-bold">{review.reviewer_username}</p>
