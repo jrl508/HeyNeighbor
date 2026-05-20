@@ -271,7 +271,7 @@ const LocalBiz = () => {
           const linksList = parseLinks(business.links);
 
           return (
-            <div key={business.id} className="column is-12-tablet is-6-desktop">
+            <div key={business.id} className="column is-12-tablet is-6-desktop is-flex">
               <div className="card h-100 shadow-none-mobile" style={{ border: "1px solid #efefef" }}>
                 <header className="card-header">
                   <p className="card-header-title is-size-5">{business.name}</p>
