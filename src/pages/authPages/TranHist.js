@@ -125,7 +125,7 @@ const TranHist = () => {
     <div className="container">
       <div className="is-flex is-align-items-center mb-5">
         <Icon path={mdiHistory} size={1.5} className="mr-3" />
-        <h1 className="title is-3 mb-0">Transaction History</h1>
+        <h1 className="title is-4 mb-0">Transaction History</h1>
       </div>
 
       <div className="columns">
@@ -143,8 +143,8 @@ const TranHist = () => {
                       style={{ borderBottom: "1px solid lightgray" }}
                       className="p-3"
                     >
-                      <div className="is-flex is-justify-content-space-between">
-                        <div>
+                      <div className="is-flex is-justify-content-space-between is-flex-wrap-wrap">
+                        <div className="mb-2">
                           <strong>{booking.tool_name}</strong>
                           <br />
                           <span className="is-size-7 has-text-grey">
@@ -157,7 +157,7 @@ const TranHist = () => {
                             {formatDisplayDate(booking.end_date)}
                           </span>
                         </div>
-                        <div className="has-text-right">
+                        <div className="has-text-right" style={{ flexGrow: 1, minWidth: "150px" }}>
                           <span
                             className={`tag ${getStatusColor(booking.status)}`}
                           >
@@ -238,8 +238,8 @@ const TranHist = () => {
                       style={{ borderBottom: "1px solid lightgray" }}
                       className="p-3"
                     >
-                      <div className="is-flex is-justify-content-space-between">
-                        <div>
+                      <div className="is-flex is-justify-content-space-between is-flex-wrap-wrap">
+                        <div className="mb-2">
                           <strong>{booking.tool_name}</strong>
                           <br />
                           <span className="is-size-7 has-text-grey">
@@ -252,7 +252,7 @@ const TranHist = () => {
                             {formatDisplayDate(booking.end_date)}
                           </span>
                         </div>
-                        <div className="has-text-right">
+                        <div className="has-text-right" style={{ flexGrow: 1, minWidth: "150px" }}>
                           <span
                             className={`tag ${getStatusColor(booking.status)}`}
                           >

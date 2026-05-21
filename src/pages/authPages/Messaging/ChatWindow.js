@@ -20,11 +20,11 @@ import {
   mdiArchive,
   mdiBlockHelper,
   mdiArrowULeftTop,
-  mdiArchiveRemove,
   mdiCancel,
+  mdiChevronLeft,
 } from "@mdi/js";
 
-const ChatWindow = ({ conversation }) => {
+const ChatWindow = ({ conversation, onBack }) => {
   const { socket, refreshConversations } = useChat();
   const { state: authState } = useAuth();
   const { user } = authState;
@@ -40,10 +40,9 @@ const ChatWindow = ({ conversation }) => {
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, []); // No dependencies needed as messagesEndRef is a ref object
+  }, []);
 
   useEffect(() => {
-    // Fetch blocking status when conversation changes
     const fetchBlockStatus = async () => {
       try {
         const response = await getBlockStatus(conversation.other_user_id, token);
@@ -54,7 +53,6 @@ const ChatWindow = ({ conversation }) => {
     };
     fetchBlockStatus();
 
-    // Handle socket errors (e.g., due to blocking)
     if (socket) {
       socket.on("error", (error) => {
         setChatError(error.message);
@@ -76,9 +74,8 @@ const ChatWindow = ({ conversation }) => {
     if (window.confirm("Are you sure you want to archive this conversation?")) {
       try {
         await archiveConversation(conversation.id, token);
-        console.log("Conversation archived successfully on frontend.");
         refreshConversations();
-        // Optionally close the chat window or navigate away
+        if (onBack) onBack();
       } catch (err) {
         setChatError(err.message || "Failed to archive conversation");
       } finally {
@@ -126,7 +123,6 @@ const ChatWindow = ({ conversation }) => {
     }
   };
 
-  // Close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -160,16 +156,11 @@ const ChatWindow = ({ conversation }) => {
       socket.on("new_message", (message) => {
         if (message.conversation_id === conversation.id) {
           setMessages((prev) => {
-            // Remove any optimistic version of this message if it exists
-            // Since we don't have a shared client-side ID yet, we'll just check if it's from me
-            // and has the same content as the last message. 
-            // A better way is to pass a client_msg_id.
             if (message.sender_id === user.id) {
               return prev.map(m => m.isOptimistic && m.content === message.content ? message : m);
             }
             return [...prev, message];
           });
-          // Mark as read if the chat is currently open
           markAsRead(conversation.id, token).then(() => refreshConversations());
         }
       });
@@ -181,11 +172,11 @@ const ChatWindow = ({ conversation }) => {
         socket.off("new_message");
       }
     };
-  }, [conversation.id, socket, token, refreshConversations, scrollToBottom]); // Add scrollToBottom here
+  }, [conversation.id, socket, token, refreshConversations, scrollToBottom, user.id]);
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, scrollToBottom]); // Add scrollToBottom here
+  }, [messages, scrollToBottom]);
 
   const handleSend = (e) => {
     e.preventDefault();
@@ -200,7 +191,6 @@ const ChatWindow = ({ conversation }) => {
       isOptimistic: true,
     };
 
-    // Optimistic Update
     setMessages((prev) => [...prev, tempMessage]);
 
     const messageData = {
@@ -209,7 +199,6 @@ const ChatWindow = ({ conversation }) => {
       receiver_id: conversation.other_user_id,
     };
 
-    // Use socket for real-time sending
     socket.emit("send_message", messageData);
     setNewMessage("");
   };
@@ -217,8 +206,14 @@ const ChatWindow = ({ conversation }) => {
   return (
     <div className="chat-window">
       <div className="chat-header">
+        <button 
+          className="button is-white mobile-back-button" 
+          onClick={onBack}
+        >
+          <Icon path={mdiChevronLeft} size={1.2} />
+        </button>
         <Avatar src={conversation.other_user_image} size="sm" />
-        <span className="ml-3 has-text-weight-bold">
+        <span className="ml-3 has-text-weight-bold is-size-6">
           {capitalize(conversation.other_user_first_name)}{" "}
           {capitalize(conversation.other_user_last_name)}
         </span>
@@ -239,12 +234,12 @@ const ChatWindow = ({ conversation }) => {
                 {conversation.archived_at ? (
                   <a href="#" className="dropdown-item" onClick={handleUnarchive}>
                     <Icon path={mdiArrowULeftTop} size={0.7} className="mr-2" />
-                    Unarchive Conversation
+                    Unarchive
                   </a>
                 ) : (
                   <a href="#" className="dropdown-item" onClick={handleArchive}>
                     <Icon path={mdiArchive} size={0.7} className="mr-2" />
-                    Archive Conversation
+                    Archive
                   </a>
                 )}
                 <hr className="dropdown-divider" />
@@ -265,20 +260,20 @@ const ChatWindow = ({ conversation }) => {
         </div>
       </div>
       {blockedStatus.isBlocked && (
-        <div className="notification is-danger is-light is-size-7 p-2">
+        <div className="notification is-danger is-light is-size-7 p-2 m-0">
           {blockedStatus.isBlockedByMe && !blockedStatus.isBlockedByOther && (
-            <>You have blocked this user. Communication is disabled.</>
+            <>You have blocked this user.</>
           )}
           {!blockedStatus.isBlockedByMe && blockedStatus.isBlockedByOther && (
-            <>This user has blocked you. Communication is disabled.</>
+            <>This user has blocked you.</>
           )}
           {blockedStatus.isBlockedByMe && blockedStatus.isBlockedByOther && (
-            <>You have both blocked each other. Communication is disabled.</>
+            <>Communication disabled.</>
           )}
         </div>
       )}
       {chatError && (
-        <div className="notification is-danger is-light is-size-7 p-2 is-flex is-align-items-center">
+        <div className="notification is-danger is-light is-size-7 p-2 m-0 is-flex is-align-items-center">
           <span className="is-flex-grow-1">{chatError}</span>
           <button className="delete chat-error-delete ml-auto" onClick={() => setChatError(null)}></button>
         </div>
@@ -314,7 +309,7 @@ const ChatWindow = ({ conversation }) => {
               type="text"
               placeholder={
                 blockedStatus.isBlocked
-                  ? "Cannot send message while blocked"
+                  ? "Blocked"
                   : "Type a message..."
               }
               value={newMessage}

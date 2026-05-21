@@ -10,15 +10,17 @@ import ReviewModal from "../../components/ReviewModal";
 import ReviewButton from "../../components/ReviewButton";
 import RescheduleModal from "../../components/RescheduleModal";
 import { useAuth } from "../../hooks/useAuth";
+import { useBookings } from "../../contexts/BookingContext";
 import { formatDisplayDate, formatRelativeTime } from "../../util/dateUtils";
 
 const DashMain = () => {
   const { state } = useAuth();
   const { user } = state;
   const navigate = useNavigate();
-  const [bookings, setBookings] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const { state: bookingState, fetchBookings } = useBookings();
+  const bookings = bookingState.bookings;
+  const loading = bookingState.loading;
+  
   const [messageLoading, setMessageLoading] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [reviewingBookingId, setReviewingBookingId] = useState(null);
@@ -48,31 +50,11 @@ const DashMain = () => {
     }
   };
 
-  const fetchBookings = async () => {
-    setLoading(true);
-    try {
-      const response = await bookingsAPI.getBookings(token);
-      if (response.ok) {
-        const data = await response.json();
-        // Only show ongoing transactions in the main dashboard
-        const ongoingBookings = data.filter(b => !["completed", "cancelled"].includes(b.status));
-        setBookings(ongoingBookings);
-      } else {
-        setError("Failed to fetch bookings");
-      }
-    } catch (err) {
-      console.error("Error fetching bookings:", err);
-      setError("An error occurred while fetching bookings");
-    } finally {
-      setLoading(false);
+  const refreshData = () => {
+    if (token) {
+      fetchBookings(token);
     }
   };
-
-  useEffect(() => {
-    if (token) {
-      fetchBookings();
-    }
-  }, [token]);
 
   const handleComplete = async (bookingId) => {
     try {
@@ -80,7 +62,7 @@ const DashMain = () => {
       const data = await response.json();
       if (response.ok) {
         alert(data.message || "Booking completed successfully");
-        fetchBookings(); // Refresh list
+        refreshData();
       } else {
         alert(data.message || "Failed to complete booking");
       }
@@ -95,9 +77,8 @@ const DashMain = () => {
     try {
       const response = await paymentsAPI.voidPayment(bookingId, token);
       if (response.ok) {
-        // Also cancel the booking record if it hasn't been already
         await bookingsAPI.cancelBooking(bookingId, "Cancelled via dashboard", token);
-        fetchBookings(); // Refresh list
+        refreshData();
       } else {
         const data = await response.json();
         alert(data.message || "Failed to void payment");
@@ -112,7 +93,7 @@ const DashMain = () => {
     try {
       const response = await bookingsAPI.confirmBooking(bookingId, deliveryDecision, token);
       if (response.ok) {
-        fetchBookings();
+        refreshData();
       } else {
         const data = await response.json();
         alert(data.message || "Failed to confirm booking");
@@ -134,7 +115,7 @@ const DashMain = () => {
     try {
       const response = await bookingsAPI.activateBooking(bookingId, token);
       if (response.ok) {
-        fetchBookings();
+        refreshData();
       } else {
         const data = await response.json();
         alert(data.message || "Failed to activate rental");
@@ -148,7 +129,7 @@ const DashMain = () => {
     try {
       const response = await bookingsAPI.returnBooking(bookingId, token);
       if (response.ok) {
-        fetchBookings();
+        refreshData();
       } else {
         const data = await response.json();
         alert(data.message || "Failed to mark as returned");
@@ -162,7 +143,7 @@ const DashMain = () => {
     try {
       const response = await bookingsAPI.respondToReschedule(bookingId, action, token);
       if (response.ok) {
-        fetchBookings();
+        refreshData();
       } else {
         const data = await response.json();
         alert(data.message || `Failed to ${action} reschedule request`);
@@ -187,7 +168,7 @@ const DashMain = () => {
       );
       if (response.ok) {
         alert("Deposit claim initiated successfully.");
-        fetchBookings();
+        refreshData();
       } else {
         const data = await response.json();
         alert(data.message || "Failed to claim deposit");
@@ -199,17 +180,10 @@ const DashMain = () => {
 
   const canMessage = (booking) => {
     const { status, completed_at, updated_at } = booking;
-    
-    // If it's an open booking, always allow messaging
-    if (!["completed", "cancelled"].includes(status)) {
-      return true;
-    }
-
-    // For completed/cancelled, allow a 48-hour grace period
+    if (!["completed", "cancelled"].includes(status)) return true;
     const lastActiveDate = new Date(completed_at || updated_at);
     const now = new Date();
     const fortyEightHoursInMs = 48 * 60 * 60 * 1000;
-
     return now - lastActiveDate < fortyEightHoursInMs;
   };
 
@@ -228,7 +202,7 @@ const DashMain = () => {
   };
 
   const handleReviewSubmitted = () => {
-    fetchBookings(); // Refresh bookings to update review status
+    refreshData();
     closeReviewModal();
   };
 
@@ -238,18 +212,23 @@ const DashMain = () => {
   };
 
   const handleRescheduleSuccess = () => {
-    fetchBookings();
+    refreshData();
     setIsRescheduleModalOpen(false);
   };
 
-  if (loading) return <div className="p-5">Loading your dashboard...</div>;
+  if (loading && bookings.length === 0) return <div className="p-5">Loading your dashboard...</div>;
 
-  const myRentals = bookings.filter(b => b.renter_id === user.id);
-  const myToolsRented = bookings.filter(b => b.owner_id === user.id);
+  const ongoingBookings = bookings.filter(b => !["completed", "cancelled"].includes(b.status));
+  const myRentals = ongoingBookings.filter(b => b.renter_id === user?.id);
+  const myToolsRented = ongoingBookings.filter(b => b.owner_id === user?.id);
+
+  const notificationBookings = bookings.filter(
+    (b) => b.owner_id === user?.id && ["requested", "reschedule_pending", "returning"].includes(b.status)
+  );
 
   return (
-    <div style={{ display: "flex", gap: "25px", flexFlow: "row wrap" }}>
-      <div className={styles.center} style={{ flex: "1 1 60%" }}>
+    <div className="columns is-multiline">
+      <div className="column is-12-tablet is-8-desktop">
         <div style={{ width: "100%" }}>
           <div className="title is-5" style={{ margin: "0 0 1em" }}>
             My Tool Rentals (Renting from others)
@@ -261,8 +240,8 @@ const DashMain = () => {
               <ul>
                 {myRentals.map(booking => (
                   <li key={booking.id} style={{ borderBottom: "1px solid lightgray" }}>
-                    <div className="is-flex is-justify-content-space-between">
-                      <div>
+                    <div className="is-flex is-justify-content-space-between is-flex-wrap-wrap">
+                      <div className="mb-2">
                         <strong>{booking.tool_name}</strong> (Owner: {booking.owner_first_name})
                         <br />
                         <span className="is-size-7 has-text-grey">
@@ -271,12 +250,12 @@ const DashMain = () => {
                         {booking.status === "reschedule_pending" && (
                           <div className="mt-1">
                             <span className="is-size-7 has-text-info is-italic">
-                              Requested Reschedule: <strong>{formatDisplayDate(booking.new_start_date)} to {formatDisplayDate(booking.new_end_date)}</strong> (Pending approval)
+                              Requested Reschedule: <strong>{formatDisplayDate(booking.new_start_date)} to {formatDisplayDate(booking.new_end_date)}</strong>
                             </span>
                           </div>
                         )}
                       </div>
-                      <div className="has-text-right">
+                      <div className="has-text-right-tablet mb-2" style={{ minWidth: "150px" }}>
                         <span className={`tag ${getStatusColor(booking.status)}`}>
                           {booking.status.toUpperCase().replace('_', ' ')}
                         </span>
@@ -284,74 +263,51 @@ const DashMain = () => {
                         <span className="is-size-7 has-text-grey">
                           Payment: {booking.payment_status || 'pending'}
                         </span>
-                        {booking.deposit_status && booking.deposit_status !== 'none' && (
-                          <div className="mt-1">
-                            <span 
-                              className={`tag is-small ${getDepositStatusColor(booking.deposit_status)}`}
-                              title={getDepositStatusTitle(booking.deposit_status)}
-                            >
-                              {['captured', 'claimed'].includes(booking.deposit_status) 
-                                ? 'DEPOSIT CLAIMED' 
-                                : `Deposit: ${booking.deposit_status.toUpperCase()}`}
-                            </span>
-                          </div>
-                        )}
-                        <div className="mt-2 buttons is-right">
-                          {canMessage(booking) && (
-                            <button
-                              className={`button is-small is-info is-light ${
-                                messageLoading ? "is-loading" : ""
-                              }`}
-                              onClick={() =>
-                                handleMessageUser(
-                                  booking.owner_id,
-                                  booking.tool_name,
-                                  booking.id
-                                )
-                              }
-                              disabled={messageLoading}
-                            >
-                              <Icon path={mdiMessageText} size={0.6} className="mr-1" />
-                              Message Owner
-                            </button>
-                          )}
-                          {booking.status === "confirmed" && (
-                            <button
-                              className="button is-small is-primary is-outlined"
-                              onClick={() => openRescheduleModal(booking)}
-                            >
-                              Request Reschedule
-                            </button>
-                          )}
-                          {booking.status === "active" && (
-                            <button
-                              className="button is-small is-info is-outlined"
-                              onClick={() => handleReturn(booking.id)}
-                            >
-                              Mark as Returned
-                            </button>
-                          )}
-                          {booking.status === "completed" && (
-                            <ReviewButton
-                              booking={booking}
-                              reviewerId={user.id}
-                              reviewedId={booking.owner_id}
-                              reviewedName={booking.owner_first_name}
-                              openReviewModal={openReviewModal}
-                              token={token}
-                              key={`renter-review-${booking.id}`}
-                            />
-                          )}
-                          {["pending_payment", "requested"].includes(booking.status) && (
-                            <button
-                              className="button is-small is-danger is-outlined"
-                              onClick={() => handleVoid(booking.id)}
-                            >
-                              Withdraw Request
-                            </button>
-                          )}
-                        </div>
                       </div>
+                    </div>
+                    <div className="mt-2 buttons is-right">
+                      {canMessage(booking) && (
+                        <button
+                          className={`button is-small is-info is-light ${
+                            messageLoading ? "is-loading" : ""
+                          }`}
+                          onClick={() =>
+                            handleMessageUser(
+                              booking.owner_id,
+                              booking.tool_name,
+                              booking.id
+                            )
+                          }
+                          disabled={messageLoading}
+                        >
+                          <Icon path={mdiMessageText} size={0.6} className="mr-1" />
+                          Message Owner
+                        </button>
+                      )}
+                      {booking.status === "confirmed" && (
+                        <button
+                          className="button is-small is-primary is-outlined"
+                          onClick={() => openRescheduleModal(booking)}
+                        >
+                          Request Reschedule
+                        </button>
+                      )}
+                      {booking.status === "active" && (
+                        <button
+                          className="button is-small is-info is-outlined"
+                          onClick={() => handleReturn(booking.id)}
+                        >
+                          Mark as Returned
+                        </button>
+                      )}
+                      {["pending_payment", "requested"].includes(booking.status) && (
+                        <button
+                          className="button is-small is-danger is-outlined"
+                          onClick={() => handleVoid(booking.id)}
+                        >
+                          Withdraw Request
+                        </button>
+                      )}
                     </div>
                   </li>
                 ))}
@@ -369,29 +325,13 @@ const DashMain = () => {
               <ul>
                 {myToolsRented.map(booking => (
                   <li key={booking.id} style={{ borderBottom: "1px solid lightgray" }}>
-                    <div className="is-flex is-justify-content-space-between is-align-items-center">
-                      <div>
+                    <div className="is-flex is-justify-content-space-between is-align-items-center is-flex-wrap-wrap">
+                      <div className="mb-2">
                         <strong>{booking.tool_name}</strong> (Renter: {booking.renter_first_name})
                         <br />
                         <span className="is-size-7 has-text-grey">
                           {formatDisplayDate(booking.start_date)} to {formatDisplayDate(booking.end_date)}
                         </span>
-                        <br />
-                        <span className="is-size-7">
-                          Payment Status: <strong>{booking.payment_status}</strong>
-                        </span>
-                        {booking.deposit_status && booking.deposit_status !== 'none' && (
-                          <div className="mt-1">
-                            <span 
-                              className={`tag is-small ${getDepositStatusColor(booking.deposit_status)}`}
-                              title={getDepositStatusTitle(booking.deposit_status)}
-                            >
-                              {['captured', 'claimed'].includes(booking.deposit_status) 
-                                ? 'DEPOSIT CLAIMED' 
-                                : `Deposit: ${booking.deposit_status.toUpperCase()}`}
-                            </span>
-                          </div>
-                        )}
                       </div>
                       <div className="buttons is-right">
                         {canMessage(booking) && (
@@ -414,15 +354,12 @@ const DashMain = () => {
                         )}
 
                         {booking.status === "reschedule_pending" && (
-                          <>
-                            <div className="notification is-info is-light is-size-7 p-2 mb-0 mr-2">
-                              New Proposed Dates: <strong>{formatDisplayDate(booking.new_start_date)} to {formatDisplayDate(booking.new_end_date)}</strong>
-                            </div>
+                          <div className="is-flex is-flex-wrap-wrap" style={{ gap: "5px" }}>
                             <button
                               className="button is-small is-success"
                               onClick={() => handleRespondToReschedule(booking.id, 'accept')}
                             >
-                              Accept Change
+                              Accept
                             </button>
                             <button
                               className="button is-small is-danger is-light"
@@ -430,92 +367,34 @@ const DashMain = () => {
                             >
                               Decline
                             </button>
-                          </>
+                          </div>
                         )}
 
-                        {booking.status === "requested" &&
-                        booking.delivery_status === "requested" ? (
-                          <>
-                            <button
-                              className="button is-small is-success"
-                              onClick={() => handleConfirmBooking(booking.id, 'accept')}
-                            >
-                              Accept with Delivery
-                            </button>
-                            <button
-                              className="button is-small is-info"
-                              onClick={() => handleConfirmBooking(booking.id, 'reject')}
-                            >
-                              Accept (Pickup Only)
-                            </button>
-                          </>
-                        ) : booking.status === 'requested' ? (
+                        {booking.status === 'requested' && (
                           <button 
                             className="button is-small is-success"
                             onClick={() => handleConfirmBooking(booking.id, 'accept')}
                           >
-                            Confirm Booking
+                            Confirm
                           </button>
-                        ) : null}
+                        )}
 
                         {booking.status === 'confirmed' && (
                           <button 
                             className="button is-small is-info"
                             onClick={() => handleActivate(booking.id)}
-                            title="Mark tool as handed over to renter"
                           >
-                            Mark Handed Over
+                            Hand Over
                           </button>
                         )}
                         
-                        {booking.status === 'active' && (
-                          <div className="is-flex is-align-items-center">
-                            <span className="is-size-7 has-text-grey-light is-italic mr-2">
-                              Rental in progress...
-                            </span>
-                            {isPastEndDate(booking.end_date) && (
-                              <button 
-                                className="button is-small is-danger is-light"
-                                onClick={() => handleComplete(booking.id)}
-                                title="Renter has not marked as returned, but the end date has passed. You can force completion."
-                              >
-                                Force Complete
-                              </button>
-                            )}
-                          </div>
-                        )}
-
                         {booking.status === 'returning' && (
                           <button 
                             className="button is-small is-success"
                             onClick={() => handleComplete(booking.id)}
-                            title="Renter has returned the tool. Confirm receipt and finalize."
                           >
-                            Confirm Return & Complete
+                            Confirm Return
                           </button>
-                        )}
-
-                        {['returning', 'completed'].includes(booking.status) && 
-                         booking.deposit_status === 'authorized' && (
-                          <button 
-                            className="button is-small is-danger is-outlined"
-                            onClick={() => handleClaimDeposit(booking.id)}
-                            title="Initiate a claim against the security deposit hold"
-                          >
-                            Claim Damage Deposit
-                          </button>
-                        )}
-
-                        {booking.status === "completed" && (
-                          <ReviewButton
-                            booking={booking}
-                            reviewerId={user.id}
-                            reviewedId={booking.renter_id}
-                            reviewedName={booking.renter_first_name}
-                            openReviewModal={openReviewModal}
-                            token={token}
-                            key={`owner-review-${booking.id}`}
-                          />
                         )}
 
                         {['requested', 'confirmed'].includes(booking.status) && (
@@ -523,7 +402,7 @@ const DashMain = () => {
                             className="button is-small is-danger is-outlined"
                             onClick={() => handleVoid(booking.id)}
                           >
-                            Cancel/Void
+                            Cancel
                           </button>
                         )}
                       </div>
@@ -536,34 +415,26 @@ const DashMain = () => {
         </div>
       </div>
 
-      <div className={styles.right} style={{ flex: "1 1 30%" }}>
+      <div className="column is-4-desktop is-hidden-touch">
         <div className="title is-5" style={{ margin: "0 0 1em" }}>
           Notification Center
         </div>
         <div className={styles.card}>
           <div className="p-4">
             <p className="is-size-7 has-text-grey mb-3">Recent activity will appear here.</p>
-            {myToolsRented.filter(b => b.status === 'requested').map(b => (
-              <div key={b.id} className="notification is-info is-light is-size-7 p-2 mb-2">
-                New request for <strong>{b.tool_name}</strong> from {b.renter_first_name}.
-                <br />
-                <span className="has-text-grey-light">{formatRelativeTime(b.updated_at)}</span>
-              </div>
-            ))}
-            {myToolsRented.filter(b => b.status === 'reschedule_pending').map(b => (
-              <div key={b.id} className="notification is-warning is-light is-size-7 p-2 mb-2">
-                <strong>{b.renter_first_name}</strong> wants to reschedule <strong>{b.tool_name}</strong>.
-                <br />
-                <span className="has-text-grey-light">{formatRelativeTime(b.updated_at)}</span>
-              </div>
-            ))}
-            {myToolsRented.filter(b => b.status === 'returning').map(b => (
-              <div key={b.id} className="notification is-success is-light is-size-7 p-2 mb-2">
-                <strong>{b.renter_first_name}</strong> has returned <strong>{b.tool_name}</strong>. Please confirm receipt.
-                <br />
-                <span className="has-text-grey-light">{formatRelativeTime(b.updated_at)}</span>
-              </div>
-            ))}
+            {notificationBookings.length === 0 ? (
+               <div className="is-size-7 has-text-grey">No current notifications.</div>
+            ) : (
+              notificationBookings.map(b => (
+                <div key={b.id} className="notification is-info is-light is-size-7 p-2 mb-2">
+                  {b.status === 'requested' && `New request for ${b.tool_name} from ${b.renter_first_name}`}
+                  {b.status === 'reschedule_pending' && `${b.renter_first_name} wants to reschedule ${b.tool_name}`}
+                  {b.status === 'returning' && `${b.renter_first_name} has returned ${b.tool_name}`}
+                  <br />
+                  <span className="has-text-grey-light">{formatRelativeTime(b.updated_at)}</span>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>
@@ -598,26 +469,6 @@ const getStatusColor = (status) => {
     case 'cancelled': return 'is-danger is-light';
     case 'reschedule_pending': return 'is-info is-light';
     default: return 'is-light';
-  }
-};
-
-const getDepositStatusColor = (status) => {
-  switch (status) {
-    case 'authorized': return 'is-info is-light';
-    case 'captured': return 'is-danger is-light';
-    case 'released': return 'is-success is-light';
-    case 'claimed': return 'is-danger';
-    default: return 'is-light';
-  }
-};
-
-const getDepositStatusTitle = (status) => {
-  switch (status) {
-    case 'authorized': return 'Funds are being held by Stripe and will be released 48h after completion if no claim is filed.';
-    case 'captured': 
-    case 'claimed': return 'A claim was filed against this deposit for damages.';
-    case 'released': return 'The security hold has been released back to the renter.';
-    default: return '';
   }
 };
 

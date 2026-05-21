@@ -12,6 +12,7 @@ const Balance = () => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [isExpanded, setIsExpanded] = useState(false);
   const token = localStorage.getItem("token");
 
   useEffect(() => {
@@ -50,11 +51,14 @@ const Balance = () => {
   const pendingEarnings = ongoingAsOwner.reduce((sum, b) => sum + parseFloat(b.rental_amount || 0), 0);
   const totalSpent = completedAsRenter.reduce((sum, b) => sum + parseFloat(b.rental_amount || 0), 0);
 
+  const allEarnings = [...ongoingAsOwner, ...completedAsOwner];
+  const displayedEarnings = isExpanded ? allEarnings : allEarnings.slice(0, 3);
+
   return (
     <div className="container">
       <div className="is-flex is-align-items-center mb-5">
         <Icon path={mdiWallet} size={1.5} className="mr-3" />
-        <h1 className="title is-3 mb-0">My Balance</h1>
+        <h1 className="title is-4 mb-0">My Balance</h1>
       </div>
 
       <div className="columns is-multiline">
@@ -98,32 +102,46 @@ const Balance = () => {
           {completedAsOwner.length === 0 && ongoingAsOwner.length === 0 ? (
             <div className="p-4">No earnings record found.</div>
           ) : (
-            <table className="table is-fullwidth is-hoverable">
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Tool</th>
-                  <th>Renter</th>
-                  <th>Status</th>
-                  <th className="has-text-right">Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                {[...ongoingAsOwner, ...completedAsOwner].map(booking => (
-                  <tr key={booking.id}>
-                    <td>{formatDisplayDate(booking.created_at)}</td>
-                    <td>{booking.tool_name}</td>
-                    <td>{booking.renter_first_name} {booking.renter_last_name}</td>
-                    <td>
-                      <span className={`tag is-small ${booking.status === 'completed' ? 'is-success' : 'is-info'} is-light`}>
-                        {booking.status.toUpperCase()}
-                      </span>
-                    </td>
-                    <td className="has-text-right">${parseFloat(booking.rental_amount || 0).toFixed(2)}</td>
+            <div className="table-container">
+              <table className={`table is-fullwidth is-hoverable ${styles.responsiveTable}`}>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Tool</th>
+                    <th>Renter</th>
+                    <th>Status</th>
+                    <th className="has-text-right">Amount</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {displayedEarnings.map(booking => (
+                    <tr key={booking.id}>
+                      <td data-label="Date">{formatDisplayDate(booking.created_at)}</td>
+                      <td data-label="Tool">{booking.tool_name}</td>
+                      <td data-label="Renter">{booking.renter_first_name} {booking.renter_last_name}</td>
+                      <td data-label="Status">
+                        <span className={`tag is-small ${booking.status === 'completed' ? 'is-success' : 'is-info'} is-light`}>
+                          {booking.status.toUpperCase()}
+                        </span>
+                      </td>
+                      <td data-label="Amount" className="has-text-right">${parseFloat(booking.rental_amount || 0).toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+          {allEarnings.length > 3 && (
+            <div className="p-3 has-text-centered">
+              <button
+                className="button is-small is-ghost"
+                onClick={() => setIsExpanded(!isExpanded)}
+              >
+                {isExpanded
+                  ? "Show Less"
+                  : `Show More (${allEarnings.length - 3} more)`}
+              </button>
+            </div>
           )}
         </div>
       </div>

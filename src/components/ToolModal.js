@@ -105,14 +105,14 @@ const ToolModal = ({ isOpen, onClose, tool }) => {
             ) : null}
           </div>
         </section>
-        <footer className="modal-card-foot">
+        <footer className="modal-card-foot is-flex is-justify-content-flex-end is-flex-wrap-wrap" style={{ gap: "10px" }}>
           {isOwner ? (
             <>
-              <Link to={`/dashboard/toolshed/edit/${tool.id}`} state={{ tool }}>
-                <button className="button is-info">Edit Info</button>
+              <Link to={`/dashboard/toolshed/edit/${tool.id}`} state={{ tool }} className="is-flex-grow-1-mobile">
+                <button className="button is-info is-fullwidth-mobile">Edit Info</button>
               </Link>
               <button
-                className="button is-warning ml-2"
+                className="button is-warning is-flex-grow-1-mobile is-fullwidth-mobile"
                 onClick={() => setAvailabilityOpen(true)}
               >
                 Manage Availability
@@ -121,7 +121,7 @@ const ToolModal = ({ isOpen, onClose, tool }) => {
           ) : (
             <>
               <button
-                className={`button is-info is-light ${
+                className={`button is-info is-light is-flex-grow-1-mobile is-fullwidth-mobile ${
                   messageLoading ? "is-loading" : ""
                 }`}
                 onClick={handleMessageOwner}
@@ -131,7 +131,7 @@ const ToolModal = ({ isOpen, onClose, tool }) => {
                 Message Owner
               </button>
               <button
-                className="button is-primary"
+                className="button is-primary is-flex-grow-1-mobile is-fullwidth-mobile"
                 onClick={() => setBookingOpen(true)}
               >
                 Book Tool

@@ -3,7 +3,7 @@ import React, { useEffect, useState, useRef } from "react";
 import ToolCard from "../../../components/ToolCard";
 import ToolModal from "../../../components/ToolModal";
 import Icon from "@mdi/react";
-import { mdiPlusCircleOutline } from "@mdi/js";
+import { mdiPlus } from "@mdi/js";
 import { Link } from "react-router-dom";
 import { useTool } from "../../../hooks/useTool";
 import { getUserTools } from "../../../api/tools";
@@ -54,21 +54,21 @@ const Toolshed = () => {
   }, [state.hasFetched]);
 
   return (
-    <div>
-      <div className="toolshed-header is-flex is-flex-direction-row mb-5 is-justify-content-space-between">
-        <div className="title is-5">Toolshed</div>
-        <Link to="/dashboard/toolshed/new" className="has-text-black">
-          <div className="icon">
-            <Icon path={mdiPlusCircleOutline} size={1} />
-          </div>
+    <div className="container px-2">
+      <div className="toolshed-header is-flex is-align-items-center mb-5 is-justify-content-space-between">
+        <h1 className="title is-4 mb-0">My Toolshed</h1>
+        <Link to="/dashboard/toolshed/new" style={{ color: "#363636" }}>
+          <Icon path={mdiPlus} size={1.5} />
         </Link>
       </div>
-      {tools ? (
+
+      {state.loading && <div className="has-text-centered p-6">Loading tools...</div>}
+
+      {tools && tools.length > 0 ? (
         <>
-          <div className="tool-list grid is-col-min-10 is-gap-3">
+          <div className="tool-list">
             {tools.map((tool) => (
               <ToolCard
-                classProps="cell"
                 key={tool.id}
                 tool={tool}
                 onClick={handleCardClick}
@@ -81,9 +81,14 @@ const Toolshed = () => {
             tool={selectedTool}
           />
         </>
-      ) : (
-        <div>No Tools Available</div>
-      )}
+      ) : !state.loading ? (
+        <div className="notification is-light has-text-centered py-6">
+          <p className="subtitle is-6">Your toolshed is empty.</p>
+          <Link to="/dashboard/toolshed/new" className="button is-primary is-outlined mt-3">
+            Add your first tool
+          </Link>
+        </div>
+      ) : null}
     </div>
   );
 };

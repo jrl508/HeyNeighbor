@@ -13,8 +13,6 @@ import ProfilePicModal from "../../components/ProfilePicModal.js";
 import { getReviewsForUser } from "../../api/reviews.js";
 import { formatDisplayDate } from "../../util/dateUtils.js";
 
-// ************************ TODO: Error Handling, Profile Picture Logic ********************************
-
 const UserProfile = () => {
   const { state, dispatch, getUser } = useAuth();
   const token = localStorage.getItem("token");
@@ -59,7 +57,6 @@ const UserProfile = () => {
       user.profile_image || "https://placehold.co/500x500?text=Profile+Image",
     );
 
-    // Fetch reviews for this user
     const fetchReviews = async () => {
       setReviewsLoading(true);
       try {
@@ -127,17 +124,11 @@ const UserProfile = () => {
 
       if (response.ok) {
         const data = await response.json();
-        // If the API returns the updated user object:
         if (data.user) {
           dispatch({ type: UPDATE_USER_SUCCESS, payload: data.user });
-        }
-        // Or if API returns just the image URL:
-        else if (data.profile_image) {
+        } else if (data.profile_image) {
           setImage(data.profile_image);
-          // optionally dispatch UPDATE_USER_SUCCESS with { profile_image: data.profile_image }
         }
-      } else {
-        console.error("Error uploading image", response);
       }
     } catch (error) {
       console.error("Error:", error);
@@ -192,250 +183,234 @@ const UserProfile = () => {
   };
 
   if (error) {
-    return <div>Error: {error.message}</div>;
+    return <div className="notification is-danger">Error: {error.message}</div>;
   }
 
-  console.log("Reviews", reviews);
   return (
-    <div>
-      <div className="title is-5">Profile</div>
-      <div className="card" style={{ overflow: "hidden" }}>
-        <div className="card-top" style={{ display: "flex", flexWrap: "wrap" }}>
-          <div 
-            className="card-image is-clickable" 
-            onClick={handleOpenModal}
-          >
-            <figure className="image" style={{ height: "100%", margin: 0 }}>
-              <img
-                src={image}
-                alt="Placeholder image"
-                style={{ 
-                  width: "500px", 
-                  height: "100%", 
-                  objectFit: "cover", 
-                  borderRadius: "0" 
-                }}
-              />
-            </figure>
+    <div className="container px-2">
+      <div className="title is-4 mb-5">Profile Settings</div>
+      <div className="card shadow-none-mobile" style={{ overflow: "hidden", border: "1px solid #efefef" }}>
+        <div className="columns is-gapless mb-0 is-multiline">
+          <div className="column is-12-mobile is-narrow-tablet is-flex">
+            <div 
+              className="card-image is-clickable h-100" 
+              onClick={handleOpenModal}
+              style={{ minHeight: "250px", aspectRatio: "1 / 1" }}
+            >
+              <figure className="image h-100" style={{ margin: 0 }}>
+                <img
+                  src={image}
+                  alt="Profile"
+                  style={{ 
+                    width: "100%", 
+                    height: "100%", 
+                    objectFit: "cover", 
+                  }}
+                />
+              </figure>
+            </div>
           </div>
-          <div
-            className="card-content"
-            style={{ flex: "1", display: "flex", flexFlow: "column nowrap" }}
-          >
-            <form>
-              <div className="field">
-                <label className="label">Name</label>
-                <div className="control">
-                  {editMode ? (
-                    <div
-                      style={{
-                        display: "flex",
-                        columnGap: "25px",
-                      }}
-                    >
+          <div className="column is-12-mobile">
+            <div className="card-content">
+              <form>
+                <div className="field">
+                  <label className="label">Name</label>
+                  <div className="control">
+                    {editMode ? (
+                      <div className="columns is-mobile">
+                        <div className="column">
+                          <input
+                            className="input"
+                            type="text"
+                            value={firstName}
+                            placeholder="First Name"
+                            onChange={(e) => setFirstName(e.target.value)}
+                          />
+                        </div>
+                        <div className="column">
+                          <input
+                            className="input"
+                            type="text"
+                            value={lastName}
+                            placeholder="Last Name"
+                            onChange={(e) => setLastName(e.target.value)}
+                          />
+                        </div>
+                      </div>
+                    ) : (
                       <input
                         className="input"
                         type="text"
-                        value={firstName}
-                        name="first_name"
-                        placeholder="First Name"
-                        onChange={(e) => setFirstName(e.target.value)}
+                        value={`${capitalize(firstName)} ${capitalize(lastName)}`}
+                        disabled
                       />
-                      <input
-                        className="input"
-                        type="text"
-                        value={lastName}
-                        name="last_name"
-                        placeholder="Last Name"
-                        onChange={(e) => setLastName(e.target.value)}
-                      />
-                    </div>
-                  ) : (
+                    )}
+                  </div>
+                </div>
+
+                <div className="field">
+                  <label className="label">Email</label>
+                  <div className="control">
+                    <input
+                      className="input"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      disabled={!editMode}
+                    />
+                  </div>
+                </div>
+
+                <div className="field">
+                  <label className="label">Phone</label>
+                  <div className="control">
+                    <input
+                      className="input"
+                      type="tel"
+                      value={phone}
+                      disabled={!editMode}
+                      placeholder="555-555-5555"
+                      onChange={(e) => setPhone(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="field">
+                  <label className="label">
+                    Location {editMode ? "(Zip Code)" : ""}
+                  </label>
+                  <div className="control">
                     <input
                       className="input"
                       type="text"
-                      value={capitalize(firstName) + " " + capitalize(lastName)}
+                      value={
+                        editMode
+                          ? zipCode
+                          : `${city || ""}, ${stateGeo || ""} ${zipCode || ""} `
+                      }
+                      onChange={(e) => setZipCode(e.target.value)}
                       disabled={!editMode}
                     />
-                  )}
+                  </div>
                 </div>
-              </div>{" "}
-              <div className="field">
-                <label className="label">Email</label>
-                <div className="control">
-                  <input
-                    className="input"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    disabled={!editMode}
-                  />
+
+                <div className="field">
+                  <label className="label">Average Rating</label>
+                  <div className="control">
+                    {(() => {
+                      const rating = parseFloat(average_rating);
+                      return !isNaN(rating) && rating > 0 ? (
+                        <div className="is-flex is-align-items-center">
+                          <Icon path={mdiStar} size={1} color="#ffc107" />
+                          <span className="ml-2 has-text-weight-bold">{rating.toFixed(1)} / 5</span>
+                        </div>
+                      ) : (
+                        <span className="tag is-light">No ratings yet</span>
+                      );
+                    })()}
+                  </div>
                 </div>
-              </div>
-              {/* TODO - Implement formatting of phone numbers */}
-              <div className="field">
-                <label className="label">Phone</label>
-                <div className="control">
-                  <input
-                    className="input"
-                    type="tel"
-                    value={phone}
-                    disabled={!editMode}
-                    pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
-                    onChange={(e) => setPhone(e.target.value)}
-                  />
-                </div>
-              </div>
-              <div className="field">
-                <label className="label">
-                  Location {editMode ? "(Zip Code)" : null}
-                </label>
-                <div className="control">
-                  <input
-                    className="input"
-                    type="text"
-                    value={
-                      editMode
-                        ? zipCode
-                        : `${city + ", " + stateGeo + " " + zipCode} `
-                    }
-                    onChange={(e) => setZipCode(e.target.value)}
-                    disabled={!editMode}
-                  />
-                </div>
-              </div>
-              <div className="field">
-                <label className="label">Average Rating</label>
-                <div className="control">
-                  {(() => {
-                    const rating = parseFloat(average_rating);
-                    return !isNaN(rating) && rating > 0 ? (
-                      <span className="tag is-info is-medium">
-                        {rating.toFixed(1)} / 5
-                      </span>
-                    ) : (
-                      <span className="tag is-light is-medium">
-                        No ratings yet
-                      </span>
-                    );
-                  })()}
-                </div>
-              </div>
-              <div
-                className={`edit-mode-buttons mt-5 ${
-                  !editMode
-                    ? null
-                    : "is-flex is-justify-content-space-between is-align-items-start"
-                }`}
-              >
-                {!editMode ? (
-                  <button
-                    className="button is-link is-inverted"
-                    style={{
-                      width: "fit-content",
-                      alignSelf: "end",
-                      display: editMode ? "none" : "null",
-                    }}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setEditMode(true);
-                    }}
-                  >
-                    Edit
-                  </button>
-                ) : (
-                  <>
-                    <div
-                      className="file mr-auto"
-                      style={{
-                        columnGap: "25px",
+
+                <div className="mt-5">
+                  {!editMode ? (
+                    <button
+                      className="button is-dark is-outlined is-fullwidth-mobile"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setEditMode(true);
                       }}
                     >
-                      <label className="file-label">
-                        <input
-                          key={fileInputKey}
-                          className="file-input"
-                          type="file"
-                          name="profile_image"
-                          accept="image/*"
-                          onChange={handleImageChange}
-                        />
-                        <span className="file-cta">
-                          <span className="file-icon">
-                            <Icon path={mdiUpload} size={3} />
+                      Edit Profile
+                    </button>
+                  ) : (
+                    <div className="is-flex-direction-column-mobile is-flex" style={{ gap: "15px" }}>
+                      <div className="file has-name is-fullwidth-mobile">
+                        <label className="file-label is-fullwidth-mobile">
+                          <input
+                            key={fileInputKey}
+                            className="file-input"
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageChange}
+                          />
+                          <span className="file-cta">
+                            <span className="file-icon">
+                              <Icon path={mdiUpload} size={1} />
+                            </span>
+                            <span className="file-label">New Photo</span>
                           </span>
-                          <span className="file-label">Select Image</span>
-                        </span>
-                      </label>
-                      {preview ? <span>{preview}</span> : null}
+                          {preview && <span className="file-name">{preview}</span>}
+                        </label>
+                      </div>
+                      <div className="buttons is-right ml-auto-tablet">
+                        <button
+                          className="button is-danger is-light"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleCancel();
+                          }}
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          className="button is-info"
+                          onClick={(event) => {
+                            handleSubmit(event);
+                          }}
+                        >
+                          Save Changes
+                        </button>
+                      </div>
                     </div>
-                    <div className="buttons">
-                      <button
-                        className="button is-danger is-outlined"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handleCancel();
-                        }}
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        className="button is-info is-outlined"
-                        onClick={(event) => {
-                          handleSubmit(event);
-                        }}
-                      >
-                        Update
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
-            </form>
+                  )}
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="title is-5 mt-5">Reviews Received</div>
-      <div className="card">
+      <div className="title is-5 mt-6 mb-4">Reviews Received</div>
+      <div className="reviews-section">
         {reviewsLoading ? (
           <div className="p-4">Loading reviews...</div>
         ) : reviewsError ? (
-          <div className="p-4 has-text-danger">{reviewsError}</div>
+          <div className="notification is-danger is-light p-3">{reviewsError}</div>
         ) : reviews.length === 0 ? (
-          <div className="p-4">No reviews yet.</div>
+          <div className="notification is-light p-5 has-text-centered">
+             <p className="has-text-grey">No reviews yet.</p>
+          </div>
         ) : (
-          <div>
+          <div className="columns is-multiline">
             {reviews.map((review) => (
-              <div key={review.id} className="box mb-3">
-                <p>
-                  <strong>Reviewer:</strong> {review.reviewer_username}
-                </p>
-                <div className="is-flex is-align-items-center mb-2">
-                  <span className="mr-2">Overall:</span>
-                  {renderStars(review.rating_overall)}
+              <div key={review.id} className="column is-12-tablet is-6-desktop is-flex">
+                <div className="box h-100 shadow-none-mobile" style={{ border: "1px solid #efefef", overflowWrap: "break-word", wordBreak: "break-word" }}>
+                  <div className="is-flex is-justify-content-space-between mb-2">
+                    <p className="has-text-weight-bold">{review.reviewer_username}</p>
+                    <span className="is-size-7 has-text-grey">{formatDisplayDate(review.created_at)}</span>
+                  </div>
+                  
+                  <div className="columns is-mobile is-multiline is-gapless mb-2">
+                    <div className="column is-6">
+                       <p className="is-size-7">Overall: {renderStars(review.rating_overall)}</p>
+                    </div>
+                    <div className="column is-6">
+                       <p className="is-size-7">Condition: {renderStars(review.rating_condition)}</p>
+                    </div>
+                    <div className="column is-6">
+                       <p className="is-size-7">Communication: {renderStars(review.rating_communication)}</p>
+                    </div>
+                    <div className="column is-6">
+                       <p className="is-size-7">Punctuality: {renderStars(review.rating_punctuality)}</p>
+                    </div>
+                  </div>
+
+                  {review.comment && (
+                    <div className="notification is-light p-2 mt-2" style={{ overflowWrap: "break-word" }}>
+                      <p className="is-size-7 is-italic">"{review.comment}"</p>
+                    </div>
+                  )}
                 </div>
-                <div className="is-flex is-align-items-center mb-2">
-                  <span className="mr-2">Condition:</span>
-                  {renderStars(review.rating_condition)}
-                </div>
-                <div className="is-flex is-align-items-center mb-2">
-                  <span className="mr-2">Communication:</span>
-                  {renderStars(review.rating_communication)}
-                </div>
-                <div className="is-flex is-align-items-center mb-2">
-                  <span className="mr-2">Punctuality:</span>
-                  {renderStars(review.rating_punctuality)}
-                </div>
-                {review.comment && (
-                  <p className="mt-2">
-                    <em>"{review.comment}"</em>
-                  </p>
-                )}
-                <p className="has-text-grey is-size-7 mt-2">
-                  Reviewed on:{" "}
-                  {formatDisplayDate(review.created_at)}
-                </p>
               </div>
             ))}
           </div>
@@ -453,24 +428,16 @@ const UserProfile = () => {
 
 const renderStars = (rating) => {
   return (
-    <div className="star-rating is-flex">
-      {[...Array(5)].map((star, i) => {
-        const ratingValue = i + 1;
-        return (
-          <span
-            key={i}
-            className="star"
-            style={{
-              color: ratingValue <= rating ? "#ffc107" : "#e4e5e9",
-              display: "flex",
-              alignItems: "center",
-            }}
-          >
-            <Icon path={mdiStar} size={0.8} />
-          </span>
-        );
-      })}
-    </div>
+    <span className="star-rating is-inline-flex">
+      {[...Array(5)].map((_, i) => (
+        <Icon 
+          key={i} 
+          path={mdiStar} 
+          size={0.5} 
+          color={i < rating ? "#ffc107" : "#e4e5e9"} 
+        />
+      ))}
+    </span>
   );
 };
 

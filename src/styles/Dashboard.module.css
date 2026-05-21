@@ -2,17 +2,32 @@
   flex: 1;
   background-color: lightgray;
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   padding: 15px 0;
+  min-height: calc(100vh - 65px);
+  overflow-x: hidden;
+}
+
+@media screen and (min-width: 1024px) {
+  .wrapper {
+    flex-direction: row;
+    justify-content: space-between;
+  }
 }
 
 .center {
   flex-grow: 2;
-  width: 52%;
+  width: 100%;
   box-sizing: border-box;
   display: flex;
   flex-flow: column nowrap;
   align-items: center;
+}
+
+@media screen and (min-width: 1024px) {
+  .center {
+    width: 52%;
+  }
 }
 
 .card {
@@ -24,6 +39,7 @@
   flex-direction: column;
   padding: 0;
   box-sizing: border-box;
+  margin-bottom: 20px;
 }
 
 .card ul {
@@ -37,6 +53,7 @@
   padding: 15px;
   min-height: 80px;
 }
+
 .left {
   box-sizing: border-box;
   padding: 2% 2% 0 2%;
@@ -44,8 +61,73 @@
   flex-direction: column;
 }
 
+@media screen and (min-width: 1024px) {
+  .left {
+    border-right: 1px solid gray;
+    width: 250px;
+    min-width: 250px;
+  }
+
+  .left :global(.menu-list a) {
+    background-color: transparent;
+  }
+
+  .left :global(.menu-list a:hover) {
+    background-color: #f5f5f5;
+  }
+
+  .left :global(.menu-list a.is-active) {
+    background-color: #485fc7;
+    color: #fff;
+  }
+}
+
 .right {
   flex-grow: 1;
   box-sizing: border-box;
-  width: 28%;
+  width: 100%;
+}
+
+@media screen and (min-width: 1024px) {
+  .right {
+    width: 28%;
+  }
+}
+
+.responsiveTable {
+  width: 100%;
+}
+
+@media screen and (max-width: 768px) {
+  .responsiveTable thead {
+    display: none;
+  }
+
+  .responsiveTable tr {
+    display: block;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #eee;
+  }
+
+  .responsiveTable tr:last-child {
+    margin-bottom: 0;
+    border-bottom: none;
+  }
+
+  .responsiveTable td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-align: right;
+    padding: 0.5rem 1rem;
+    border: none !important;
+    border-top: none !important;
+  }
+
+  .responsiveTable td::before {
+    content: attr(data-label);
+    font-weight: bold;
+    text-align: left;
+    flex: 1;
+  }
 }
