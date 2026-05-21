@@ -80,3 +80,41 @@
     width: 28%;
   }
 }
+
+.responsiveTable {
+  width: 100%;
+}
+
+@media screen and (max-width: 768px) {
+  .responsiveTable thead {
+    display: none;
+  }
+
+  .responsiveTable tr {
+    display: block;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #eee;
+  }
+
+  .responsiveTable tr:last-child {
+    margin-bottom: 0;
+    border-bottom: none;
+  }
+
+  .responsiveTable td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-align: right;
+    padding: 0.5rem 1rem;
+    border: none !important;
+    border-top: none !important;
+  }
+
+  .responsiveTable td::before {
+    content: attr(data-label);
+    font-weight: bold;
+    text-align: left;
+    flex: 1;
+  }
+}
