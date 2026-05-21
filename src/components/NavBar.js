@@ -210,12 +210,9 @@ const NavBar = () => {
                   </Link>
                 </div>
                 <div className="navbar-item">
-                  <button
-                    className="button is-primary is-outlined"
-                    onClick={() => navigate("/login")}
-                  >
+                  <Link to="/login" className="navbar-item">
                     Login
-                  </button>
+                  </Link>
                 </div>
               </>
             )}

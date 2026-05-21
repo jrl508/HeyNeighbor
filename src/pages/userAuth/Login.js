@@ -11,7 +11,7 @@ const Login = () => {
     <div className="login-wrapper">
       <div
         className="box is-flex is-flex-direction-column is-justify-content-space-evenly"
-        style={{ minHeight: "45vh" }}
+        style={{ minHeight: "45vh", width: "100%", maxWidth: "400px" }}
       >
         <header className="mb-5">
           <div className="is-flex is-justify-content-center is-align-items-center">
