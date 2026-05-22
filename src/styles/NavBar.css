@@ -54,7 +54,7 @@ div .navbar {
   position: absolute;
   top: 100%;
   right: 0;
-  width: 250px;
+  width: 350px;
   background: white;
   border-radius: 4px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -63,13 +63,25 @@ div .navbar {
   margin-top: 10px;
 }
 
+@media screen and (max-width: 1023px) {
+  .notification-dropdown {
+    position: fixed;
+    top: 50px; /* Below the navbar */
+    left: 0;
+    width: 100vw;
+    margin-top: 0;
+    border-radius: 0;
+  }
+}
+
 .notification-list {
-  max-height: 300px;
+  max-height: 400px;
   overflow-y: auto;
 }
 
 .notification-item {
   transition: background 0.2s;
+  padding: 12px !important;
 }
 
 .notification-item:hover {
@@ -78,6 +90,10 @@ div .navbar {
 
 .border-bottom {
   border-bottom: 1px solid #efefef;
+}
+
+.border-top {
+  border-top: 1px solid #efefef;
 }
 
 /* Mobile Drawer Styles */

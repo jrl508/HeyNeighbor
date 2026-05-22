@@ -11,6 +11,7 @@ import ReviewButton from "../../components/ReviewButton";
 import RescheduleModal from "../../components/RescheduleModal";
 import { useAuth } from "../../hooks/useAuth";
 import { useBookings } from "../../contexts/BookingContext";
+import { useNotifications } from "../../contexts/NotificationContext";
 import { formatDisplayDate, formatRelativeTime } from "../../util/dateUtils";
 
 const DashMain = () => {
@@ -18,6 +19,7 @@ const DashMain = () => {
   const { user } = state;
   const navigate = useNavigate();
   const { state: bookingState, fetchBookings } = useBookings();
+  const { notifications, markAsRead } = useNotifications();
   const bookings = bookingState.bookings;
   const loading = bookingState.loading;
   
@@ -222,9 +224,12 @@ const DashMain = () => {
   const myRentals = ongoingBookings.filter(b => b.renter_id === user?.id);
   const myToolsRented = ongoingBookings.filter(b => b.owner_id === user?.id);
 
-  const notificationBookings = bookings.filter(
-    (b) => b.owner_id === user?.id && ["requested", "reschedule_pending", "returning"].includes(b.status)
-  );
+  const handleNotificationClick = async (n) => {
+    await markAsRead(n.id);
+    if (n.entity_type === "message") {
+      navigate("/dashboard/inbox");
+    }
+  };
 
   return (
     <div className="columns is-multiline">
@@ -422,16 +427,19 @@ const DashMain = () => {
         <div className={styles.card}>
           <div className="p-4">
             <p className="is-size-7 has-text-grey mb-3">Recent activity will appear here.</p>
-            {notificationBookings.length === 0 ? (
+            {notifications.length === 0 ? (
                <div className="is-size-7 has-text-grey">No current notifications.</div>
             ) : (
-              notificationBookings.map(b => (
-                <div key={b.id} className="notification is-info is-light is-size-7 p-2 mb-2">
-                  {b.status === 'requested' && `New request for ${b.tool_name} from ${b.renter_first_name}`}
-                  {b.status === 'reschedule_pending' && `${b.renter_first_name} wants to reschedule ${b.tool_name}`}
-                  {b.status === 'returning' && `${b.renter_first_name} has returned ${b.tool_name}`}
+              notifications.map(n => (
+                <div 
+                  key={n.id} 
+                  className={`notification is-info is-light is-size-7 p-2 mb-2 is-clickable ${!n.is_read ? 'has-background-info-light' : 'has-background-white'}`}
+                  style={{ border: !n.is_read ? '1px solid #b5d1ff' : '1px solid #f5f5f5', color: '#363636' }}
+                  onClick={() => handleNotificationClick(n)}
+                >
+                  {n.content}
                   <br />
-                  <span className="has-text-grey-light">{formatRelativeTime(b.updated_at)}</span>
+                  <span className="has-text-grey-light">{formatRelativeTime(n.created_at)}</span>
                 </div>
               ))
             )}

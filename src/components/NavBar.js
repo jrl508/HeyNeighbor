@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import Logo from "../images/hand-shake-filled.svg";
 import Icon from "@mdi/react";
-import { mdiInbox, mdiStar, mdiBell } from "@mdi/js";
+import { mdiInbox, mdiStar, mdiBell, mdiClose } from "@mdi/js";
 import { useAuth } from "../hooks/useAuth";
 import { useChat } from "../contexts/ChatContext";
 import { useBookings } from "../contexts/BookingContext";
+import { useNotifications } from "../contexts/NotificationContext";
 import { LOGOUT } from "../actionTypes";
 import Avatar from "./Avatar";
 import { capitalize } from "../util/UtilFunctions";
@@ -15,11 +16,14 @@ import "../styles/NavBar.css";
 const NavBar = () => {
   const [isActive, setIsActive] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const notificationRef = useRef(null);
+  const mobileNotificationRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
   const { state, dispatch } = useAuth();
   const { unreadCount } = useChat();
   const { state: bookingState, fetchBookings } = useBookings();
+  const { notifications, unreadCount: notificationCount, markAsRead, markAllAsRead, clearAll, deleteNotification } = useNotifications();
   const { isAuthenticated, user } = state;
   const token = localStorage.getItem("token");
 
@@ -29,6 +33,24 @@ const NavBar = () => {
     }
   }, [isAuthenticated, token, fetchBookings]);
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        (notificationRef.current && !notificationRef.current.contains(event.target)) &&
+        (mobileNotificationRef.current && !mobileNotificationRef.current.contains(event.target))
+      ) {
+        setShowNotifications(false);
+      }
+    };
+
+    if (showNotifications) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showNotifications]);
+
   const handleLogout = () => {
     dispatch({ type: LOGOUT });
     localStorage.clear();
@@ -37,11 +59,15 @@ const NavBar = () => {
 
   const closeMenu = () => setIsActive(false);
 
-  const notifications = bookingState.bookings.filter(
-    (b) =>
-      b.owner_id === user?.id &&
-      ["requested", "reschedule_pending", "returning"].includes(b.status),
-  );
+  const handleNotificationClick = async (n) => {
+    await markAsRead(n.id);
+    setShowNotifications(false);
+    if (n.entity_type === "message") {
+      navigate("/dashboard/inbox");
+    } else {
+      navigate("/dashboard");
+    }
+  };
 
   const isDashboard = location.pathname.startsWith("/dashboard");
 
@@ -71,21 +97,32 @@ const NavBar = () => {
 
           <div className="is-flex is-align-items-center is-hidden-desktop ml-auto">
             {isAuthenticated && isDashboard && (
-              <div className="notification-bell-wrapper mr-2">
+              <div className="notification-bell-wrapper mr-2" ref={mobileNotificationRef}>
                 <button
                   className="button is-dark p-2"
                   onClick={() => setShowNotifications(!showNotifications)}
                   style={{ background: "none", border: "none" }}
                 >
                   <Icon path={mdiBell} size={1} color="whitesmoke" />
-                  {notifications.length > 0 && (
+                  {notificationCount > 0 && (
                     <span className="notification-badge"></span>
                   )}
                 </button>
                 {showNotifications && (
                   <div className="notification-dropdown">
-                    <div className="notification-header p-2 has-text-weight-bold border-bottom">
-                      Notifications
+                    <div className="notification-header p-2 is-flex is-justify-content-space-between is-align-items-center border-bottom">
+                      <span className="has-text-weight-bold">Notifications</span>
+                      {notificationCount > 0 && (
+                        <button 
+                          className="button is-ghost is-small p-0 h-auto" 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            markAllAsRead();
+                          }}
+                        >
+                          Mark all as read
+                        </button>
+                      )}
                     </div>
                     <div className="notification-list">
                       {notifications.length === 0 ? (
@@ -93,30 +130,47 @@ const NavBar = () => {
                           No new notifications
                         </div>
                       ) : (
-                        notifications.map((b) => (
+                        notifications.map((n) => (
                           <div
-                            key={b.id}
-                            className="notification-item p-2 border-bottom is-clickable"
-                            onClick={() => {
-                              navigate("/dashboard");
-                              setShowNotifications(false);
-                            }}
+                            key={n.id}
+                            className={`notification-item p-2 border-bottom is-clickable is-flex is-align-items-start ${!n.is_read ? 'has-background-light' : ''}`}
+                            onClick={() => handleNotificationClick(n)}
                           >
-                            <div className="is-size-7">
-                              {b.status === "requested" &&
-                                `New request for ${b.tool_name} from ${b.renter_first_name}`}
-                              {b.status === "reschedule_pending" &&
-                                `${b.renter_first_name} wants to reschedule ${b.tool_name}`}
-                              {b.status === "returning" &&
-                                `${b.renter_first_name} has returned ${b.tool_name}`}
+                            <div className="is-flex-grow-1 mr-2">
+                              <div className="is-size-7" style={{ color: '#363636', whiteSpace: 'normal', overflowWrap: 'anywhere' }}>
+                                {n.content}
+                              </div>
+                              <div className="is-size-7 has-text-grey-light">
+                                {formatRelativeTime(n.created_at)}
+                              </div>
                             </div>
-                            <div className="is-size-7 has-text-grey-light">
-                              {formatRelativeTime(b.updated_at)}
-                            </div>
+                            <button 
+                              className="button is-small is-ghost p-1"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                deleteNotification(n.id);
+                              }}
+                              title="Delete notification"
+                            >
+                              <Icon path={mdiClose} size={0.6} color="grey" />
+                            </button>
                           </div>
                         ))
                       )}
                     </div>
+                    {notifications.length > 0 && (
+                      <div className="p-2 is-flex is-justify-content-end border-top">
+                        <button 
+                          className="button is-ghost is-small p-0 h-auto has-text-danger" 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            clearAll();
+                          }}
+                        >
+                          Clear all
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -145,6 +199,86 @@ const NavBar = () => {
           <div className="navbar-end">
             {isAuthenticated ? (
               <>
+                <div className="navbar-item" style={{ padding: "0.5rem" }}>
+                  <div className="notification-bell-wrapper" ref={notificationRef}>
+                    <button
+                      className="button is-dark p-2"
+                      onClick={() => setShowNotifications(!showNotifications)}
+                      style={{ background: "none", border: "none" }}
+                    >
+                      <Icon path={mdiBell} size={1} color="whitesmoke" />
+                      {notificationCount > 0 && (
+                        <span className="notification-badge"></span>
+                      )}
+                    </button>
+                    {showNotifications && (
+                      <div className="notification-dropdown is-right">
+                        <div className="notification-header p-2 is-flex is-justify-content-space-between is-align-items-center border-bottom">
+                          <span className="has-text-weight-bold">Notifications</span>
+                          {notificationCount > 0 && (
+                            <button 
+                              className="button is-ghost is-small p-0 h-auto" 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                markAllAsRead();
+                              }}
+                            >
+                              Mark all as read
+                            </button>
+                          )}
+                        </div>
+                        <div className="notification-list">
+                          {notifications.length === 0 ? (
+                            <div className="p-3 is-size-7 has-text-grey">
+                              No new notifications
+                            </div>
+                          ) : (
+                            notifications.map((n) => (
+                              <div
+                                key={n.id}
+                                className={`notification-item p-2 border-bottom is-clickable is-flex is-align-items-start ${!n.is_read ? 'has-background-light' : ''}`}
+                                onClick={() => handleNotificationClick(n)}
+                              >
+                                <div className="is-flex-grow-1 mr-2">
+                                  <div className="is-size-7" style={{ color: '#363636', whiteSpace: 'normal', overflowWrap: 'anywhere' }}>
+                                    {n.content}
+                                  </div>
+                                  <div className="is-size-7 has-text-grey-light">
+                                    {formatRelativeTime(n.created_at)}
+                                  </div>
+                                </div>
+                                <button 
+                                  className="button is-small is-ghost p-1"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    deleteNotification(n.id);
+                                  }}
+                                  title="Delete notification"
+                                >
+                                  <Icon path={mdiClose} size={0.6} color="grey" />
+                                </button>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                        {notifications.length > 0 && (
+                          <div className="p-2 is-flex is-justify-content-end border-top">
+                            <button 
+                              className="button is-ghost is-small p-0 h-auto has-text-danger" 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                clearAll();
+                              }}
+                            >
+                              Clear all
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
                 <div className="navbar-item is-hoverable">
                   <Link
                     to="/dashboard/inbox"
