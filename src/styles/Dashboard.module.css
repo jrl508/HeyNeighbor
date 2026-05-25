@@ -1,133 +1,541 @@
 .wrapper {
-  flex: 1;
-  background-color: lightgray;
+  display: flex;
+  min-height: 100vh;
+  background-color: #faf9f6;
+}
+
+/* Sidebar Styles */
+.sidebar {
+  width: 280px;
+  background-color: #fff;
+  border-right: 1px solid #f0f0f0;
   display: flex;
   flex-direction: column;
-  padding: 15px 0;
-  min-height: calc(100vh - 65px);
-  overflow-x: hidden;
+  padding: 2rem 1.5rem;
 }
 
-@media screen and (min-width: 1024px) {
-  .wrapper {
-    flex-direction: row;
-    justify-content: space-between;
-  }
+.profileSection {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid #f0f0f0;
 }
 
-.center {
-  flex-grow: 2;
-  width: 100%;
-  box-sizing: border-box;
+.userName {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-top: 1rem;
+  color: #1a1a1a;
+}
+
+.userRating {
   display: flex;
-  flex-flow: column nowrap;
   align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  color: #fbbf24;
+  font-weight: 600;
+  margin-top: 0.25rem;
 }
 
-@media screen and (min-width: 1024px) {
-  .center {
-    width: 52%;
-  }
+.userLocation {
+  color: #666;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  margin-top: 0.5rem;
 }
 
-.card {
-  background-color: whitesmoke;
-  width: 100%;
-  border-radius: 6px;
-  box-shadow: 0px 2px 5px rgba(128, 128, 128, 0.5);
+.memberSince {
+  color: #999;
+  font-size: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.userStats {
+  margin-top: 1.5rem;
   display: flex;
   flex-direction: column;
-  padding: 0;
-  box-sizing: border-box;
-  margin-bottom: 20px;
+  gap: 0.75rem;
 }
 
-.card ul {
+.statItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+  color: #4a4a4a;
+}
+
+.statValue {
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.navSection {
+  margin-top: 1rem;
+}
+
+.navLabel {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: #999;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.navList {
   list-style: none;
   padding: 0;
-  margin: 0;
-  height: 100%;
-}
-
-.card ul li {
-  padding: 15px;
-  min-height: 80px;
-}
-
-.left {
-  box-sizing: border-box;
-  padding: 2% 2% 0 2%;
   display: flex;
   flex-direction: column;
+  gap: 0.25rem;
 }
 
-@media screen and (min-width: 1024px) {
-  .left {
-    border-right: 1px solid gray;
-    width: 250px;
-    min-width: 250px;
-  }
-
-  .left :global(.menu-list a) {
-    background-color: transparent;
-  }
-
-  .left :global(.menu-list a:hover) {
-    background-color: #f5f5f5;
-  }
-
-  .left :global(.menu-list a.is-active) {
-    background-color: #485fc7;
-    color: #fff;
-  }
+.navLink {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  color: #4a4a4a;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s;
 }
 
-.right {
-  flex-grow: 1;
-  box-sizing: border-box;
-  width: 100%;
+.navLink:hover {
+  background-color: #f5f5f5;
+  color: #1a1a1a;
 }
 
-@media screen and (min-width: 1024px) {
-  .right {
-    width: 28%;
-  }
+.navLink.active {
+  background-color: #fff2e6;
+  color: #f97316;
 }
 
-.responsiveTable {
-  width: 100%;
+/* Main Content Area */
+.mainContent {
+  flex: 1;
+  padding: 2.5rem;
+  overflow-y: auto;
 }
 
-@media screen and (max-width: 768px) {
-  .responsiveTable thead {
-    display: none;
-  }
+.welcomeHeader {
+  margin-bottom: 2rem;
+}
 
-  .responsiveTable tr {
-    display: block;
-    margin-bottom: 1rem;
-    border-bottom: 2px solid #eee;
-  }
+.welcomeTitle {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #1a1a1a;
+}
 
-  .responsiveTable tr:last-child {
-    margin-bottom: 0;
-    border-bottom: none;
-  }
+.welcomeSubtitle {
+  color: #666;
+  margin-top: 0.25rem;
+}
 
-  .responsiveTable td {
-    display: flex;
-    justify-content: space-between;
+/* Stats Cards Grid */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.statCard {
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+@media screen and (max-width: 1023px) {
+  .statsGrid {
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .statCard {
+    flex-direction: column;
     align-items: center;
-    text-align: right;
-    padding: 0.5rem 1rem;
-    border: none !important;
-    border-top: none !important;
+    text-align: center;
+    padding: 0.75rem 0.25rem;
+    gap: 0.5rem;
   }
+  .statIconWrapper {
+    padding: 0.5rem;
+  }
+  .statInfo h3 {
+    font-size: 1.1rem;
+  }
+  .statInfo p {
+    font-size: 0.65rem;
+    line-height: 1.2;
+  }
+  .statLink {
+    display: none; /* Hidden on mobile stats cards as per mockup */
+  }
+}
 
-  .responsiveTable td::before {
-    content: attr(data-label);
-    font-weight: bold;
+.statIconWrapper {
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+}
+
+.iconTools { background: #fff7ed; color: #f97316; }
+.iconBiz { background: #f0fdf4; color: #22c55e; }
+.iconRentals { background: #eff6ff; color: #3b82f6; }
+
+.statInfo h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.statInfo p {
+  color: #666;
+  font-size: 0.875rem;
+}
+
+.statLink {
+  color: #3b82f6;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: 0.5rem;
+}
+
+/* Quick Actions */
+.sectionTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: #1a1a1a;
+}
+
+.quickActions {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+}
+
+@media screen and (max-width: 1023px) {
+  .quickActions {
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .actionCard {
+    padding: 1rem 0.25rem;
+  }
+  .actionCard h4 {
+    font-size: 0.75rem;
+    line-height: 1.2;
+  }
+  .actionCard p {
+    display: none; /* Subtitles hidden on mobile quick actions */
+  }
+  .sectionTitle {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+  }
+}
+
+.actionCard {
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  text-align: center;
+  border: 1px solid #f0f0f0;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.actionCard:hover {
+  border-color: #f97316;
+  transform: translateY(-2px);
+}
+
+.actionIcon {
+  color: #f97316;
+  margin-bottom: 1rem;
+}
+
+.actionCard h4 {
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 0.25rem;
+}
+
+.actionCard p {
+  font-size: 0.75rem;
+  color: #999;
+}
+
+/* Dashboard Sections */
+.dashboardGrid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 2.5rem;
+}
+
+.rentalListingsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.contentCard {
+  background: #fff;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.cardHeader h3 {
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 2rem 1rem;
+}
+
+@media screen and (max-width: 1023px) {
+  .emptyState {
+    display: flex;
+    align-items: center;
     text-align: left;
+    padding: 1rem;
+    gap: 1rem;
+  }
+  .emptyIcon {
+    margin-bottom: 0;
+    font-size: 3rem;
+  }
+  .emptyContent {
     flex: 1;
   }
+  .emptyText {
+    margin-bottom: 0.5rem;
+  }
+  .browseBtn {
+    padding: 0.25rem 0;
+    background: transparent;
+    color: #f97316;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+  .browseBtn::after {
+    content: "→";
+  }
+}
+
+.emptyIcon {
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.emptyText {
+  color: #666;
+  font-size: 0.875rem;
+  margin-bottom: 1.5rem;
+}
+
+.browseBtn {
+  background: #f97316;
+  color: #fff;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tagOrange {
+  background-color: #fff7ed;
+  color: #f97316;
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+/* Recommended Tools */
+.recommendedSection {
+  margin-top: 2.5rem;
+}
+
+.toolsCarousel {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  padding: 0.5rem 0.5rem 1.5rem 0.5rem;
+  scrollbar-width: none;
+}
+
+.toolsCarousel::-webkit-scrollbar {
+  display: none;
+}
+
+.miniToolCard {
+  min-width: 200px;
+  background: #fff;
+  border-radius: 1rem;
+  overflow: hidden;
+  border: 1px solid #f0f0f0;
+  position: relative;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.favoriteBtn {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+  color: #999;
+}
+
+.favoriteBtn:hover {
+  background: #fff;
+  color: #ef4444;
+}
+
+.toolImage {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+}
+
+.toolInfo {
+  padding: 0.75rem;
+}
+
+.toolName {
+  font-weight: 600;
+  font-size: 0.875rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.toolPrice {
+  font-size: 0.75rem;
+  color: #666;
+  margin-top: 0.25rem;
+}
+
+/* Side Panels */
+.sidePanel {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+.activityList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.activityItem {
+  display: flex;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+}
+
+.activityIcon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f3f4f6;
+}
+
+.activityContent p {
+  color: #1a1a1a;
+}
+
+.activityTime {
+  color: #999;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.viewAllLink {
+  color: #f97316;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* Mobile Navigation */
+.mobileNav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #1e293b;
+  padding: 0.75rem;
+  justify-content: space-around;
+  z-index: 100;
+}
+
+.mobileNavLink {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #94a3b8;
+  font-size: 0.7rem;
+  text-decoration: none;
+  gap: 0.25rem;
+}
+
+.mobileNavLink.active {
+  color: #f97316;
+}
+
+@media screen and (max-width: 1023px) {
+  .sidebar { display: none; }
+  .mainContent { padding: 1.5rem; padding-bottom: 5rem; }
+  .statsGrid { grid-template-columns: 1fr; }
+  .quickActions { grid-template-columns: repeat(2, 1fr); }
+  .dashboardGrid { grid-template-columns: 1fr; }
+  .rentalListingsGrid { grid-template-columns: 1fr; }
+  .mobileNav { display: flex; }
 }
