@@ -486,14 +486,36 @@
   background: #f3f4f6;
 }
 
-.activityContent p {
-  color: #1a1a1a;
+.requestIcon {
+  background: #f3f4f6;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.activityTime {
-  color: #999;
-  font-size: 0.75rem;
-  margin-top: 0.25rem;
+.activityContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.activityContent p {
+  color: #1a1a1a;
+  word-wrap: break-word;
+}
+
+.requestHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.requestInfo {
+  flex: 1;
+  min-width: 0;
 }
 
 .viewAllLink {
@@ -501,6 +523,27 @@
   font-size: 0.875rem;
   font-weight: 600;
   text-decoration: none;
+}
+
+@media screen and (max-width: 1215px) {
+  .dashboardGrid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .sidePanel {
+    flex-direction: row;
+    gap: 1.5rem;
+  }
+
+  .sidePanel > div {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .rentalListingsGrid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Mobile Navigation */
@@ -533,9 +576,10 @@
 @media screen and (max-width: 1023px) {
   .sidebar { display: none; }
   .mainContent { padding: 1.5rem; padding-bottom: 5rem; }
-  .statsGrid { grid-template-columns: 1fr; }
+  .statsGrid { grid-template-columns: repeat(3, 1fr); }
   .quickActions { grid-template-columns: repeat(2, 1fr); }
   .dashboardGrid { grid-template-columns: 1fr; }
   .rentalListingsGrid { grid-template-columns: 1fr; }
   .mobileNav { display: flex; }
+  .statLink { display: none; }
 }
