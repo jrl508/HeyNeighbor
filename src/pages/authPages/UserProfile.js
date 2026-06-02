@@ -103,6 +103,23 @@ const UserProfile = () => {
     setEditMode(false);
   };
 
+  const handleUseLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+          alert(`Location captured: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}. In a production app, this would auto-fill your Zip Code.`);
+        },
+        (error) => {
+          console.error("Geolocation error:", error);
+          alert("Unable to retrieve your location.");
+        }
+      );
+    } else {
+      alert("Geolocation is not supported by your browser.");
+    }
+  };
+
   const handleUploadImage = async (e) => {
     e.preventDefault();
     if (!imageFile) return;
@@ -279,10 +296,11 @@ const UserProfile = () => {
                   <label className="label">
                     Location {editMode ? "(Zip Code)" : ""}
                   </label>
-                  <div className="control">
+                  <div className="control is-flex" style={{ gap: "10px" }}>
                     <input
                       className="input"
                       type="text"
+                      style={{ flex: 1 }}
                       value={
                         editMode
                           ? zipCode
@@ -291,6 +309,16 @@ const UserProfile = () => {
                       onChange={(e) => setZipCode(e.target.value)}
                       disabled={!editMode}
                     />
+                    {editMode && (
+                      <button 
+                        type="button"
+                        className="button is-info is-light"
+                        onClick={handleUseLocation}
+                        title="Use current location"
+                      >
+                        📍
+                      </button>
+                    )}
                   </div>
                 </div>
 
