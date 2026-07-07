@@ -31,6 +31,9 @@ const LocalBiz = () => {
   const [searchZip, setSearchZip] = useState("");
   const [searchRadius, setSearchRadius] = useState(10);
   const [isSearching, setIsSearching] = useState(false);
+  const [useDevice, setUseDevice] = useState(false);
+  const [deviceCoords, setDeviceCoords] = useState(null);
+  const [geoLoading, setGeoLoading] = useState(false);
 
   // Fetch businesses on component mount
   useEffect(() => {
@@ -60,28 +63,24 @@ const LocalBiz = () => {
     }
   };
 
-  const handleSearch = async () => {
-    if (!searchZip.trim()) {
-      setError("Please enter a ZIP code");
-      return;
-    }
-
+  const executeSearch = async (loc, rad, limit = 20, offset = 0) => {
     setLoading(true);
     setError("");
     setIsSearching(true);
 
     try {
-      const response = await searchByLocation(searchZip, searchRadius);
+      const response = await searchByLocation(loc, rad, limit, offset);
 
       if (!response.ok) {
-        throw new Error("Failed to search businesses");
+        const errorResponse = await response.json();
+        throw new Error(errorResponse.message || "Failed to search businesses");
       }
 
       const data = await response.json();
       setBusinesses(data.businesses);
       setPagination(data.pagination);
     } catch (err) {
-      console.error("[LocalBiz] handleSearch error=", err);
+      console.error("[LocalBiz] executeSearch error=", err);
       const errorMsg =
         err instanceof Error ? err.message : "Failed to search businesses";
       setError(errorMsg);
@@ -90,9 +89,58 @@ const LocalBiz = () => {
     }
   };
 
+  const handleSearch = async () => {
+    if (useDevice && deviceCoords) {
+      await executeSearch(deviceCoords, searchRadius);
+    } else {
+      if (!searchZip.trim()) {
+        setError("Please enter a ZIP code");
+        return;
+      }
+      await executeSearch(searchZip.trim(), searchRadius);
+    }
+  };
+
+  const handleUseLocation = () => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser");
+      return;
+    }
+    setGeoLoading(true);
+    setError("");
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const coords = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude
+        };
+        setDeviceCoords(coords);
+        setUseDevice(true);
+        setSearchZip("Current Location");
+        setGeoLoading(false);
+        executeSearch(coords, searchRadius);
+      },
+      (err) => {
+        console.error(err);
+        setError("Unable to retrieve your location.");
+        setGeoLoading(false);
+      }
+    );
+  };
+
+  const handleInputChange = (e) => {
+    setSearchZip(e.target.value);
+    if (useDevice) {
+      setUseDevice(false);
+      setDeviceCoords(null);
+    }
+  };
+
   const handleClearSearch = () => {
     setSearchZip("");
     setSearchRadius(10);
+    setUseDevice(false);
+    setDeviceCoords(null);
     fetchBusinesses();
   };
 
@@ -162,7 +210,7 @@ const LocalBiz = () => {
   };
 
   return (
-    <div className="container px-2">
+    <div className="container p-4">
       <div className="is-flex is-align-items-center is-justify-content-space-between mb-4">
         <div>
           <h1 className="title is-4 mb-1">Local Business</h1>
@@ -200,9 +248,20 @@ const LocalBiz = () => {
                   type="text"
                   placeholder="ZIP code"
                   value={searchZip}
-                  onChange={(e) => setSearchZip(e.target.value)}
+                  onChange={handleInputChange}
                   onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+                  disabled={geoLoading}
                 />
+              </p>
+              <p className="control">
+                <button
+                  type="button"
+                  className={`button is-info is-light ${geoLoading ? 'is-loading' : ''}`}
+                  onClick={handleUseLocation}
+                  title="Use current location"
+                >
+                  📍
+                </button>
               </p>
               <p className="control">
                 <span className="select">
@@ -220,13 +279,13 @@ const LocalBiz = () => {
             </div>
             <div className="field is-grouped">
               <p className="control is-expanded">
-                <button onClick={handleSearch} className="button is-info is-fullwidth">
+                <button onClick={handleSearch} className="button is-info is-fullwidth" disabled={geoLoading}>
                   Search
                 </button>
               </p>
               {isSearching && (
                 <p className="control">
-                  <button onClick={handleClearSearch} className="button is-light">
+                  <button onClick={handleClearSearch} className="button is-light" disabled={geoLoading}>
                     Clear
                   </button>
                 </p>

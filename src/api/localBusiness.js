@@ -32,21 +32,29 @@ export const listBusinesses = async (limit = 20, offset = 0) => {
   return response;
 };
 
-// Search businesses by location (zip code + radius)
+// Search businesses by location (zip code or coordinates + radius)
 export const searchByLocation = async (
-  zip,
+  location,
   radius = 10,
   limit = 20,
   offset = 0,
 ) => {
+  let locationParams = "";
+  if (location && typeof location === "object" && location.lat !== undefined && location.lng !== undefined) {
+    locationParams = `lat=${location.lat}&lng=${location.lng}`;
+  } else {
+    locationParams = `zip=${location}`;
+  }
+
   const response = await fetch(
-    `${api}/local-businesses/search?zip=${zip}&radius=${radius}&limit=${limit}&offset=${offset}`,
+    `${api}/local-businesses/search?${locationParams}&radius=${radius}&limit=${limit}&offset=${offset}`,
     {
       method: "GET",
     },
   );
   return response;
 };
+
 
 // Search businesses by type
 export const searchByType = async (type, limit = 20, offset = 0) => {

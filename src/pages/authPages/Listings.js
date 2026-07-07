@@ -6,6 +6,7 @@ import ToolModal from "../../components/ToolModal";
 import BookingModal from "../../components/BookingModal";
 import Pagination from "../../components/Pagination";
 import { useAuth } from "../../hooks/useAuth";
+import { useDeviceLocation } from "../../hooks/useDeviceLocation";
 
 const Listings = () => {
   const { state } = useAuth();
@@ -21,7 +22,15 @@ const Listings = () => {
   const [error, setError] = useState(null);
   const [zip, setZip] = useState(user?.zip_code || null);
   const [radius, setRadius] = useState(10);
+  const [useDevice, setUseDevice] = useState(true);
   const itemsPerPage = 8;
+
+  const {
+    location: deviceCoords,
+    loading: geoLoading,
+    error: geoError,
+    getLocation: triggerGeoFetch,
+  } = useDeviceLocation(true);
 
   // Update zip when user's zip_code loads
   useEffect(() => {
@@ -37,10 +46,18 @@ const Listings = () => {
       setError(null);
       try {
         const token = localStorage.getItem("token");
-        const params = new URLSearchParams({
-          zip,
+        const queryParams = {
           radius: String(radius),
-        });
+        };
+
+        if (useDevice && deviceCoords) {
+          queryParams.lat = String(deviceCoords.lat);
+          queryParams.lng = String(deviceCoords.lng);
+        } else if (zip) {
+          queryParams.zip = zip;
+        }
+
+        const params = new URLSearchParams(queryParams);
         const response = await fetch(
           `${process.env.REACT_APP_API_URL}/tools/search?${params}`,
           {
@@ -69,10 +86,11 @@ const Listings = () => {
       }
     };
 
-    if (zip && radius !== null) {
+    const hasLocation = (useDevice && deviceCoords) || zip;
+    if (hasLocation && radius !== null) {
       fetchTools();
     }
-  }, [zip, radius]);
+  }, [zip, radius, useDevice, deviceCoords, user?.id]);
 
   // Filter tools by search query
   useEffect(() => {
@@ -111,12 +129,17 @@ const Listings = () => {
     currentPage * itemsPerPage,
   );
 
+  const hasActiveLocation = (useDevice && deviceCoords) || zip;
+
   return (
     <div>
       <div className="title is-5">Listings</div>
-      {!zip ? (
+      {!hasActiveLocation && !geoLoading ? (
         <div className="notification is-warning">
-          Please update your profile with a valid zip code to search for tools.
+          <p className="mb-2">Please enable device location or add a valid ZIP code to your profile to view listings.</p>
+          <button className="button is-warning is-dark is-small" onClick={() => { setUseDevice(true); triggerGeoFetch(); }}>
+            Enable Device GPS
+          </button>
         </div>
       ) : (
         <>
@@ -135,18 +158,68 @@ const Listings = () => {
             </p>
           </div>
           {error && <div className="notification is-danger">{error}</div>}
-          <div className="is-size-6">
-            There are{" "}
-            <span className="has-text-weight-semibold is-clickable">
-              {filteredTools.length}
-            </span>{" "}
-            listings within{" "}
-            <span className="has-text-weight-semibold is-clickable">
-              {radius}
-            </span>{" "}
-            miles of{" "}
-            <span className="has-text-weight-semibold is-clickable">{zip}</span>
+          
+          <div className="is-flex is-align-items-center is-flex-wrap-wrap mb-4" style={{ gap: "12px" }}>
+            <div className="is-size-6">
+              There are{" "}
+              <span className="has-text-weight-semibold">
+                {filteredTools.length}
+              </span>{" "}
+              listings within{" "}
+              <span className="has-text-weight-semibold">
+                {radius}
+              </span>{" "}
+              miles of{" "}
+              <span className="has-text-weight-semibold">
+                {useDevice && deviceCoords ? "your device location" : `${zip || "profile ZIP"}`}
+              </span>
+            </div>
+
+            {/* Premium Location Source Controller */}
+            <div className="is-flex is-align-items-center">
+              {useDevice && deviceCoords ? (
+                <span className="tag is-success is-light is-medium" style={{ display: "inline-flex", alignItems: "center" }}>
+                  <span className="mr-1">📍</span> GPS Active
+                  <button 
+                    className="button is-small is-ghost ml-2 p-0 has-text-info" 
+                    onClick={() => setUseDevice(false)}
+                    style={{ height: "auto", fontSize: "0.75rem", textDecoration: "underline" }}
+                    title="Switch to profile ZIP code"
+                  >
+                    Use ZIP instead
+                  </button>
+                </span>
+              ) : (
+                <span className="tag is-info is-light is-medium" style={{ display: "inline-flex", alignItems: "center" }}>
+                  <span className="mr-1">📮</span> ZIP: {zip || "Not Set"}
+                  <button 
+                    className="button is-small is-ghost ml-2 p-0 has-text-info" 
+                    onClick={() => {
+                      setUseDevice(true);
+                      triggerGeoFetch();
+                    }}
+                    style={{ height: "auto", fontSize: "0.75rem", textDecoration: "underline" }}
+                    title="Use current device location"
+                  >
+                    Use GPS
+                  </button>
+                </span>
+              )}
+              
+              {geoLoading && (
+                <span className="is-size-7 has-text-grey ml-3 is-italic">
+                  Locating device...
+                </span>
+              )}
+              
+              {geoError && !deviceCoords && (
+                <span className="tag is-danger is-light ml-3" title={geoError}>
+                  ⚠️ GPS Denied/Failed
+                </span>
+              )}
+            </div>
           </div>
+
           {loading ? (
             <div className="has-text-centered p-6">
               <p>Loading tools...</p>

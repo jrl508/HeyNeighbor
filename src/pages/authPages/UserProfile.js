@@ -39,6 +39,7 @@ const UserProfile = () => {
   const [phone, setPhone] = useState(phone_number || "");
   const [email, setEmail] = useState(userEmail || "");
   const [zipCode, setZipCode] = useState(zip_code || "");
+  const [locLoading, setLocLoading] = useState(false);
   const [imageFile, setImageFile] = useState(null);
   const [fileInputKey, setFileInputKey] = useState(Date.now());
   const [openModal, setOpenModal] = useState(false);
@@ -105,20 +106,46 @@ const UserProfile = () => {
 
   const handleUseLocation = () => {
     if (navigator.geolocation) {
+      setLocLoading(true);
       navigator.geolocation.getCurrentPosition(
         async (position) => {
           const { latitude, longitude } = position.coords;
-          alert(`Location captured: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}. In a production app, this would auto-fill your Zip Code.`);
+          try {
+            const response = await fetch(
+              `${process.env.REACT_APP_API_URL}/users/reverse-geocode?lat=${latitude}&lng=${longitude}`
+            );
+            if (!response.ok) {
+              throw new Error("Failed to reverse-geocode coordinates");
+            }
+            const data = await response.json();
+            if (data && data.zip) {
+              setZipCode(data.zip);
+            } else {
+              alert("Location captured, but could not determine ZIP code.");
+            }
+          } catch (error) {
+            console.error("Error getting location info:", error);
+            alert("Error auto-detecting ZIP code. Please enter it manually.");
+          } finally {
+            setLocLoading(false);
+          }
         },
         (error) => {
           console.error("Geolocation error:", error);
           alert("Unable to retrieve your location.");
+          setLocLoading(false);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 60000
         }
       );
     } else {
       alert("Geolocation is not supported by your browser.");
     }
   };
+
 
   const handleUploadImage = async (e) => {
     e.preventDefault();
@@ -209,8 +236,8 @@ const UserProfile = () => {
       <div className="card shadow-none-mobile" style={{ overflow: "hidden", border: "1px solid #efefef" }}>
         <div className="columns is-gapless mb-0 is-multiline">
           <div className="column is-12-mobile is-narrow-tablet is-flex">
-            <div 
-              className="card-image is-clickable h-100" 
+            <div
+              className="card-image is-clickable h-100"
               onClick={handleOpenModal}
               style={{ minHeight: "250px", aspectRatio: "1 / 1" }}
             >
@@ -218,10 +245,10 @@ const UserProfile = () => {
                 <img
                   src={image}
                   alt="Profile"
-                  style={{ 
-                    width: "100%", 
-                    height: "100%", 
-                    objectFit: "cover", 
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
                   }}
                 />
               </figure>
@@ -310,10 +337,11 @@ const UserProfile = () => {
                       disabled={!editMode}
                     />
                     {editMode && (
-                      <button 
+                      <button
                         type="button"
-                        className="button is-info is-light"
+                        className={`button is-info is-light ${locLoading ? 'is-loading' : ''}`}
                         onClick={handleUseLocation}
+                        disabled={locLoading}
                         title="Use current location"
                       >
                         📍
@@ -406,7 +434,7 @@ const UserProfile = () => {
           <div className="notification is-danger is-light p-3">{reviewsError}</div>
         ) : reviews.length === 0 ? (
           <div className="notification is-light p-5 has-text-centered">
-             <p className="has-text-grey">No reviews yet.</p>
+            <p className="has-text-grey">No reviews yet.</p>
           </div>
         ) : (
           <div className="columns is-multiline">
@@ -417,19 +445,19 @@ const UserProfile = () => {
                     <p className="has-text-weight-bold">{review.reviewer_username}</p>
                     <span className="is-size-7 has-text-grey">{formatDisplayDate(review.created_at)}</span>
                   </div>
-                  
+
                   <div className="columns is-mobile is-multiline is-gapless mb-2">
                     <div className="column is-6">
-                       <p className="is-size-7">Overall: {renderStars(review.rating_overall)}</p>
+                      <p className="is-size-7">Overall: {renderStars(review.rating_overall)}</p>
                     </div>
                     <div className="column is-6">
-                       <p className="is-size-7">Condition: {renderStars(review.rating_condition)}</p>
+                      <p className="is-size-7">Condition: {renderStars(review.rating_condition)}</p>
                     </div>
                     <div className="column is-6">
-                       <p className="is-size-7">Communication: {renderStars(review.rating_communication)}</p>
+                      <p className="is-size-7">Communication: {renderStars(review.rating_communication)}</p>
                     </div>
                     <div className="column is-6">
-                       <p className="is-size-7">Punctuality: {renderStars(review.rating_punctuality)}</p>
+                      <p className="is-size-7">Punctuality: {renderStars(review.rating_punctuality)}</p>
                     </div>
                   </div>
 
@@ -458,11 +486,11 @@ const renderStars = (rating) => {
   return (
     <span className="star-rating is-inline-flex">
       {[...Array(5)].map((_, i) => (
-        <Icon 
-          key={i} 
-          path={mdiStar} 
-          size={0.5} 
-          color={i < rating ? "#ffc107" : "#e4e5e9"} 
+        <Icon
+          key={i}
+          path={mdiStar}
+          size={0.5}
+          color={i < rating ? "#ffc107" : "#e4e5e9"}
         />
       ))}
     </span>

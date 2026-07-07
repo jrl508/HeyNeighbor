@@ -18,33 +18,53 @@ const SignUpForm = ({ setRegisterMode, errors, setErrors }) => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [zipCode, setZipCode] = useState("");
+  const [locLoading, setLocLoading] = useState(false);
   const navigate = useNavigate();
   const { state, dispatch } = useAuth();
 
   const handleUseLocation = () => {
     if (navigator.geolocation) {
+      setLocLoading(true);
       navigator.geolocation.getCurrentPosition(
         async (position) => {
           const { latitude, longitude } = position.coords;
           try {
-            // We'll use a public API or our own backend if we had one for reverse geocoding
-            // For now, let's assume we can at least log it or if we had a zip lookup by coords
             console.log(`Latitude: ${latitude}, Longitude: ${longitude}`);
-            // In a real app, we'd fetch the zip from these coords here.
-            alert(`Location captured: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}. In a production app, this would auto-fill your Zip Code.`);
+            const response = await fetch(
+              `${process.env.REACT_APP_API_URL}/users/reverse-geocode?lat=${latitude}&lng=${longitude}`
+            );
+            if (!response.ok) {
+              throw new Error("Failed to reverse-geocode coordinates");
+            }
+            const data = await response.json();
+            if (data && data.zip) {
+              setZipCode(data.zip);
+            } else {
+              alert("Location captured, but could not determine ZIP code.");
+            }
           } catch (error) {
             console.error("Error getting location info:", error);
+            alert("Error auto-detecting ZIP code. Please enter it manually.");
+          } finally {
+            setLocLoading(false);
           }
         },
         (error) => {
           console.error("Geolocation error:", error);
           alert("Unable to retrieve your location.");
+          setLocLoading(false);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 60000
         }
       );
     } else {
       alert("Geolocation is not supported by your browser.");
     }
   };
+
 
   const handleLogin = async (email, password) => {
     try {
@@ -162,14 +182,16 @@ const SignUpForm = ({ setRegisterMode, errors, setErrors }) => {
           />
           <button 
             type="button"
-            className="button is-info is-light is-medium"
+            className={`button is-info is-light is-medium ${locLoading ? 'is-loading' : ''}`}
             onClick={handleUseLocation}
+            disabled={locLoading}
             title="Use current location"
           >
             📍
           </button>
         </div>
       </div>
+
 
       <div className="buttons-wrapper">
         <button
