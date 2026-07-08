@@ -61,3 +61,276 @@ code {
   width: 100% !important;
 }
 
+/* Profile Page Custom Mockup Styles */
+.profile-avatar-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 20px;
+}
+
+.profile-avatar-circle {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background-color: #e5e7eb;
+  overflow: hidden;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.2s ease;
+}
+
+@media screen and (min-width: 769px) {
+  .profile-avatar-circle {
+    width: 300px !important;
+    height: 300px !important;
+  }
+}
+
+.profile-avatar-circle:hover {
+  background-color: #d1d5db;
+}
+
+.profile-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-avatar-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  padding-bottom: 25%;
+  background-color: rgba(229, 231, 235, 0.55); /* subtle tint */
+}
+
+.profile-avatar-circle:hover .profile-avatar-overlay {
+  background-color: rgba(209, 213, 221, 0.7);
+}
+
+.profile-avatar-camera-icon {
+  color: #1f2937;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-avatar-overlay-text {
+  background-color: rgba(0, 0, 0, 0.85);
+  color: #ffffff;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* Form Styles */
+.profile-form-row {
+  display: flex;
+  gap: 20px;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.profile-field-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 8px;
+}
+
+.profile-field-group.full-width {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.profile-field-label {
+  font-size: 11px;
+  color: #6b7280;
+  font-weight: 500;
+  margin-bottom: 4px;
+  text-transform: capitalize;
+}
+
+.profile-field-value {
+  font-size: 15px;
+  color: #1f2937;
+  font-weight: 500;
+  min-height: 24px;
+  display: flex;
+  align-items: center;
+}
+
+.profile-field-input {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  font-size: 15px !important;
+  color: #1f2937 !important;
+  font-weight: 500 !important;
+  width: 100% !important;
+  height: auto !important;
+}
+
+.profile-field-input:focus {
+  outline: none !important;
+  border: none !important;
+}
+
+.profile-field-group:focus-within {
+  border-bottom-color: #ea580c;
+}
+
+/* Orange Button */
+.profile-orange-button {
+  background-color: #ea580c !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-radius: 8px !important;
+  height: 44px !important;
+  font-weight: 600 !important;
+  font-size: 15px !important;
+  width: 100% !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: background-color 0.2s ease !important;
+}
+
+.profile-orange-button:hover {
+  background-color: #c2410c !important;
+}
+
+/* Secondary Cancel Button */
+.profile-cancel-button {
+  background-color: #f3f4f6 !important;
+  color: #4b5563 !important;
+  border: none !important;
+  border-radius: 8px !important;
+  height: 44px !important;
+  font-weight: 600 !important;
+  font-size: 15px !important;
+  width: 100% !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: background-color 0.2s ease !important;
+}
+
+.profile-cancel-button:hover {
+  background-color: #e5e7eb !important;
+}
+
+/* Edit actions grid */
+.profile-edit-actions-mockup {
+  display: flex;
+  gap: 15px;
+  width: 100%;
+}
+
+/* Reviews Rework */
+.reviews-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  width: 100%;
+}
+
+@media screen and (max-width: 1024px) {
+  .reviews-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .reviews-grid {
+    grid-template-columns: 1fr;
+  }
+  .profile-form-row {
+    flex-direction: column;
+    gap: 20px;
+  }
+}
+
+.review-card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+  border: 1px solid #f3f4f6;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+}
+
+.review-stars {
+  display: flex;
+  gap: 2px;
+}
+
+.review-comment {
+  font-size: 13.5px;
+  color: #374151;
+  line-height: 1.5;
+  flex-grow: 1;
+  margin-bottom: 8px;
+}
+
+.review-user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: auto;
+}
+
+.review-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: #4b5563;
+  border: 1px solid #e5e7eb;
+}
+
+.review-meta {
+  display: flex;
+  flex-direction: column;
+}
+
+.review-username {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #1f2937;
+  line-height: 1.2;
+}
+
+.review-date {
+  font-size: 11px;
+  color: #9ca3af;
+  margin-top: 1px;
+}
+
