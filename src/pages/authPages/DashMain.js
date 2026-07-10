@@ -15,9 +15,10 @@ import {
   mdiHeartOutline,
 } from "@mdi/js";
 import styles from "../../styles/Dashboard.module.css";
-import { bookingsAPI, paymentsAPI, toolsAPI } from "../../api";
+import { bookingsAPI, paymentsAPI, toolsAPI, neighborhoodAPI } from "../../api";
 import { sendMessage } from "../../api/messaging";
 import ReviewModal from "../../components/ReviewModal";
+import RequestToolModal from "../../components/RequestToolModal";
 import RescheduleModal from "../../components/RescheduleModal";
 import { useAuth } from "../../hooks/useAuth";
 import { useBookings } from "../../contexts/BookingContext";
@@ -41,7 +42,31 @@ const DashMain = () => {
   const [reviewingBookingId, setReviewingBookingId] = useState(null);
   const [isRescheduleModalOpen, setIsRescheduleModalOpen] = useState(false);
   const [reschedulingBooking, setReschedulingBooking] = useState(null);
+  
+  const [neighborhoodRequests, setNeighborhoodRequests] = useState([]);
+  const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
+  const [requestsLoading, setRequestsLoading] = useState(true);
+
   const token = localStorage.getItem("token");
+
+  const fetchNeighborhoodRequests = async () => {
+    if (!token) return;
+    setRequestsLoading(true);
+    try {
+      const data = await neighborhoodAPI.getRequests(token, { limit: 3 });
+      setNeighborhoodRequests(data);
+    } catch (err) {
+      console.error("Error fetching requests for dashboard:", err);
+    } finally {
+      setRequestsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (token) {
+      fetchNeighborhoodRequests();
+    }
+  }, [token]);
 
   useEffect(() => {
     // Mock recommended tools since backend doesn't have it yet
@@ -92,6 +117,7 @@ const DashMain = () => {
   const refreshData = () => {
     if (token) {
       fetchBookings(token);
+      fetchNeighborhoodRequests();
     }
   };
 
@@ -191,7 +217,7 @@ const DashMain = () => {
               icon={mdiBellOutline}
               title="Request a Tool"
               subtitle="Can't find it? Let neighbors know"
-              onClick={() => {}}
+              onClick={() => setIsRequestModalOpen(true)}
             />
           </div>
 
@@ -378,45 +404,52 @@ const DashMain = () => {
           <div className={styles.contentCard}>
             <div className={styles.cardHeader}>
               <h3 className="is-size-6">Neighborhood Requests</h3>
-              <Link to="#" className={styles.viewAllLink}>
+              <Link to="/dashboard/requests" className={styles.viewAllLink}>
                 View all
               </Link>
             </div>
             <div className={styles.activityList}>
-              <div className={styles.activityItem}>
-                <div className={styles.requestIcon}>
-                  <Icon path={mdiTools} size={1} />
-                </div>
-                <div className={styles.activityContent}>
-                  <div className={styles.requestHeader}>
-                    <div className={styles.requestInfo}>
-                      <p>
-                        <strong>Post Hole Digger</strong>
-                      </p>
-                      <p className="is-size-7 has-text-grey">
-                        Needed by May 30
-                      </p>
-                      <p className="is-size-7 has-text-grey">1.2 mi away</p>
+              {requestsLoading ? (
+                <div className="p-4 has-text-centered is-size-7 has-text-grey">Loading requests...</div>
+              ) : neighborhoodRequests.length === 0 ? (
+                <div className="p-4 has-text-centered is-size-7 has-text-grey">No active tool requests nearby.</div>
+              ) : (
+                neighborhoodRequests.map((req) => {
+                  const isNew = new Date() - new Date(req.created_at) < 24 * 60 * 60 * 1000;
+                  const distanceStr = req.distance !== undefined ? `${parseFloat(req.distance).toFixed(1)} mi away` : "";
+                  return (
+                    <div 
+                      key={req.id} 
+                      className={styles.activityItem} 
+                      style={{ cursor: "pointer" }}
+                      onClick={() => navigate("/dashboard/requests")}
+                    >
+                      <div className={styles.requestIcon}>
+                        <Icon path={mdiTools} size={1} />
+                      </div>
+                      <div className={styles.activityContent}>
+                        <div className={styles.requestHeader}>
+                          <div className={styles.requestInfo}>
+                            <p>
+                              <strong>{req.tool_name}</strong>
+                            </p>
+                            <p className="is-size-7 has-text-grey">
+                              Needed by {formatDisplayDate(req.needed_by)}
+                            </p>
+                            {distanceStr && (
+                              <p className="is-size-7 has-text-grey">{distanceStr}</p>
+                            )}
+                          </div>
+                          {isNew && <span className={styles.tagOrange}>NEW</span>}
+                        </div>
+                      </div>
                     </div>
-                    <span className={styles.tagOrange}>NEW</span>
-                  </div>
-                </div>
-              </div>
-              <div className={styles.activityItem}>
-                <div className={styles.requestIcon}>
-                  <Icon path={mdiTools} size={1} />
-                </div>
-                <div className={styles.activityContent}>
-                  <p>
-                    <strong>Concrete Mixer</strong>
-                  </p>
-                  <p className="is-size-7 has-text-grey">Needed by Jun 2</p>
-                  <p className="is-size-7 has-text-grey">2.1 mi away</p>
-                </div>
-              </div>
+                  );
+                })
+              )}
             </div>
             <div className="has-text-centered mt-4 is-hidden-mobile">
-              <Link to="#" className={styles.viewAllLink}>
+              <Link to="/dashboard/requests" className={styles.viewAllLink}>
                 See all requests <Icon path={mdiChevronRight} size={0.5} />
               </Link>
             </div>
@@ -429,6 +462,11 @@ const DashMain = () => {
         onClose={() => setIsReviewModalOpen(false)}
         bookingId={reviewingBookingId}
         onReviewSubmitted={refreshData}
+      />
+      <RequestToolModal
+        isOpen={isRequestModalOpen}
+        onClose={() => setIsRequestModalOpen(false)}
+        onRequestSubmitted={refreshData}
       />
       {isRescheduleModalOpen && reschedulingBooking && (
         <RescheduleModal
