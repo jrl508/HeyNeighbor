@@ -16,7 +16,8 @@ import {
   mdiHistory,
   mdiWallet,
   mdiHome,
-  mdiMagnify
+  mdiMagnify,
+  mdiBellOutline
 } from "@mdi/js";
 import { useAuth } from "../../hooks/useAuth.js";
 import { useChat } from "../../contexts/ChatContext.js";
@@ -98,6 +99,7 @@ const Dashboard = () => {
           <p className={styles.navLabel} style={{ marginTop: "1.5rem" }}>Neighborhood</p>
           <ul className={styles.navList}>
             <NavItem to="listings" icon={mdiFormatListBulleted} label="Listings" />
+            <NavItem to="requests" icon={mdiBellOutline} label="Requests" />
             <NavItem to="local-biz" icon={mdiStorefront} label="Local Business" />
           </ul>
 

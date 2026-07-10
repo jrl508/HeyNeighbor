@@ -13,6 +13,7 @@ import UserProfile from "./pages/authPages/UserProfile";
 import LocalBiz from "./pages/authPages/LocalBusiness/LocalBiz";
 import Balance from "./pages/authPages/Balance";
 import Listings from "./pages/authPages/Listings";
+import NeighborhoodRequests from "./pages/authPages/NeighborhoodRequests";
 import Toolshed from "./pages/authPages/Tools/Toolshed";
 import TranHist from "./pages/authPages/TranHist";
 import AddTool from "./pages/authPages/Tools/AddTool";
@@ -49,6 +50,7 @@ const App = () => {
                         <Route path="local-biz" element={<LocalBiz />} />
                         <Route path="balance" element={<Balance />} />
                         <Route path="listings" element={<Listings />} />
+                        <Route path="requests" element={<NeighborhoodRequests />} />
                         <Route path="toolshed">
                           <Route index element={<Toolshed />} />
                           <Route path="new" element={<AddTool />} />
