@@ -15,7 +15,7 @@ import {
   mdiHeartOutline,
 } from "@mdi/js";
 import styles from "../../styles/Dashboard.module.css";
-import { bookingsAPI, paymentsAPI, toolsAPI, neighborhoodAPI } from "../../api";
+import { bookingsAPI, paymentsAPI, toolsAPI, neighborhoodAPI, dashboardAPI } from "../../api";
 import { sendMessage } from "../../api/messaging";
 import ReviewModal from "../../components/ReviewModal";
 import RequestToolModal from "../../components/RequestToolModal";
@@ -47,6 +47,13 @@ const DashMain = () => {
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
   const [requestsLoading, setRequestsLoading] = useState(true);
 
+  const [stats, setStats] = useState({
+    tools_available_nearby: 0,
+    local_businesses_nearby: 0,
+    active_rentals_count: 0
+  });
+  const [statsLoading, setStatsLoading] = useState(true);
+
   const token = localStorage.getItem("token");
 
   const fetchNeighborhoodRequests = async () => {
@@ -62,9 +69,24 @@ const DashMain = () => {
     }
   };
 
+  const fetchStats = async () => {
+    if (!token) return;
+    setStatsLoading(true);
+    try {
+      const data = await dashboardAPI.getDashboardStats(token);
+      setStats(data);
+    } catch (err) {
+      console.error("Error fetching stats:", err);
+    } finally {
+      setStatsLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (token) {
+      fetchBookings(token);
       fetchNeighborhoodRequests();
+      fetchStats();
     }
   }, [token]);
 
@@ -118,6 +140,7 @@ const DashMain = () => {
     if (token) {
       fetchBookings(token);
       fetchNeighborhoodRequests();
+      fetchStats();
     }
   };
 
@@ -127,7 +150,14 @@ const DashMain = () => {
   const myRentals = ongoingBookings.filter((b) => b.renter_id === user?.id);
   const myToolsRented = ongoingBookings.filter((b) => b.owner_id === user?.id);
 
-  const StatCard = ({ icon, label, value, colorClass, link, linkText }) => (
+  const scrollToRentals = () => {
+    const element = document.getElementById("active-rentals-section");
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
+  const StatCard = ({ icon, label, value, colorClass, link, linkText, onClick }) => (
     <div className={styles.statCard}>
       <div className={`${styles.statIconWrapper} ${colorClass}`}>
         <Icon path={icon} size={1.2} />
@@ -135,9 +165,15 @@ const DashMain = () => {
       <div className={styles.statInfo}>
         <h3>{value}</h3>
         <p>{label}</p>
-        <Link to={link} className={styles.statLink}>
-          {linkText} <Icon path={mdiChevronRight} size={0.6} />
-        </Link>
+        {onClick ? (
+          <button onClick={onClick} className={styles.statLink} style={{ background: "none", border: "none", padding: 0, cursor: "pointer", font: "inherit" }}>
+            {linkText} <Icon path={mdiChevronRight} size={0.6} />
+          </button>
+        ) : (
+          <Link to={link} className={styles.statLink}>
+            {linkText} <Icon path={mdiChevronRight} size={0.6} />
+          </Link>
+        )}
       </div>
     </div>
   );
@@ -166,7 +202,7 @@ const DashMain = () => {
       <div className={styles.statsGrid}>
         <StatCard
           icon={mdiTools}
-          value="42"
+          value={statsLoading ? "..." : stats.tools_available_nearby}
           label="Tools available near you"
           colorClass={styles.iconTools}
           link="/dashboard/listings"
@@ -174,7 +210,7 @@ const DashMain = () => {
         />
         <StatCard
           icon={mdiStorefront}
-          value="18"
+          value={statsLoading ? "..." : stats.local_businesses_nearby}
           label="Local businesses nearby"
           colorClass={styles.iconBiz}
           link="/dashboard/local-biz"
@@ -182,10 +218,10 @@ const DashMain = () => {
         />
         <StatCard
           icon={mdiCalendarMonth}
-          value={myRentals.length + myToolsRented.length}
+          value={loading ? "..." : myRentals.length + myToolsRented.length}
           label="Active rentals"
           colorClass={styles.iconRentals}
-          link="/dashboard"
+          onClick={scrollToRentals}
           linkText="View rentals"
         />
       </div>
@@ -222,7 +258,7 @@ const DashMain = () => {
           </div>
 
           {/* Listings Grid */}
-          <div className={styles.rentalListingsGrid}>
+          <div className={styles.rentalListingsGrid} id="active-rentals-section">
             <div className={styles.contentCard}>
               <div className={styles.cardHeader}>
                 <h3>
