@@ -345,7 +345,7 @@ const DashMain = () => {
           </div>
 
           {/* Recommended Nearby Tools */}
-          <div className={`${styles.recommendedSection} is-hidden-mobile`}>
+          {/* <div className={`${styles.recommendedSection} is-hidden-mobile`}>
             <div className={styles.cardHeader}>
               <h2 className={styles.sectionTitle} style={{ marginBottom: 0 }}>
                 Recommended Nearby Tools
@@ -383,7 +383,7 @@ const DashMain = () => {
                 </div>
               ))}
             </div>
-          </div>
+          </div> */}
         </div>
 
         {/* Side Panels */}
