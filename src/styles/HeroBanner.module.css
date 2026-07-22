@@ -1,12 +1,29 @@
 /* HeroBanner.css */
 .banner {
-  background-image: url("../../public/tools-splash.jpg"); /* Set the background image here */
+  background-image: url("../../public/tools-splash.jpg");
   background-size: cover;
   background-position: center;
-  height: 60vh; /* Adjust the height for mobile */
-  min-height: 400px;
+  height: 65vh;
+  min-height: 480px;
   display: flex;
   align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    135deg,
+    rgba(18, 30, 49, 0.85) 0%,
+    rgba(10, 20, 35, 0.75) 50%,
+    rgba(24, 43, 73, 0.85) 100%
+  );
+  z-index: 1;
 }
 
 @media screen and (min-width: 769px) {
@@ -17,7 +34,11 @@
 }
 
 .content {
+  position: relative;
+  z-index: 2;
   width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
   display: flex;
   flex-flow: column nowrap;
   align-items: center;
@@ -26,24 +47,31 @@
 }
 
 .title {
-  font-size: 2rem;
-  color: #ffffff; /* Customize the color */
+  font-family: "lobstah", cursive, sans-serif;
+  font-size: 2.8rem;
+  color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
+  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  margin-bottom: 12px;
 }
 
 @media screen and (min-width: 769px) {
   .title {
-    font-size: 3rem;
+    font-size: 4.2rem;
   }
 }
 
 .subtitle {
-  font-size: 1.1rem;
-  color: #ffffff; /* Customize the color */
-  margin-bottom: 20px;
+  font-size: 1.15rem;
+  color: #e2e8f0;
+  margin-bottom: 28px;
+  max-width: 680px;
+  line-height: 1.5;
+  font-weight: 300;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 @media screen and (min-width: 769px) {
@@ -55,35 +83,74 @@
 .button {
   box-sizing: border-box;
   width: fit-content;
-  padding: 12px 24px;
-  font-size: 1rem;
-  background: none;
-  color: #ffffff; /* Customize the text color */
-  border: 1px solid #ffffff;
-  border-radius: 4px;
+  padding: 14px 36px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, #00d2ff 0%, #0083b0 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 50px;
   cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0, 131, 176, 0.4);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.3s ease;
+  margin-bottom: 35px;
 }
 
 @media screen and (min-width: 769px) {
   .button {
-    font-size: 1.2rem;
+    font-size: 1.25rem;
+    padding: 16px 42px;
   }
 }
 
 .button:hover {
-  background-color: #535353a8; /* Customize the hover color */
-  transition: 0.2s;
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(0, 210, 255, 0.5);
+  background: linear-gradient(135deg, #00e0ff 0%, #0096cc 100%);
+}
+
+.button:active {
+  transform: translateY(1px);
 }
 
 .icon {
-  height: 40px;
-  width: 40px;
-  margin-right: 10px;
+  height: 48px;
+  width: 48px;
+  margin-right: 14px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
 }
 
 @media screen and (min-width: 769px) {
   .icon {
-    height: 60px;
-    width: 60px;
+    height: 68px;
+    width: 68px;
+    margin-right: 18px;
   }
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 10px;
+}
+
+.badgeItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  padding: 8px 18px;
+  border-radius: 30px;
+  font-size: 0.92rem;
+  font-weight: 500;
+}
+
+.badgeIcon {
+  font-size: 1rem;
 }
