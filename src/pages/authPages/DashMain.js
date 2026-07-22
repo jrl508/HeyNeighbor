@@ -410,7 +410,7 @@ const DashMain = () => {
           <div className={`${styles.contentCard} is-hidden-mobile`}>
             <div className={styles.cardHeader}>
               <h3 className="is-size-6">Neighborhood Activity</h3>
-              <Link to="#" className={styles.viewAllLink}>
+              <Link to="/dashboard/activity" className={styles.viewAllLink}>
                 View all
               </Link>
             </div>
@@ -463,7 +463,7 @@ const DashMain = () => {
               )}
             </div>
             <div className="has-text-centered mt-4">
-              <Link to="/dashboard/listings" className={styles.viewAllLink}>
+              <Link to="/dashboard/activity" className={styles.viewAllLink}>
                 See more activity <Icon path={mdiChevronRight} size={0.5} />
               </Link>
             </div>

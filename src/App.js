@@ -24,6 +24,7 @@ import { BookingProvider } from "./contexts/BookingContext";
 import { NotificationProvider } from "./contexts/NotificationContext";
 import AuthRoutes from "./components/AuthRoutes";
 import EditTool from "./pages/authPages/Tools/EditTool";
+import NeighborhoodActivity from "./pages/authPages/NeighborhoodActivity";
 
 // Initialize Stripe
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
@@ -50,6 +51,7 @@ const App = () => {
                         <Route path="balance" element={<Balance />} />
                         <Route path="listings" element={<Listings />} />
                         <Route path="requests" element={<NeighborhoodRequests />} />
+                        <Route path="activity" element={<NeighborhoodActivity />} />
                         <Route path="toolshed">
                           <Route index element={<Toolshed />} />
                           <Route path="new" element={<AddTool />} />
