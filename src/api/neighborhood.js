@@ -36,3 +36,11 @@ export const deleteRequest = async (id, token) => {
   }
   return response.json();
 };
+
+export const getActivity = async (token) => {
+  const response = await fetch(`${API_URL}/neighborhood/activity`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!response.ok) throw new Error("Failed to fetch neighborhood activity");
+  return response.json();
+};

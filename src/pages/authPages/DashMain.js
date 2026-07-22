@@ -23,7 +23,7 @@ import RescheduleModal from "../../components/RescheduleModal";
 import { useAuth } from "../../hooks/useAuth";
 import { useBookings } from "../../contexts/BookingContext";
 import { useNotifications } from "../../contexts/NotificationContext";
-import { formatDisplayDate } from "../../util/dateUtils";
+import { formatDisplayDate, formatRelativeTime } from "../../util/dateUtils";
 import { capitalize } from "../../util/UtilFunctions";
 import Avatar from "../../components/Avatar";
 
@@ -47,6 +47,9 @@ const DashMain = () => {
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
   const [requestsLoading, setRequestsLoading] = useState(true);
 
+  const [neighborhoodActivity, setNeighborhoodActivity] = useState([]);
+  const [activityLoading, setActivityLoading] = useState(true);
+
   const [stats, setStats] = useState({
     tools_available_nearby: 0,
     local_businesses_nearby: 0,
@@ -69,6 +72,20 @@ const DashMain = () => {
     }
   };
 
+  const fetchNeighborhoodActivity = async () => {
+    if (!token) return;
+    setActivityLoading(true);
+    try {
+      const data = await neighborhoodAPI.getActivity(token);
+      // Limit to 3 items on the main dashboard preview
+      setNeighborhoodActivity(data.slice(0, 3));
+    } catch (err) {
+      console.error("Error fetching neighborhood activity:", err);
+    } finally {
+      setActivityLoading(false);
+    }
+  };
+
   const fetchStats = async () => {
     if (!token) return;
     setStatsLoading(true);
@@ -87,6 +104,7 @@ const DashMain = () => {
       fetchBookings(token);
       fetchNeighborhoodRequests();
       fetchStats();
+      fetchNeighborhoodActivity();
     }
   }, [token]);
 
@@ -141,6 +159,7 @@ const DashMain = () => {
       fetchBookings(token);
       fetchNeighborhoodRequests();
       fetchStats();
+      fetchNeighborhoodActivity();
     }
   };
 
@@ -396,42 +415,55 @@ const DashMain = () => {
               </Link>
             </div>
             <div className={styles.activityList}>
-              <div className={styles.activityItem}>
-                <div className={styles.activityIcon}>
-                  <Avatar size="sm" />
+              {activityLoading ? (
+                <div className="p-4 has-text-centered is-size-7 has-text-grey">
+                  Loading activity...
                 </div>
-                <div className={styles.activityContent}>
-                  <p>
-                    <strong>Mike</strong> requested your DeWalt Drill
-                  </p>
-                  <span className={styles.activityTime}>2h ago</span>
+              ) : neighborhoodActivity.length === 0 ? (
+                <div className="p-4 has-text-centered is-size-7 has-text-grey">
+                  No recent neighborhood activity.
                 </div>
-              </div>
-              <div className={styles.activityItem}>
-                <div className={styles.activityIcon}>
-                  <Icon path={mdiStar} size={0.6} color="#fbbf24" />
-                </div>
-                <div className={styles.activityContent}>
-                  <p>
-                    <strong>Sarah</strong> rated your listing
-                  </p>
-                  <span className={styles.activityTime}>4h ago</span>
-                </div>
-              </div>
-              <div className={styles.activityItem}>
-                <div className={styles.activityIcon}>
-                  <Icon path={mdiStorefront} size={0.6} color="#22c55e" />
-                </div>
-                <div className={styles.activityContent}>
-                  <p>
-                    New business added: <strong>Taunton Hardware</strong>
-                  </p>
-                  <span className={styles.activityTime}>6h ago</span>
-                </div>
-              </div>
+              ) : (
+                neighborhoodActivity.map((act) => {
+                  if (act.activity_type === "tool_added") {
+                    return (
+                      <div key={`tool-${act.id}`} className={styles.activityItem}>
+                        <div className={styles.activityIcon}>
+                          <Avatar src={act.user_image} size="sm" />
+                        </div>
+                        <div className={styles.activityContent}>
+                          <p>
+                            <strong>{act.user_name || "Neighbor"}</strong> added a new tool: <strong>{act.name}</strong>
+                          </p>
+                          <span className={styles.activityTime}>
+                            {formatRelativeTime(act.created_at)}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  } else if (act.activity_type === "business_added") {
+                    return (
+                      <div key={`business-${act.id}`} className={styles.activityItem}>
+                        <div className={styles.activityIcon}>
+                          <Icon path={mdiStorefront} size={0.6} color="#22c55e" />
+                        </div>
+                        <div className={styles.activityContent}>
+                          <p>
+                            New business added: <strong>{act.name}</strong>
+                          </p>
+                          <span className={styles.activityTime}>
+                            {formatRelativeTime(act.created_at)}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  }
+                  return null;
+                })
+              )}
             </div>
             <div className="has-text-centered mt-4">
-              <Link to="#" className={styles.viewAllLink}>
+              <Link to="/dashboard/listings" className={styles.viewAllLink}>
                 See more activity <Icon path={mdiChevronRight} size={0.5} />
               </Link>
             </div>
