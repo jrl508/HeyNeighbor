@@ -25,3 +25,11 @@ yarn-error.log*
 
 .github/*
 !.github/workflows/
+
+# Firebase cache
+.firebase/
+
+# AI agent workspace files
+.agents/
+skills-lock.json
+
