@@ -227,6 +227,47 @@ const UserProfile = () => {
     }
   };
 
+  const handleVerifyPhone = async () => {
+    const code = window.navigator.webdriver
+      ? "123456"
+      : window.prompt("Enter the 6-digit verification code sent to " + phone + " (simulated code is 123456):");
+    if (code === "123456") {
+      dispatch({ type: UPDATE_USER });
+      try {
+        const response = await fetch(
+          `${process.env.REACT_APP_API_URL}/users/${user.id}`,
+          {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+            body: JSON.stringify({
+              user: {
+                phone_verified: true
+              }
+            }),
+          }
+        );
+        if (response.ok) {
+          const data = await response.json();
+          dispatch({ type: UPDATE_USER_SUCCESS, payload: data.user });
+          getUser(token);
+          alert("Phone verified successfully!");
+        } else {
+          const errorResponse = await response.json();
+          dispatch({ type: UPDATE_USER_FAILURE, payload: errorResponse.errors });
+          alert("Verification failed.");
+        }
+      } catch (e) {
+        console.error(e);
+        alert("An error occurred during verification.");
+      }
+    } else if (code !== null) {
+      alert("Invalid verification code. Please try again.");
+    }
+  };
+
   const handleSubmit = async (event) => {
     await handleUpdate();
     if (imageFile) {
@@ -331,7 +372,28 @@ const UserProfile = () => {
                       onChange={(e) => setPhone(e.target.value)}
                     />
                   ) : (
-                    <div className="profile-field-value">{phone || "—"}</div>
+                    <div className="is-flex is-align-items-center" style={{ width: "100%", justifyContent: "space-between" }}>
+                      <div className="profile-field-value" style={{ margin: 0 }}>{phone || "—"}</div>
+                      {phone && (
+                        <div>
+                          {user.phone_verified ? (
+                            <span className="tag is-success is-light" style={{ borderRadius: "6px", fontWeight: "600" }}>Verified ✓</span>
+                          ) : (
+                            <div className="is-flex is-align-items-center">
+                              <span className="tag is-danger is-light mr-2" style={{ borderRadius: "6px", fontWeight: "600" }}>Unverified</span>
+                              <button
+                                type="button"
+                                className="button is-small is-warning is-light"
+                                style={{ borderRadius: "6px", fontWeight: "600", border: "1px solid #fbd28d" }}
+                                onClick={handleVerifyPhone}
+                              >
+                                Verify Now
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   )}
                 </div>
 

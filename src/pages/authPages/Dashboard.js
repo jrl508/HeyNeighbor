@@ -61,28 +61,37 @@ const Dashboard = () => {
           </h2>
           <div className={styles.userRating}>
             <Icon path={mdiStar} size={0.7} />
-            <span>{parseFloat(user.average_rating || 0).toFixed(1)} (24)</span>
+            <span>{parseFloat(user.average_rating || 0).toFixed(1)} ({user.reviews_count !== undefined ? user.reviews_count : 0})</span>
           </div>
           <div className={styles.userLocation}>
             <Icon path={mdiMapMarker} size={0.6} />
             <span>{`${user.city || "Taunton"}, ${user.state || "MA"}`}</span>
           </div>
           <div className={styles.memberSince}>
-            Member since {new Date(user.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+            Member since {user.created_at ? new Date(user.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : "..."}
           </div>
 
           <div className={styles.userStats}>
             <div className={styles.statItem}>
               <Icon path={mdiTools} size={0.7} />
-              <span><span className={styles.statValue}>8</span> Tools Listed</span>
+              <span><span className={styles.statValue}>{user.tools_listed_count !== undefined ? user.tools_listed_count : 0}</span> Tools Listed</span>
             </div>
             <div className={styles.statItem}>
               <Icon path={mdiLibrary} size={0.7} />
-              <span><span className={styles.statValue}>3</span> Completed Rentals</span>
+              <span><span className={styles.statValue}>{user.completed_rentals_count !== undefined ? user.completed_rentals_count : 0}</span> Completed Rentals</span>
             </div>
             <div className={styles.statItem}>
-              <Icon path={mdiCheckDecagram} size={0.7} color="#22c55e" />
-              <span>Phone Verified</span>
+              {user.phone_verified ? (
+                <>
+                  <Icon path={mdiCheckDecagram} size={0.7} color="#22c55e" />
+                  <span>Phone Verified</span>
+                </>
+              ) : (
+                <>
+                  <Icon path={mdiCheckDecagram} size={0.7} color="#ef4444" />
+                  <span>Phone Unverified</span>
+                </>
+              )}
             </div>
           </div>
         </div>
