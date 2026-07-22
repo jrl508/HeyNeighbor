@@ -334,14 +334,46 @@ const NavBar = () => {
             ) : (
               <>
                 <div className="navbar-item">
-                  <Link to="/" className="navbar-item">
-                    About Us
-                  </Link>
+                  <a
+                    href="#how-it-works"
+                    className="navbar-item"
+                    onClick={(e) => {
+                      if (location.pathname === "/") {
+                        e.preventDefault();
+                        document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" });
+                      }
+                    }}
+                  >
+                    How It Works
+                  </a>
                 </div>
                 <div className="navbar-item">
-                  <Link to="/" className="navbar-item">
+                  <a
+                    href="#about-us"
+                    className="navbar-item"
+                    onClick={(e) => {
+                      if (location.pathname === "/") {
+                        e.preventDefault();
+                        document.getElementById("about-us")?.scrollIntoView({ behavior: "smooth" });
+                      }
+                    }}
+                  >
+                    About Us
+                  </a>
+                </div>
+                <div className="navbar-item">
+                  <a
+                    href="#contact"
+                    className="navbar-item"
+                    onClick={(e) => {
+                      if (location.pathname === "/") {
+                        e.preventDefault();
+                        document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
+                      }
+                    }}
+                  >
                     Contact
-                  </Link>
+                  </a>
                 </div>
                 <div className="navbar-item">
                   <Link to="/login" className="navbar-item">
@@ -456,6 +488,48 @@ const NavBar = () => {
                   <Link to="/" onClick={closeMenu}>
                     Home
                   </Link>
+                </li>
+                <li>
+                  <a
+                    href="#how-it-works"
+                    onClick={(e) => {
+                      closeMenu();
+                      if (location.pathname === "/") {
+                        e.preventDefault();
+                        document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" });
+                      }
+                    }}
+                  >
+                    How It Works
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#about-us"
+                    onClick={(e) => {
+                      closeMenu();
+                      if (location.pathname === "/") {
+                        e.preventDefault();
+                        document.getElementById("about-us")?.scrollIntoView({ behavior: "smooth" });
+                      }
+                    }}
+                  >
+                    About Us
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#contact"
+                    onClick={(e) => {
+                      closeMenu();
+                      if (location.pathname === "/") {
+                        e.preventDefault();
+                        document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
+                      }
+                    }}
+                  >
+                    Contact
+                  </a>
                 </li>
                 <li>
                   <Link to="/login" onClick={closeMenu}>

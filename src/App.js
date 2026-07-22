@@ -4,7 +4,6 @@ import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 import NavigationBar from "./components/NavBar";
 import Home from "./pages/Home";
-// import Footer from "./components/Footer";
 import Login from "./pages/userAuth/Login";
 import Dashboard from "./pages/authPages/Dashboard";
 import "./styles/bulma-custom-styles.css";
