@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Icon from "@mdi/react";
 import { mdiEye, mdiEyeOff } from "@mdi/js";
+import { GoogleLogin } from "@react-oauth/google";
 import { useAuth } from "../../hooks/useAuth";
 import { LOGIN, LOGIN_FAILURE, LOGIN_SUCCESS } from "../../actionTypes";
 import { authAPI } from "../../api";
@@ -43,6 +44,31 @@ const LoginForm = ({ setRegisterMode, errors, setErrors }) => {
     } catch (error) {
       console.error("Login error:", error);
       setErrors(["Network error. Please try again."]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    if (!credentialResponse.credential) return;
+    setErrors && setErrors(null);
+    setLoading(true);
+    dispatch({ type: LOGIN });
+    try {
+      const response = await authAPI.googleLogin(credentialResponse.credential);
+      if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem("token", data.token);
+        dispatch({ type: LOGIN_SUCCESS, payload: data.user });
+        navigate("/dashboard");
+      } else {
+        const errorResponse = await response.json();
+        dispatch({ type: LOGIN_FAILURE, payload: errorResponse });
+        setErrors([errorResponse.message || "Google Sign-In failed"]);
+      }
+    } catch (err) {
+      console.error("Google Auth error:", err);
+      setErrors(["Google sign-in error. Please try again."]);
     } finally {
       setLoading(false);
     }
@@ -102,6 +128,23 @@ const LoginForm = ({ setRegisterMode, errors, setErrors }) => {
           </button>
         </div>
       </form>
+
+      <div className="divider my-4 is-flex is-align-items-center" style={{ gap: "10px" }}>
+        <div style={{ flex: 1, height: "1px", backgroundColor: "#dbdbdb" }}></div>
+        <span className="has-text-grey is-size-7">OR</span>
+        <div style={{ flex: 1, height: "1px", backgroundColor: "#dbdbdb" }}></div>
+      </div>
+
+      <div className="is-flex is-justify-content-center mb-4">
+        <GoogleLogin
+          onSuccess={handleGoogleSuccess}
+          onError={() => setErrors && setErrors(["Google Sign-In failed"])}
+          shape="pill"
+          theme="outline"
+          text="continue_with"
+        />
+      </div>
+
       <div className="is-size-6 mx-auto">
         Don't have an account?{" "}
         <span

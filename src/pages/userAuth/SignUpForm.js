@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { GoogleLogin } from "@react-oauth/google";
 import { useAuth } from "../../hooks/useAuth";
 import { authAPI } from "../../api";
 import {
@@ -133,6 +134,32 @@ const SignUpForm = ({ setRegisterMode, errors, setErrors }) => {
     }
   };
 
+  const handleGoogleSuccess = async (credentialResponse) => {
+    if (!credentialResponse.credential) return;
+    setErrors && setErrors(null);
+    setLoading(true);
+    dispatch({ type: REGISTER });
+    try {
+      const response = await authAPI.googleLogin(credentialResponse.credential);
+      if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem("token", data.token);
+        dispatch({ type: REGISTER_SUCCESS, payload: data.user });
+        dispatch({ type: LOGIN_SUCCESS, payload: data.user });
+        navigate("/dashboard");
+      } else {
+        const errorResponse = await response.json();
+        dispatch({ type: REGISTER_FAILURE, payload: [errorResponse.message || "Google Sign-Up failed"] });
+        setErrors([errorResponse.message || "Google Sign-Up failed"]);
+      }
+    } catch (err) {
+      console.error("Google Auth error:", err);
+      setErrors(["Google sign-up error. Please try again."]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <>
       <div className="field">
@@ -225,6 +252,22 @@ const SignUpForm = ({ setRegisterMode, errors, setErrors }) => {
           </button>
         </div>
       </form>
+
+      <div className="divider my-4 is-flex is-align-items-center" style={{ gap: "10px" }}>
+        <div style={{ flex: 1, height: "1px", backgroundColor: "#dbdbdb" }}></div>
+        <span className="has-text-grey is-size-7">OR</span>
+        <div style={{ flex: 1, height: "1px", backgroundColor: "#dbdbdb" }}></div>
+      </div>
+
+      <div className="is-flex is-justify-content-center mb-4">
+        <GoogleLogin
+          onSuccess={handleGoogleSuccess}
+          onError={() => setErrors && setErrors(["Google Sign-Up failed"])}
+          shape="pill"
+          theme="outline"
+          text="continue_with"
+        />
+      </div>
       <div className="is-size-6 my-4 mx-auto">
         Already have an account?{" "}
         <span

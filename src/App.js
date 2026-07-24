@@ -22,16 +22,19 @@ import { ToolProvider } from "./contexts/ToolContext";
 import { ChatProvider } from "./contexts/ChatContext";
 import { BookingProvider } from "./contexts/BookingContext";
 import { NotificationProvider } from "./contexts/NotificationContext";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 import AuthRoutes from "./components/AuthRoutes";
 import EditTool from "./pages/authPages/Tools/EditTool";
 import NeighborhoodActivity from "./pages/authPages/NeighborhoodActivity";
 
 // Initialize Stripe
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
+const googleClientId = process.env.REACT_APP_GOOGLE_CLIENT_ID || "placeholder-client-id";
 
 const App = () => {
   return (
-    <AuthProvider>
+    <GoogleOAuthProvider clientId={googleClientId}>
+      <AuthProvider>
       <BookingProvider>
         <ToolProvider>
           <ChatProvider>
@@ -68,6 +71,7 @@ const App = () => {
         </ToolProvider>
       </BookingProvider>
     </AuthProvider>
+    </GoogleOAuthProvider>
   );
 };
 
