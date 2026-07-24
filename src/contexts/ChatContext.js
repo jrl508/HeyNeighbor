@@ -40,8 +40,9 @@ export const ChatProvider = ({ children }) => {
 
   useEffect(() => {
     if (isAuthenticated && user) {
-      const token = localStorage.getItem("token");
-      const newSocket = io("http://localhost:3001", {
+      const socketUrl = process.env.REACT_APP_SOCKET_URL || 
+        (process.env.REACT_APP_API_URL ? process.env.REACT_APP_API_URL.replace(/\/api\/?$/, "") : "http://localhost:3001");
+      const newSocket = io(socketUrl, {
         auth: { token },
       });
 
