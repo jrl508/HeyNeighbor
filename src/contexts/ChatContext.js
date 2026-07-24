@@ -40,6 +40,7 @@ export const ChatProvider = ({ children }) => {
 
   useEffect(() => {
     if (isAuthenticated && user) {
+      const token = localStorage.getItem("token");
       let socketUrl = process.env.REACT_APP_SOCKET_URL;
       if (!socketUrl && process.env.REACT_APP_API_URL) {
         socketUrl = process.env.REACT_APP_API_URL.replace(/\/api\/?$/, "");
