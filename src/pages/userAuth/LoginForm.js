@@ -12,6 +12,14 @@ const LoginForm = ({ setRegisterMode, errors, setErrors }) => {
   const [pw, setPw] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // Forgot password modal state
+  const [forgotModalOpen, setForgotModalOpen] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotLoading, setForgotLoading] = useState(false);
+  const [forgotMsg, setForgotMsg] = useState(null);
+  const [forgotErr, setForgotErr] = useState(null);
+
   const navigate = useNavigate();
   const { state, dispatch } = useAuth();
 
@@ -74,6 +82,32 @@ const LoginForm = ({ setRegisterMode, errors, setErrors }) => {
     }
   };
 
+  const handleSendForgotEmail = async () => {
+    if (!forgotEmail) {
+      setForgotErr("Please enter your email address.");
+      return;
+    }
+
+    setForgotLoading(true);
+    setForgotErr(null);
+    setForgotMsg(null);
+
+    try {
+      const response = await authAPI.forgotPassword(forgotEmail);
+      const data = await response.json();
+      if (response.ok) {
+        setForgotMsg(data.message || "A password reset link has been sent to your email.");
+      } else {
+        setForgotErr(data.message || "Failed to request password reset.");
+      }
+    } catch (err) {
+      console.error("Forgot password request error:", err);
+      setForgotErr("Network error. Please try again.");
+    } finally {
+      setForgotLoading(false);
+    }
+  };
+
   return (
     <>
       <div className="field">
@@ -87,7 +121,7 @@ const LoginForm = ({ setRegisterMode, errors, setErrors }) => {
           />
         </div>
       </div>
-      <div className="field">
+      <div className="field mb-1">
         <div className="control is-flex is-align-items-center" style={{ position: "relative" }}>
           <input
             className="input is-medium"
@@ -117,6 +151,20 @@ const LoginForm = ({ setRegisterMode, errors, setErrors }) => {
         </div>
       </div>
 
+      <div className="has-text-right mb-3">
+        <span
+          className="is-size-7 has-text-info is-clickable has-text-weight-semibold"
+          onClick={() => {
+            setForgotModalOpen(true);
+            setForgotEmail(email);
+            setForgotMsg(null);
+            setForgotErr(null);
+          }}
+        >
+          Forgot password?
+        </span>
+      </div>
+
       <form onSubmit={handleSubmit}>
         <div className="buttons-wrapper">
           <button
@@ -128,6 +176,66 @@ const LoginForm = ({ setRegisterMode, errors, setErrors }) => {
           </button>
         </div>
       </form>
+
+      {/* Forgot Password Modal */}
+      <div className={`modal ${forgotModalOpen ? "is-active" : ""}`}>
+        <div className="modal-background" onClick={() => setForgotModalOpen(false)}></div>
+        <div className="modal-card" style={{ maxWidth: "420px", margin: "0 15px" }}>
+          <header className="modal-card-head">
+            <p className="modal-card-title is-size-5 font-weight-bold">Reset Password</p>
+            <button className="delete" aria-label="close" onClick={() => setForgotModalOpen(false)}></button>
+          </header>
+          <section className="modal-card-body">
+            {forgotMsg ? (
+              <div className="notification is-success is-light p-3 has-text-centered">
+                {forgotMsg}
+              </div>
+            ) : (
+              <>
+                <p className="is-size-6 mb-4">
+                  Enter your account email below and we will send you a link to reset your password.
+                </p>
+                {forgotErr && (
+                  <div className="notification is-danger is-light p-2 mb-3 has-text-centered is-size-7">
+                    {forgotErr}
+                  </div>
+                )}
+                <div className="field">
+                  <div className="control">
+                    <input
+                      className="input is-medium"
+                      type="email"
+                      placeholder="Your email address"
+                      value={forgotEmail}
+                      onChange={(e) => setForgotEmail(e.target.value)}
+                    />
+                  </div>
+                </div>
+              </>
+            )}
+          </section>
+          <footer className="modal-card-foot is-justify-content-flex-end">
+            {!forgotMsg ? (
+              <>
+                <button className="button mr-2" onClick={() => setForgotModalOpen(false)}>
+                  Cancel
+                </button>
+                <button
+                  className={`button is-info ${forgotLoading ? "is-loading" : ""}`}
+                  disabled={forgotLoading}
+                  onClick={handleSendForgotEmail}
+                >
+                  Send Reset Link
+                </button>
+              </>
+            ) : (
+              <button className="button is-info" onClick={() => setForgotModalOpen(false)}>
+                Close
+              </button>
+            )}
+          </footer>
+        </div>
+      </div>
 
       <div className="divider my-4 is-flex is-align-items-center" style={{ gap: "10px" }}>
         <div style={{ flex: 1, height: "1px", backgroundColor: "#dbdbdb" }}></div>

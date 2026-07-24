@@ -5,6 +5,7 @@ import { loadStripe } from "@stripe/stripe-js";
 import NavigationBar from "./components/NavBar";
 import Home from "./pages/Home";
 import Login from "./pages/userAuth/Login";
+import ResetPasswordPage from "./pages/userAuth/ResetPasswordPage";
 import Dashboard from "./pages/authPages/Dashboard";
 import "./styles/bulma-custom-styles.css";
 import DashMain from "./pages/authPages/DashMain";
@@ -45,6 +46,7 @@ const App = () => {
                   <Routes>
                     <Route path="/" element={<Home />} />
                     <Route path="/login" element={<Login />} />
+                    <Route path="/reset-password" element={<ResetPasswordPage />} />
                     <Route element={<AuthRoutes />}>
                       <Route path="dashboard" element={<Dashboard />}>
                         <Route index element={<DashMain />} />
