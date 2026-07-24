@@ -7,12 +7,14 @@ import { authAPI } from "../../api";
 const LoginForm = ({ setRegisterMode, errors, setErrors }) => {
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { state, dispatch } = useAuth();
 
-  const api = process.env.REACT_APP_API_URL;
-
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
+    if (e) e.preventDefault();
+    setErrors && setErrors(null);
+    setLoading(true);
     dispatch({ type: LOGIN });
     const payload = {
       email,
@@ -28,11 +30,18 @@ const LoginForm = ({ setRegisterMode, errors, setErrors }) => {
       } else {
         const errorResponse = await response.json();
         dispatch({ type: LOGIN_FAILURE, payload: errorResponse });
-        setErrors([errorResponse.error]);
-        throw new Error(`${JSON.stringify(errorResponse)}`);
+        const errMsg =
+          errorResponse.message ||
+          errorResponse.error ||
+          (errorResponse.errors && errorResponse.errors[0]?.msg) ||
+          "Invalid email or password";
+        setErrors([errMsg]);
       }
     } catch (error) {
-      console.log(error);
+      console.error("Login error:", error);
+      setErrors(["Network error. Please try again."]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -61,14 +70,17 @@ const LoginForm = ({ setRegisterMode, errors, setErrors }) => {
         </div>
       </div>
 
-      <div className="buttons-wrapper">
-        <button
-          className="button is-info is-fullwidth"
-          onClick={() => handleSubmit()}
-        >
-          Sign In
-        </button>
-      </div>
+      <form onSubmit={handleSubmit}>
+        <div className="buttons-wrapper">
+          <button
+            type="submit"
+            className={`button is-info is-fullwidth ${loading ? "is-loading" : ""}`}
+            disabled={loading}
+          >
+            Sign In
+          </button>
+        </div>
+      </form>
       <div className="is-size-6 mx-auto">
         Don't have an account?{" "}
         <span

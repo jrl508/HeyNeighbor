@@ -84,7 +84,16 @@ const SignUpForm = ({ setRegisterMode, errors, setErrors }) => {
     }
   };
 
-  const handleSubmit = async () => {
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
+    if (e) e.preventDefault();
+    if (pw !== confirmPw) {
+      setErrors(["Passwords do not match."]);
+      return;
+    }
+    setErrors && setErrors(null);
+    setLoading(true);
     dispatch({ type: REGISTER });
     const payload = {
       first_name: firstName,
@@ -103,12 +112,24 @@ const SignUpForm = ({ setRegisterMode, errors, setErrors }) => {
         navigate("/dashboard");
       } else {
         const errorResponse = await response.json();
-        dispatch({ type: REGISTER_FAILURE, payload: errorResponse.errors });
-        setErrors(errorResponse.errors);
-        throw new Error(`${JSON.stringify(errorResponse)}`);
+        let errs = [];
+        if (Array.isArray(errorResponse.errors)) {
+          errs = errorResponse.errors.map((e) => e.msg || e.message || e);
+        } else if (errorResponse.message) {
+          errs = [errorResponse.message];
+        } else if (errorResponse.error) {
+          errs = [errorResponse.error];
+        } else {
+          errs = ["Registration failed. Please try again."];
+        }
+        dispatch({ type: REGISTER_FAILURE, payload: errs });
+        setErrors(errs);
       }
     } catch (error) {
-      console.log(error);
+      console.error("Registration error:", error);
+      setErrors(["Registration error. Please try again."]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -193,16 +214,17 @@ const SignUpForm = ({ setRegisterMode, errors, setErrors }) => {
       </div>
 
 
-      <div className="buttons-wrapper">
-        <button
-          className="button is-info is-fullwidth"
-          onClick={() => {
-            handleSubmit();
-          }}
-        >
-          Sign Up
-        </button>
-      </div>
+      <form onSubmit={handleSubmit}>
+        <div className="buttons-wrapper">
+          <button
+            type="submit"
+            className={`button is-info is-fullwidth ${loading ? "is-loading" : ""}`}
+            disabled={loading}
+          >
+            Sign Up
+          </button>
+        </div>
+      </form>
       <div className="is-size-6 my-4 mx-auto">
         Already have an account?{" "}
         <span

@@ -39,12 +39,11 @@ const Login = () => {
             errors={errors}
           />
         )}
-        {errors ? (
-          <div className="errors mx-auto has-text-danger">
-            {" "}
+        {errors && errors.length > 0 ? (
+          <div className="errors mx-auto has-text-danger has-text-centered mt-3">
             {errors.map((error, index) => (
-              <p key={index}>{error}</p>
-            ))}{" "}
+              <p key={index} className="has-text-weight-medium">{error}</p>
+            ))}
           </div>
         ) : null}
       </div>
