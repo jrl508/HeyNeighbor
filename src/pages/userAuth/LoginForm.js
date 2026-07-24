@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Icon from "@mdi/react";
+import { mdiEye, mdiEyeOff } from "@mdi/js";
 import { useAuth } from "../../hooks/useAuth";
 import { LOGIN, LOGIN_FAILURE, LOGIN_SUCCESS } from "../../actionTypes";
 import { authAPI } from "../../api";
@@ -7,6 +9,7 @@ import { authAPI } from "../../api";
 const LoginForm = ({ setRegisterMode, errors, setErrors }) => {
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { state, dispatch } = useAuth();
@@ -59,14 +62,32 @@ const LoginForm = ({ setRegisterMode, errors, setErrors }) => {
         </div>
       </div>
       <div className="field">
-        <div className="control">
+        <div className="control is-flex is-align-items-center" style={{ position: "relative" }}>
           <input
             className="input is-medium"
+            style={{ paddingRight: "40px" }}
             value={pw}
-            type="password"
+            type={showPassword ? "text" : "password"}
             placeholder="Password"
             onChange={(e) => setPw(e.target.value)}
           />
+          <button
+            type="button"
+            className="button is-ghost p-0"
+            style={{
+              position: "absolute",
+              right: "12px",
+              height: "auto",
+              color: "#7a7a7a",
+              border: "none",
+              background: "none",
+              cursor: "pointer",
+            }}
+            onClick={() => setShowPassword(!showPassword)}
+            title={showPassword ? "Hide password" : "Show password"}
+          >
+            <Icon path={showPassword ? mdiEyeOff : mdiEye} size={0.9} />
+          </button>
         </div>
       </div>
 
