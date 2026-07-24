@@ -40,8 +40,17 @@ export const ChatProvider = ({ children }) => {
 
   useEffect(() => {
     if (isAuthenticated && user) {
-      const socketUrl = process.env.REACT_APP_SOCKET_URL || 
-        (process.env.REACT_APP_API_URL ? process.env.REACT_APP_API_URL.replace(/\/api\/?$/, "") : "http://localhost:3001");
+      let socketUrl = process.env.REACT_APP_SOCKET_URL;
+      if (!socketUrl && process.env.REACT_APP_API_URL) {
+        socketUrl = process.env.REACT_APP_API_URL.replace(/\/api\/?$/, "");
+      }
+      if (!socketUrl) {
+        if (typeof window !== "undefined" && window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1") {
+          socketUrl = window.location.origin;
+        } else {
+          socketUrl = "http://localhost:3001";
+        }
+      }
       const newSocket = io(socketUrl, {
         auth: { token },
       });
