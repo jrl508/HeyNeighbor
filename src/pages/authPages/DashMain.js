@@ -169,13 +169,6 @@ const DashMain = () => {
   const myRentals = ongoingBookings.filter((b) => b.renter_id === user?.id);
   const myToolsRented = ongoingBookings.filter((b) => b.owner_id === user?.id);
 
-  const scrollToRentals = () => {
-    const element = document.getElementById("active-rentals-section");
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
-    }
-  };
-
   const StatCard = ({ icon, label, value, colorClass, link, linkText, onClick }) => (
     <div className={styles.statCard}>
       <div className={`${styles.statIconWrapper} ${colorClass}`}>
@@ -240,7 +233,7 @@ const DashMain = () => {
           value={loading ? "..." : myRentals.length + myToolsRented.length}
           label="Active rentals"
           colorClass={styles.iconRentals}
-          onClick={scrollToRentals}
+          link="/dashboard/bookings"
           linkText="View rentals"
         />
       </div>
@@ -279,7 +272,11 @@ const DashMain = () => {
           {/* Listings Grid */}
           <div className={styles.rentalListingsGrid} id="active-rentals-section">
             <div className={styles.contentCard}>
-              <div className={styles.cardHeader}>
+              <div 
+                className={styles.cardHeader} 
+                onClick={() => navigate("/dashboard/bookings?tab=rentals")}
+                style={{ cursor: "pointer" }}
+              >
                 <h3>
                   <Icon path={mdiPackageVariant} size={0.8} color="#f97316" />
                   My Rentals{" "}
@@ -311,7 +308,12 @@ const DashMain = () => {
               ) : (
                 <ul className={styles.activeBookingsList}>
                   {myRentals.map((b) => (
-                    <li key={b.id} className={styles.bookingItem}>
+                    <li 
+                      key={b.id} 
+                      className={styles.bookingItem}
+                      onClick={() => navigate("/dashboard/bookings?tab=rentals")}
+                      style={{ cursor: "pointer" }}
+                    >
                       <strong>{b.tool_name}</strong>
                       <span className="is-size-7 has-text-grey ml-2">
                         {formatDisplayDate(b.end_date)}
@@ -323,7 +325,11 @@ const DashMain = () => {
             </div>
 
             <div className={styles.contentCard}>
-              <div className={styles.cardHeader}>
+              <div 
+                className={styles.cardHeader} 
+                onClick={() => navigate("/dashboard/bookings?tab=listings")}
+                style={{ cursor: "pointer" }}
+              >
                 <h3>
                   <Icon path={mdiTools} size={0.8} color="#22c55e" />
                   My Listings{" "}
@@ -351,7 +357,12 @@ const DashMain = () => {
               ) : (
                 <ul className={styles.activeBookingsList}>
                   {myToolsRented.map((b) => (
-                    <li key={b.id} className={styles.bookingItem}>
+                    <li 
+                      key={b.id} 
+                      className={styles.bookingItem}
+                      onClick={() => navigate("/dashboard/bookings?tab=listings")}
+                      style={{ cursor: "pointer" }}
+                    >
                       <strong>{b.tool_name}</strong>
                       <span className="is-size-7 has-text-grey ml-2">
                         {formatDisplayDate(b.end_date)}
