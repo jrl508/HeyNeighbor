@@ -27,6 +27,7 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 import AuthRoutes from "./components/AuthRoutes";
 import EditTool from "./pages/authPages/Tools/EditTool";
 import NeighborhoodActivity from "./pages/authPages/NeighborhoodActivity";
+import Bookings from "./pages/authPages/Bookings";
 
 // Initialize Stripe
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
@@ -52,6 +53,7 @@ const App = () => {
                         <Route index element={<DashMain />} />
                         <Route path="profile" element={<UserProfile />} />
                         <Route path="inbox" element={<Inbox />} />
+                        <Route path="bookings" element={<Bookings />} />
                         <Route path="local-biz" element={<LocalBiz />} />
                         <Route path="balance" element={<Balance />} />
                         <Route path="listings" element={<Listings />} />

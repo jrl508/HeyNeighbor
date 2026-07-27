@@ -17,18 +17,25 @@ import {
   mdiWallet,
   mdiHome,
   mdiMagnify,
-  mdiBellOutline
+  mdiBellOutline,
+  mdiCalendarMonth
 } from "@mdi/js";
 import { useAuth } from "../../hooks/useAuth.js";
 import { useChat } from "../../contexts/ChatContext.js";
+import { useBookings } from "../../contexts/BookingContext.js";
 import { capitalize } from "../../util/UtilFunctions.js";
 import Avatar from "../../components/Avatar";
 
 const Dashboard = () => {
   const { state } = useAuth();
   const { unreadCount } = useChat();
+  const { state: bookingState } = useBookings();
   const { user } = state;
   const location = useLocation();
+
+  const activeBookingsCount = (bookingState.bookings || []).filter(
+    (b) => !["completed", "cancelled"].includes(b.status)
+  ).length;
 
   if (state.loading) return null;
 
@@ -102,6 +109,7 @@ const Dashboard = () => {
             <NavItem to="/dashboard" icon={mdiViewDashboard} label="Dashboard" />
             <NavItem to="profile" icon={mdiAccount} label="Profile" />
             <NavItem to="inbox" icon={mdiMessageText} label="Messages" badge={unreadCount} />
+            <NavItem to="bookings" icon={mdiCalendarMonth} label="Bookings" badge={activeBookingsCount} />
             <NavItem to="toolshed" icon={mdiLibrary} label="Toolshed" />
           </ul>
 
