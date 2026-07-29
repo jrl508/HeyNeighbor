@@ -288,10 +288,22 @@ const NeighborhoodRequests = () => {
                       )}
 
                       {/* Needed By Section */}
-                      <div className="is-size-7 has-text-grey mb-4 is-flex is-align-items-center">
-                        <Icon path={mdiCalendarClock} size={0.6} className="mr-1" />
-                        Needed by: {formatDisplayDate(req.needed_by)}
-                      </div>
+                      {(() => {
+                        const todayStr = new Date().toISOString().split("T")[0];
+                        const reqNeededDate = req.needed_by ? new Date(req.needed_by).toISOString().split("T")[0] : null;
+                        const isToday = reqNeededDate === todayStr;
+                        return (
+                          <div className="is-size-7 has-text-grey mb-4 is-flex is-align-items-center is-justify-content-space-between">
+                            <span className="is-flex is-align-items-center">
+                              <Icon path={mdiCalendarClock} size={0.6} className="mr-1" />
+                              Needed by: {formatDisplayDate(req.needed_by)}
+                            </span>
+                            {isToday && (
+                              <span className="tag is-warning is-light ml-2">Expires Today</span>
+                            )}
+                          </div>
+                        );
+                      })()}
 
                       {/* CTA Buttons */}
                       <div className="buttons mt-auto">
