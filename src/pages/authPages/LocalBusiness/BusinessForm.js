@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Icon from "@mdi/react";
 import { mdiMinus, mdiPlus } from "@mdi/js";
 import { createBusiness } from "../../../api/localBusiness";
+import { isValidPhone, formatPhoneNumber } from "../../../util/validationUtils";
 
 const BusinessForm = ({ setOpenBizForm, onBusinessCreated }) => {
   const token = localStorage.getItem("token");
@@ -128,6 +129,10 @@ const BusinessForm = ({ setOpenBizForm, onBusinessCreated }) => {
       setError("Address is required");
       return;
     }
+    if (phone.trim() && !isValidPhone(phone.trim(), true)) {
+      setError("Phone must be a valid 10-digit phone number, e.g. (555) 555-5555");
+      return;
+    }
 
     setLoading(true);
 
@@ -136,7 +141,7 @@ const BusinessForm = ({ setOpenBizForm, onBusinessCreated }) => {
         name: name.trim(),
         type: type.trim(),
         address: address.trim(),
-        phone: phone.trim() || null,
+        phone: phone.trim() ? formatPhoneNumber(phone.trim()) : null,
         description: null,
         hours: JSON.stringify({
           startTime,
@@ -273,8 +278,12 @@ const BusinessForm = ({ setOpenBizForm, onBusinessCreated }) => {
               className="input"
               type="tel"
               name="Phone"
+              placeholder="(555) 555-5555"
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              onChange={(e) => {
+                setError("");
+                setPhone(formatPhoneNumber(e.target.value));
+              }}
             />
           </div>
         </div>
