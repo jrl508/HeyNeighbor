@@ -11,6 +11,7 @@ import {
   LOGIN_FAILURE,
   LOGIN_SUCCESS,
 } from "../../actionTypes";
+import { isValidEmail } from "../../util/validationUtils";
 
 const SignUpForm = ({ setRegisterMode, errors, setErrors }) => {
   const [email, setEmail] = useState("");
@@ -89,6 +90,11 @@ const SignUpForm = ({ setRegisterMode, errors, setErrors }) => {
 
   const handleSubmit = async (e) => {
     if (e) e.preventDefault();
+    const cleanEmail = (email || "").trim().toLowerCase();
+    if (!cleanEmail || !isValidEmail(cleanEmail)) {
+      setErrors(["Please enter a valid email address."]);
+      return;
+    }
     if (pw !== confirmPw) {
       setErrors(["Passwords do not match."]);
       return;
@@ -97,11 +103,11 @@ const SignUpForm = ({ setRegisterMode, errors, setErrors }) => {
     setLoading(true);
     dispatch({ type: REGISTER });
     const payload = {
-      first_name: firstName,
-      last_name: lastName,
-      email,
+      first_name: firstName.trim(),
+      last_name: lastName.trim(),
+      email: cleanEmail,
       password: pw,
-      zip_code: zipCode,
+      zip_code: zipCode.trim(),
     };
     try {
       const response = await authAPI.register(payload);

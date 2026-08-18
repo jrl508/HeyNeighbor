@@ -6,6 +6,7 @@ import { GoogleLogin } from "@react-oauth/google";
 import { useAuth } from "../../hooks/useAuth";
 import { LOGIN, LOGIN_FAILURE, LOGIN_SUCCESS } from "../../actionTypes";
 import { authAPI } from "../../api";
+import { isValidEmail } from "../../util/validationUtils";
 
 const LoginForm = ({ setRegisterMode, errors, setErrors }) => {
   const [email, setEmail] = useState("");
@@ -25,11 +26,20 @@ const LoginForm = ({ setRegisterMode, errors, setErrors }) => {
 
   const handleSubmit = async (e) => {
     if (e) e.preventDefault();
+    const cleanEmail = (email || "").trim().toLowerCase();
+    if (!cleanEmail || !isValidEmail(cleanEmail)) {
+      setErrors(["Please enter a valid email address."]);
+      return;
+    }
+    if (!pw) {
+      setErrors(["Please enter your password."]);
+      return;
+    }
     setErrors && setErrors(null);
     setLoading(true);
     dispatch({ type: LOGIN });
     const payload = {
-      email,
+      email: cleanEmail,
       password: pw,
     };
     try {
@@ -83,8 +93,9 @@ const LoginForm = ({ setRegisterMode, errors, setErrors }) => {
   };
 
   const handleSendForgotEmail = async () => {
-    if (!forgotEmail) {
-      setForgotErr("Please enter your email address.");
+    const cleanForgotEmail = (forgotEmail || "").trim().toLowerCase();
+    if (!cleanForgotEmail || !isValidEmail(cleanForgotEmail)) {
+      setForgotErr("Please enter a valid email address.");
       return;
     }
 
@@ -93,7 +104,7 @@ const LoginForm = ({ setRegisterMode, errors, setErrors }) => {
     setForgotMsg(null);
 
     try {
-      const response = await authAPI.forgotPassword(forgotEmail);
+      const response = await authAPI.forgotPassword(cleanForgotEmail);
       const data = await response.json();
       if (response.ok) {
         setForgotMsg(data.message || "A password reset link has been sent to your email.");
