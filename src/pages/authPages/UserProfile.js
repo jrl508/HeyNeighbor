@@ -12,6 +12,12 @@ import { mdiUpload, mdiStar, mdiCamera } from "@mdi/js";
 import ProfilePicModal from "../../components/ProfilePicModal.js";
 import { getReviewsForUser } from "../../api/reviews.js";
 import { formatDisplayDate } from "../../util/dateUtils.js";
+import {
+  isValidEmail,
+  isValidPhone,
+  formatPhoneNumber,
+  formatDisplayPhone,
+} from "../../util/validationUtils.js";
 
 const getInitials = (name) => {
   if (!name) return "";
@@ -45,7 +51,7 @@ const UserProfile = () => {
   const [preview, setPreview] = useState("");
   const [firstName, setFirstName] = useState(first_name || "");
   const [lastName, setLastName] = useState(last_name || "");
-  const [phone, setPhone] = useState(phone_number || "");
+  const [phone, setPhone] = useState(phone_number ? formatDisplayPhone(phone_number) : "");
   const [email, setEmail] = useState(userEmail || "");
   const [zipCode, setZipCode] = useState(zip_code || "");
   const [locLoading, setLocLoading] = useState(false);
@@ -55,6 +61,7 @@ const UserProfile = () => {
   const [reviews, setReviews] = useState([]);
   const [reviewsLoading, setReviewsLoading] = useState(true);
   const [reviewsError, setReviewsError] = useState(null);
+  const [formError, setFormError] = useState("");
 
   useEffect(() => {
     if (!user) return;
@@ -105,11 +112,13 @@ const UserProfile = () => {
   const handleCancel = () => {
     setFirstName(first_name);
     setLastName(last_name);
-    setPhone(phone_number || "");
+    setPhone(phone_number ? formatDisplayPhone(phone_number) : "");
+    setEmail(userEmail || "");
     setZipCode(zip_code || "");
     setImageFile(null);
     setFileInputKey(Date.now());
     setPreview("");
+    setFormError("");
     setEditMode(false);
   };
 
@@ -189,15 +198,27 @@ const UserProfile = () => {
   };
 
   const handleUpdate = async () => {
+    const cleanEmail = (email || "").trim().toLowerCase();
+    if (!cleanEmail || !isValidEmail(cleanEmail)) {
+      setFormError("Please enter a valid email address.");
+      return false;
+    }
+
+    if (phone && !isValidPhone(phone, true)) {
+      setFormError("Please enter a valid 10-digit phone number, e.g. (555) 555-5555.");
+      return false;
+    }
+
+    setFormError("");
     dispatch({ type: UPDATE_USER });
 
     const payload = {
       user: {
-        first_name: firstName,
-        last_name: lastName,
-        phone_number: String(phone),
-        email,
-        zip_code: zipCode,
+        first_name: firstName.trim(),
+        last_name: lastName.trim(),
+        phone_number: phone ? formatPhoneNumber(phone) : null,
+        email: cleanEmail,
+        zip_code: zipCode.trim(),
       },
     };
 
@@ -218,12 +239,21 @@ const UserProfile = () => {
         dispatch({ type: UPDATE_USER_SUCCESS, payload: data.user });
         getUser(token);
         setEditMode(false);
+        return true;
       } else {
         const errorResponse = await response.json();
+        const msg =
+          errorResponse.message ||
+          (errorResponse.errors && errorResponse.errors[0]?.msg) ||
+          "Failed to update user profile";
+        setFormError(msg);
         dispatch({ type: UPDATE_USER_FAILURE, payload: errorResponse.errors });
+        return false;
       }
     } catch (e) {
       console.error(e);
+      setFormError("Network error while updating profile.");
+      return false;
     }
   };
 
@@ -269,11 +299,13 @@ const UserProfile = () => {
   };
 
   const handleSubmit = async (event) => {
-    await handleUpdate();
-    if (imageFile) {
-      await handleUploadImage(event);
+    const success = await handleUpdate();
+    if (success) {
+      if (imageFile) {
+        await handleUploadImage(event);
+      }
+      await getUser(token);
     }
-    await getUser(token);
   };
 
   if (error) {
@@ -308,6 +340,11 @@ const UserProfile = () => {
           {/* Form Fields Column */}
           <div className="column is-12-mobile is-7-tablet">
             <div className="card-content px-0 py-0">
+              {formError && (
+                <div className="notification is-danger is-light p-3 mb-4 is-size-7" style={{ borderRadius: "8px" }}>
+                  {formError}
+                </div>
+              )}
               <form>
                 {/* First Name & Last Name */}
                 <div className="profile-form-row">
@@ -319,7 +356,10 @@ const UserProfile = () => {
                         type="text"
                         value={firstName}
                         placeholder="First Name"
-                        onChange={(e) => setFirstName(e.target.value)}
+                        onChange={(e) => {
+                          setFormError("");
+                          setFirstName(e.target.value);
+                        }}
                       />
                     ) : (
                       <div className="profile-field-value">
@@ -335,7 +375,10 @@ const UserProfile = () => {
                         type="text"
                         value={lastName}
                         placeholder="Last Name"
-                        onChange={(e) => setLastName(e.target.value)}
+                        onChange={(e) => {
+                          setFormError("");
+                          setLastName(e.target.value);
+                        }}
                       />
                     ) : (
                       <div className="profile-field-value">
@@ -353,7 +396,10 @@ const UserProfile = () => {
                       className="profile-field-input"
                       type="email"
                       value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      onChange={(e) => {
+                        setFormError("");
+                        setEmail(e.target.value);
+                      }}
                     />
                   ) : (
                     <div className="profile-field-value">{email}</div>
@@ -369,11 +415,16 @@ const UserProfile = () => {
                       type="tel"
                       value={phone}
                       placeholder="(555) 555-5555"
-                      onChange={(e) => setPhone(e.target.value)}
+                      onChange={(e) => {
+                        setFormError("");
+                        setPhone(formatPhoneNumber(e.target.value));
+                      }}
                     />
                   ) : (
                     <div className="is-flex is-align-items-center" style={{ width: "100%", justifyContent: "space-between" }}>
-                      <div className="profile-field-value" style={{ margin: 0 }}>{phone || "—"}</div>
+                      <div className="profile-field-value" style={{ margin: 0 }}>
+                        {phone ? formatDisplayPhone(phone) : "—"}
+                      </div>
                       {phone && (
                         <div>
                           {user.phone_verified ? (
