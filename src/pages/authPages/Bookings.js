@@ -28,6 +28,7 @@ import {
   cancelBooking,
   respondToReschedule,
   claimDeposit,
+  releaseDeposit,
 } from "../../api/bookings";
 import { sendMessage } from "../../api/messaging";
 import RescheduleModal from "../../components/RescheduleModal";
@@ -299,6 +300,34 @@ const Bookings = () => {
     }
   };
 
+  const handleReleaseDeposit = async (bookingId) => {
+    if (
+      !window.confirm(
+        "Are you sure you want to release the security deposit hold back to the renter immediately?"
+      )
+    ) {
+      return;
+    }
+    setBookingActionLoading(bookingId, true);
+    setErrorMsg("");
+    setSuccessMsg("");
+    try {
+      const res = await releaseDeposit(bookingId, token);
+      if (res.ok) {
+        setSuccessMsg("Security deposit hold released successfully.");
+        fetchBookings(token);
+      } else {
+        const data = await res.json();
+        setErrorMsg(data.message || "Failed to release security deposit.");
+      }
+    } catch (err) {
+      console.error(err);
+      setErrorMsg("Error releasing security deposit.");
+    } finally {
+      setBookingActionLoading(bookingId, false);
+    }
+  };
+
   // Filter bookings based on activeTab and statusFilter
   const myRentals = bookings.filter((b) => b.renter_id === user?.id);
   const myListings = bookings.filter((b) => b.owner_id === user?.id);
@@ -482,9 +511,14 @@ const Bookings = () => {
                       <span className="mr-4">
                         📅 <strong>{formatDisplayDate(b.start_date)}</strong> to <strong>{formatDisplayDate(b.end_date)}</strong>
                       </span>
-                      <span>
+                      <span className="mr-3">
                         💰 Total: <strong>${parseFloat(b.total_amount || 0).toFixed(2)}</strong>
                       </span>
+                      {parseFloat(b.deposit_amount || 0) > 0 && (
+                        <span className="tag is-info is-light is-small">
+                          🛡️ Hold: ${parseFloat(b.deposit_amount).toFixed(2)} ({b.deposit_status || "authorized"})
+                        </span>
+                      )}
                     </div>
 
                     <div className="is-flex is-align-items-center mt-2">
@@ -683,17 +717,45 @@ const Bookings = () => {
 
                       {/* Status Action: COMPLETED */}
                       {b.status === "completed" && (
-                        <ReviewButton
-                          booking={b}
-                          reviewerId={user.id}
-                          reviewedId={otherUserId}
-                          reviewedName={isOwner ? b.renter_first_name : b.owner_first_name}
-                          openReviewModal={(bId, rId, rName) => {
-                            setReviewBookingTarget(b);
-                            setIsReviewOpen(true);
-                          }}
-                          token={token}
-                        />
+                        <>
+                          {isOwner && b.deposit_status === "authorized" && (
+                            <>
+                              <button
+                                className={`button is-small is-success is-light ${isLoading ? "is-loading" : ""}`}
+                                onClick={() => handleReleaseDeposit(b.id)}
+                                disabled={isLoading}
+                                title="Immediately release the security deposit hold back to the renter"
+                              >
+                                <Icon path={mdiCheckCircle} size={0.6} className="mr-1" />
+                                Release Deposit Hold
+                              </button>
+                              <button
+                                className="button is-small is-warning is-light"
+                                onClick={() => {
+                                  setClaimTarget(b);
+                                  setClaimAmount(b.deposit_amount ? String(b.deposit_amount) : "");
+                                  setClaimReason("");
+                                }}
+                                disabled={isLoading}
+                                title="File a damage claim against the security deposit"
+                              >
+                                <Icon path={mdiShieldAlert} size={0.6} className="mr-1" />
+                                Claim Deposit
+                              </button>
+                            </>
+                          )}
+                          <ReviewButton
+                            booking={b}
+                            reviewerId={user.id}
+                            reviewedId={otherUserId}
+                            reviewedName={isOwner ? b.renter_first_name : b.owner_first_name}
+                            openReviewModal={(bId, rId, rName) => {
+                              setReviewBookingTarget(b);
+                              setIsReviewOpen(true);
+                            }}
+                            token={token}
+                          />
+                        </>
                       )}
                     </div>
                   </div>

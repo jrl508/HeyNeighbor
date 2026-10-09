@@ -109,3 +109,13 @@ export const claimDeposit = async (id, claimData, token) => {
   });
   return response;
 };
+
+export const releaseDeposit = async (id, token) => {
+  const response = await fetch(`${api}/bookings/${id}/release-deposit`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return response;
+};
