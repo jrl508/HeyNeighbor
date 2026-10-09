@@ -11,6 +11,7 @@ import { createPaymentIntent, voidPayment } from "../api/payments";
 import { sendMessage } from "../api/messaging";
 import PaymentForm from "./PaymentForm";
 import { formatApiDate } from "../util/dateUtils";
+import { calculateBookingPricing } from "../util/pricingUtils";
 
 const BookingModal = ({ tool, isOpen, onClose, onBooked }) => {
   const { state: authState } = useAuth();
@@ -259,23 +260,79 @@ const BookingModal = ({ tool, isOpen, onClose, onBooked }) => {
                 </div>
               )}
 
-              {startDate && endDate && (
-                <div className="notification is-info mt-4">
-                  <p>
-                    <strong>
-                      Rental Duration: {calculateDays(startDate, endDate)} days
-                    </strong>
-                  </p>
-                  <p>Daily Rate: ${tool.rental_price_per_day}</p>
-                  <p>
-                    Estimated Total: $
-                    {(
-                      calculateDays(startDate, endDate) *
-                      tool.rental_price_per_day
-                    ).toFixed(2)}
-                  </p>
-                </div>
-              )}
+              {startDate && endDate && (() => {
+                const p = calculateBookingPricing({
+                  pricePerDay: tool.rental_price_per_day,
+                  days: calculateDays(startDate, endDate),
+                  deliveryFee:
+                    deliveryRequired && tool.deliveryAvailable
+                      ? tool.delivery_fee
+                      : 0,
+                });
+                return (
+                  <div
+                    className="notification is-info is-light mt-4 p-3"
+                    style={{ fontSize: "14px" }}
+                  >
+                    <p className="mb-2">
+                      <strong>Rental Duration:</strong> {p.days} day
+                      {p.days > 1 ? "s" : ""}
+                    </p>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <span>Rental Subtotal (${p.dailyRate}/day):</span>
+                      <span>${p.rentalSubtotal.toFixed(2)}</span>
+                    </div>
+                    {p.deliveryFee > 0 && (
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                        }}
+                      >
+                        <span>Delivery Fee:</span>
+                        <span>${p.deliveryFee.toFixed(2)}</span>
+                      </div>
+                    )}
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <span>Community Service Fee (10%):</span>
+                      <span>${p.renterFee.toFixed(2)}</span>
+                    </div>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        color: "#666",
+                      }}
+                    >
+                      <span>Security Deposit (Refundable Hold):</span>
+                      <span>${p.depositAmount.toFixed(2)}</span>
+                    </div>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        fontWeight: "bold",
+                        borderTop: "1px solid #cce5ff",
+                        marginTop: "6px",
+                        paddingTop: "6px",
+                      }}
+                    >
+                      <span>Total Due Now:</span>
+                      <span>${p.totalRentalCharge.toFixed(2)}</span>
+                    </div>
+                  </div>
+                );
+              })()}
 
               {error && (
                 <div className="notification is-danger">
@@ -325,7 +382,7 @@ const BookingModal = ({ tool, isOpen, onClose, onBooked }) => {
                     style={{ display: "flex", justifyContent: "space-between" }}
                   >
                     <span>
-                      Rental Fee ({calculateDays(startDate, endDate)} days):
+                      Rental Subtotal ({calculateDays(startDate, endDate)} days):
                     </span>
                     <span>
                       $
@@ -345,6 +402,20 @@ const BookingModal = ({ tool, isOpen, onClose, onBooked }) => {
                     >
                       <span>Delivery Fee:</span>
                       <span>${Number(booking.delivery_fee).toFixed(2)}</span>
+                    </div>
+                  )}
+
+                  {payment?.payment?.renter_fee > 0 && (
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <span>Community Service Fee (10%):</span>
+                      <span>
+                        ${Number(payment.payment.renter_fee).toFixed(2)}
+                      </span>
                     </div>
                   )}
 
